@@ -1,20 +1,20 @@
 # Implementation Plan
 
-- [ ] 1. Set up project structure and core dependencies
+- [x] 1. Set up project structure and core dependencies
   - Create directory structure for Flask application with templates and static folders
   - Initialize requirements.txt with all necessary dependencies (Flask, newspaper3k, spaCy, nltk, scikit-learn, requests, python-dotenv)
   - Create .env template file for configuration management
   - Set up basic Flask application entry point with development configuration
   - _Requirements: 5.1, 5.2_
 
-- [-] 2. Implement core data models and configuration
+- [x] 2. Implement core data models and configuration
   - Create data classes for Article, Entity, ScoreCard, and ScoringConfig using Python dataclasses
   - Implement configuration loading from environment variables using python-dotenv
   - Create validation functions for URL input using validators library
   - Write unit tests for data models and configuration loading
   - _Requirements: 5.1, 5.2, 6.5_
 
-- [ ] 3. Build article parsing and content extraction
+- [x] 3. Build article parsing and content extraction
   - Implement article parsing functionality using newspaper3k library
   - Create error handling for unparsable articles and network timeouts
   - Add content validation to ensure minimum word count requirements
@@ -74,25 +74,18 @@
   - Write integration tests for complete analysis workflow
   - _Requirements: 1.2, 2.2, 6.2_
 
-- [ ] 7. Build Flask web application routes
-- [ ] 7.1 Create homepage and basic routing
-  - Implement Flask application factory pattern with configuration management
-  - Create homepage route (/) with forms for manual analysis and topic curation
-  - Set up Jinja2 template configuration and static file serving
-  - Write unit tests for basic routing using Flask test client
-  - _Requirements: 4.1_
-
-- [ ] 7.2 Implement manual article analysis endpoint
-  - Create POST /analyze route that accepts URL input and validates format
-  - Integrate article parsing and scoring pipeline for single article analysis
+- [ ] 7. Integrate Flask routes with analysis pipeline
+- [ ] 7.1 Implement manual article analysis endpoint
+  - Integrate article parsing and scoring pipeline into POST /analyze route
+  - Add URL validation using existing validation functions
   - Implement error handling for invalid URLs and parsing failures
   - Return structured scorecard data to results template
   - Write unit tests for analysis endpoint with various input scenarios
   - _Requirements: 1.1, 1.3, 1.4, 1.5, 6.1, 6.4_
 
-- [ ] 7.3 Build topic-based curation endpoint
-  - Create POST /curate-topic route that accepts topic keywords
-  - Integrate NewsAPI fetching with article parsing and scoring pipeline
+- [ ] 7.2 Build topic-based curation endpoint
+  - Integrate NewsAPI fetching with article parsing and scoring pipeline into POST /curate-topic route
+  - Add topic keyword validation using existing validation functions
   - Implement batch processing for multiple articles with progress tracking
   - Sort and rank articles by composite score in descending order
   - Write unit tests for curation endpoint with mocked NewsAPI responses
@@ -127,20 +120,12 @@
   - Ensure proper pagination or infinite scroll for large result sets
   - _Requirements: 2.3, 4.3_
 
-- [ ] 9. Implement comprehensive error handling
-- [ ] 9.1 Create custom error pages
+- [ ] 9. Create custom error page templates
   - Design and implement 400.html template for client errors with helpful messaging
   - Create 500.html template for server errors with fallback options
   - Add 404.html template for not found errors with navigation suggestions
   - Implement error logging with appropriate detail levels for debugging
   - _Requirements: 6.4_
-
-- [ ] 9.2 Add application-wide error handling
-  - Implement Flask error handlers for different HTTP status codes
-  - Create safe wrapper functions for external API calls with timeout handling
-  - Add circuit breaker pattern for repeated failures to external services
-  - Write unit tests for error handling scenarios and recovery mechanisms
-  - _Requirements: 6.1, 6.2, 6.3, 6.4_
 
 - [ ] 10. Add static assets and styling
   - Process and optimize Tailwind CSS for production use with custom configuration
@@ -149,15 +134,7 @@
   - Optimize static asset loading and caching for better performance
   - _Requirements: 4.4_
 
-- [ ] 11. Create comprehensive test suite
-- [ ] 11.1 Write unit tests for core functionality
-  - Create test fixtures with sample articles, API responses, and expected scores
-  - Write comprehensive tests for all scoring algorithms with edge cases
-  - Test error handling and validation functions with invalid inputs
-  - Implement test coverage reporting to ensure adequate test coverage
-  - _Requirements: 1.1, 1.2, 2.1, 2.2, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_
-
-- [ ] 11.2 Build integration tests
+- [ ] 11. Create integration tests for complete workflows
   - Create end-to-end tests for complete user workflows using Flask test client
   - Test external service integration with mocked responses using responses library
   - Implement performance tests to ensure response time requirements are met
@@ -173,7 +150,6 @@
 
 - [ ] 13. Documentation and final integration
   - Write comprehensive README.md with setup instructions and API documentation
-  - Create example .env file with all required configuration variables
   - Add code comments and docstrings following PEP8 standards
   - Perform final integration testing and bug fixes before deployment
   - _Requirements: 5.4, 5.5_
