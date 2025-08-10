@@ -22,7 +22,7 @@
   - Write unit tests for parsing functionality with mocked article content
   - _Requirements: 1.1, 6.2, 6.4_
 
-- [ ] 4. Develop NewsAPI integration module
+- [-] 4. Develop NewsAPI integration module
   - Create NewsSource class with methods for fetching articles by topic
   - Implement API key authentication and request parameter configuration
   - Add rate limiting handling and retry logic with exponential backoff
