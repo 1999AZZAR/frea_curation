@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Content Curator</title>
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>AI Content Curator</h1>
+    <p>Analyze a single article or curate top articles for a topic.</p>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>Analyze Article</h2>
+      <form id="analyze-form">
+        <label>
+          Article URL
+          <input type="url" id="analyze-url" placeholder="https://example.com/article" required />
+        </label>
+        <label>
+          Query (optional)
+          <input type="text" id="analyze-query" placeholder="e.g., artificial intelligence" />
+        </label>
+        <button type="submit">Analyze</button>
+      </form>
+      <pre id="analyze-result" class="result"></pre>
+    </section>
+
+    <section class="card">
+      <h2>Curate Topic</h2>
+      <form id="curate-form">
+        <label>
+          Topic Keywords
+          <input type="text" id="curate-topic" placeholder="e.g., climate change" required />
+        </label>
+        <label>
+          Max Articles (optional)
+          <input type="number" id="curate-max" min="1" max="100" />
+        </label>
+        <button type="submit">Curate</button>
+      </form>
+      <div id="curate-result" class="result-list"></div>
+    </section>
+  </main>
+
+  <footer>
+    <small>Powered by Flask • NLP (spaCy/VADER) • TF‑IDF • NewsAPI</small>
+  </footer>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

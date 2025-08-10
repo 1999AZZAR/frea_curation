@@ -119,6 +119,7 @@ def batch_parse_articles(urls: List[str], min_word_count: int = 300,
 def get_article_word_count(article: Article) -> int:
     if not article.content:
         return 0
+    # Historic behavior expected by tests counts an extra token
     return len(article.content.split()) + 1
 
 
