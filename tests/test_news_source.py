@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 import requests
 from requests.exceptions import RequestException, Timeout, ConnectionError, HTTPError
 
-from news_source import NewsSource, NewsAPIError, RateLimitError
+from curator.services.news_source import NewsSource, NewsAPIError, RateLimitError
 
 
 class TestNewsSource(unittest.TestCase):

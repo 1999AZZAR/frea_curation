@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 import requests
 from newspaper import Article as NewspaperArticle
 
-from parser import (
+from curator.services.parser import (
     parse_article, batch_parse_articles, validate_content,
     parse_article_with_config, get_article_word_count, is_article_recent,
     ArticleParsingError, ContentValidationError, USER_AGENTS
@@ -43,7 +43,7 @@ class TestArticleParser(unittest.TestCase):
         mock_article.html = html
         return mock_article
 
-    @patch('parser.NewspaperArticle')
+    @patch('curator.services._parser.NewspaperArticle')
     def test_parse_article_success(self, mock_newspaper_class):
         """Test successful article parsing."""
         # Setup mock
@@ -73,7 +73,7 @@ class TestArticleParser(unittest.TestCase):
         
         self.assertIn("URL cannot be empty", str(context.exception))
 
-    @patch('parser.NewspaperArticle')
+    @patch('curator.services._parser.NewspaperArticle')
     def test_parse_article_download_failure(self, mock_newspaper_class):
         """Test handling of download failures."""
         # Setup mock to simulate download failure
@@ -87,7 +87,7 @@ class TestArticleParser(unittest.TestCase):
         
         self.assertIn("Failed to parse article after 2 attempts", str(context.exception))
 
-    @patch('parser.NewspaperArticle')
+    @patch('curator.services._parser.NewspaperArticle')
     def test_parse_article_network_timeout(self, mock_newspaper_class):
         """Test handling of network timeouts."""
         # Setup mock to raise timeout
@@ -101,7 +101,7 @@ class TestArticleParser(unittest.TestCase):
         
         self.assertIn("Failed to parse article after 2 attempts", str(context.exception))
 
-    @patch('parser.NewspaperArticle')
+    @patch('curator.services._parser.NewspaperArticle')
     def test_parse_article_retry_success(self, mock_newspaper_class):
         """Test successful parsing after initial failure."""
         # Setup mock to fail first, succeed second
@@ -163,7 +163,7 @@ class TestArticleParser(unittest.TestCase):
         
         self.assertIn("Article title is missing", str(context.exception))
 
-    @patch('parser.parse_article')
+    @patch('curator.services._parser.parse_article')
     def test_batch_parse_articles_success(self, mock_parse):
         """Test successful batch parsing of multiple articles."""
         # Setup mock to return different articles
@@ -187,7 +187,7 @@ class TestArticleParser(unittest.TestCase):
         # Verify parse_article was called for each URL
         self.assertEqual(mock_parse.call_count, 3)
 
-    @patch('parser.parse_article')
+    @patch('curator.services._parser.parse_article')
     def test_batch_parse_articles_partial_failure(self, mock_parse):
         """Test batch parsing with some failures."""
         urls = ["https://example.com/1", "https://example.com/2", "https://example.com/3"]
@@ -242,7 +242,7 @@ class TestArticleParser(unittest.TestCase):
         # Should return True when no date is available
         self.assertTrue(is_article_recent(article))
 
-    @patch('parser.NewspaperArticle')
+    @patch('curator.services._parser.NewspaperArticle')
     def test_parse_article_with_config_success(self, mock_newspaper_class):
         """Test parsing with specific configuration."""
         mock_article = self.create_mock_newspaper_article()
@@ -256,7 +256,7 @@ class TestArticleParser(unittest.TestCase):
         mock_article.download.assert_called_once()
         mock_article.parse.assert_called_once()
 
-    @patch('parser.NewspaperArticle')
+    @patch('curator.services._parser.NewspaperArticle')
     def test_parse_article_with_config_timeout(self, mock_newspaper_class):
         """Test parsing with timeout error."""
         mock_article = Mock(spec=NewspaperArticle)
@@ -268,7 +268,7 @@ class TestArticleParser(unittest.TestCase):
         
         self.assertIn("Request timeout", str(context.exception))
 
-    @patch('parser.NewspaperArticle')
+    @patch('curator.services._parser.NewspaperArticle')
     def test_parse_article_with_config_connection_error(self, mock_newspaper_class):
         """Test parsing with connection error."""
         mock_article = Mock(spec=NewspaperArticle)
@@ -280,8 +280,8 @@ class TestArticleParser(unittest.TestCase):
         
         self.assertIn("Network connection error", str(context.exception))
 
-    @patch('parser.time.sleep')
-    @patch('parser.NewspaperArticle')
+    @patch('curator.services._parser.time.sleep')
+    @patch('curator.services._parser.NewspaperArticle')
     def test_parse_article_retry_delay(self, mock_newspaper_class, mock_sleep):
         """Test that retry delay is applied between attempts."""
         # Setup mock to fail twice, succeed third time

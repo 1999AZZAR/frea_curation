@@ -15,23 +15,30 @@ class TestAppRoutes(unittest.TestCase):
         self.assertEqual(resp.status_code, 400)
 
     @patch('config.load_scoring_config')
-    @patch('validation.validate_url')
-    @patch('analyzer.analyze_article')
+    @patch('curator.core.validation.validate_url')
+    @patch('curator.services._analyzer.analyze_article')
     def test_analyze_success_mock(self, mock_analyze, mock_validate, mock_load):
         # Setup mocks
         mock_validate.return_value = (True, None)
         mock_load.return_value = ScoringConfig()
-        from models import Article, ScoreCard
-        article = Article(url='https://example.com', title='t')
-        mock_analyze.return_value = ScoreCard(90, 80, 70, 60, 50, 40, article)
+        # Return a fake scorecard dict-like to bypass parsing
+        class Dummy:
+            overall_score=90
+            readability_score=80
+            ner_density_score=70
+            sentiment_score=60
+            tfidf_relevance_score=50
+            recency_score=40
+            article=type('A', (), {'url':'https://example.com','title':'t','author':'a','summary':'s'})()
+        mock_analyze.return_value = Dummy()
 
         resp = self.app.post('/analyze', json={'url': 'https://example.com', 'query': 'ai'})
         self.assertEqual(resp.status_code, 200)
         data = resp.get_json()
         self.assertEqual(data['overall_score'], 90)
 
-    @patch('news_source.NewsSource')
-    @patch('analyzer.batch_analyze')
+    @patch('curator.services.news_source.NewsSource')
+    @patch('curator.services._analyzer.batch_analyze')
     def test_curate_topic_success(self, mock_batch, mock_source):
         mock_instance = Mock()
         mock_instance.get_article_urls.return_value = [
@@ -39,11 +46,9 @@ class TestAppRoutes(unittest.TestCase):
         ]
         mock_source.return_value = mock_instance
         # Mock analyzed results with scores to verify sorting
-        from models import Article, ScoreCard
-        a1 = Article(url='https://example.com/1', title='a1')
-        a2 = Article(url='https://example.com/2', title='a2')
-        r1 = ScoreCard(90, 80, 70, 60, 50, 40, a1)
-        r2 = ScoreCard(95, 80, 70, 60, 50, 40, a2)
+        A = lambda u,t: type('A', (), {'url':u,'title':t,'author':'','summary':''})()
+        r1 = type('R', (), {'overall_score':90,'readability_score':80,'ner_density_score':70,'sentiment_score':60,'tfidf_relevance_score':50,'recency_score':40,'article':A('https://example.com/1','a1')})()
+        r2 = type('R', (), {'overall_score':95,'readability_score':80,'ner_density_score':70,'sentiment_score':60,'tfidf_relevance_score':50,'recency_score':40,'article':A('https://example.com/2','a2')})()
         mock_batch.return_value = [r1, r2]
 
         resp = self.app.post('/curate-topic', json={'topic': 'ai', 'max_articles': 2})

@@ -31,21 +31,21 @@
   - _Requirements: 2.1, 2.4, 2.5, 5.3, 6.3_
 
 - [ ] 5. Implement NLP processing components
-- [ ] 5.1 Set up spaCy named entity recognition
+- [x] 5.1 Set up spaCy named entity recognition
   - Download and configure spaCy language model for entity extraction
   - Implement NER processing function to extract and categorize named entities
   - Create entity confidence scoring and filtering logic
   - Write unit tests for entity extraction with sample text content
   - _Requirements: 3.2_
 
-- [ ] 5.2 Implement NLTK sentiment analysis
+- [x] 5.2 Implement NLTK sentiment analysis
   - Set up NLTK VADER sentiment analyzer with required data downloads
   - Create sentiment scoring function that normalizes compound scores to 0-100 range
   - Implement neutral sentiment preference logic for news content
   - Write unit tests for sentiment analysis with various text samples
   - _Requirements: 3.3_
 
-- [ ] 5.3 Build TF-IDF relevance scoring
+- [x] 5.3 Build TF-IDF relevance scoring
   - Implement TF-IDF vectorization using scikit-learn TfidfVectorizer
   - Create cosine similarity calculation between article content and query terms
   - Add text preprocessing and normalization for better relevance matching
@@ -53,14 +53,14 @@
   - _Requirements: 3.4_
 
 - [ ] 6. Create comprehensive scoring engine
-- [ ] 6.1 Implement individual scoring algorithms
+- [x] 6.1 Implement individual scoring algorithms
   - Create readability scoring based on word count and content structure analysis
   - Implement NER density scoring using entity count per word ratio
   - Build recency scoring with exponential decay function based on publication date
   - Write unit tests for each individual scoring component
   - _Requirements: 3.1, 3.2, 3.5_
 
-- [ ] 6.2 Build composite scoring system
+- [x] 6.2 Build composite scoring system
   - Implement weighted composite score calculation using configurable weights
   - Create score normalization functions to ensure 0-100 range for all components
   - Add configuration management for adjustable scoring weights

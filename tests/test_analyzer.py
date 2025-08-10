@@ -10,7 +10,7 @@ from unittest.mock import Mock, patch
 from datetime import datetime, timedelta
 
 from models import Article, ScoringConfig
-from analyzer import (
+from curator.services.analyzer import (
     compute_readability_score,
     compute_ner_density_score,
     compute_sentiment_score,
@@ -76,7 +76,7 @@ class TestScoringFunctions(unittest.TestCase):
 
 
 class TestAnalyzerOrchestration(unittest.TestCase):
-    @patch("analyzer.parse_article")
+    @patch("curator.services._analyzer.parse_article")
     def test_analyze_article_success(self, mock_parse):
         article = Article(
             url="https://example.com/a",
@@ -104,7 +104,7 @@ class TestAnalyzerOrchestration(unittest.TestCase):
         self.assertGreaterEqual(card.overall_score, 0)
         self.assertLessEqual(card.overall_score, 100)
 
-    @patch("analyzer.batch_parse_articles")
+    @patch("curator.services._analyzer.batch_parse_articles")
     def test_batch_analyze(self, mock_batch):
         articles = [
             Article(url="https://ex/1", title="t1", content="c1", publish_date=None),

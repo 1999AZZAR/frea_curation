@@ -28,9 +28,9 @@ def create_app():
     @app.route('/analyze', methods=['POST'])
     def analyze_article_route():
         """Manual article analysis endpoint"""
-        from analyzer import analyze_article as analyze_fn
+        from curator.services.analyzer import analyze_article as analyze_fn
         from config import load_scoring_config
-        from validation import validate_url
+        from curator.core.validation import validate_url
 
         data = request.get_json(silent=True) or request.form
         url = (data.get('url') if data else None) or ''
@@ -46,7 +46,12 @@ def create_app():
             return jsonify({'error': f'Configuration error: {str(e)}'}), 500
 
         try:
-            scorecard = analyze_fn(url=url, query=query, config=config)
+            # Optional NLP components
+            from curator.core.nlp import get_spacy_model, get_vader_analyzer
+            nlp_model = get_spacy_model()
+            vader = get_vader_analyzer()
+
+            scorecard = analyze_fn(url=url, query=query, config=config, nlp=nlp_model, vader_analyzer=vader)
             result = {
                 'overall_score': scorecard.overall_score,
                 'readability_score': scorecard.readability_score,
@@ -68,10 +73,10 @@ def create_app():
     @app.route('/curate-topic', methods=['POST'])
     def curate_topic():
         """Topic-based curation endpoint"""
-        from analyzer import batch_analyze
+        from curator.services.analyzer import batch_analyze
         from config import load_scoring_config
-        from validation import validate_topic_keywords
-        from news_source import NewsSource
+        from curator.core.validation import validate_topic_keywords
+        from curator.services.news_source import NewsSource
 
         data = request.get_json(silent=True) or request.form
         topic = (data.get('topic') if data else None) or ''
@@ -97,7 +102,10 @@ def create_app():
             urls = source.get_article_urls(topic, max_articles=max_articles or config.max_articles_per_topic)
 
             # Analyze
-            results = batch_analyze(urls, query=topic, config=config)
+            from curator.core.nlp import get_spacy_model, get_vader_analyzer
+            nlp_model = get_spacy_model()
+            vader = get_vader_analyzer()
+            results = batch_analyze(urls, query=topic, config=config, nlp=nlp_model, vader_analyzer=vader)
             # Sort by overall_score descending
             results.sort(key=lambda r: r.overall_score, reverse=True)
             payload = [

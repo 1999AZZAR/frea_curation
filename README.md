@@ -11,6 +11,10 @@ ai-content-curator/
 ├── requirements.txt       # Python dependencies
 ├── .env.template         # Environment variables template
 ├── README.md             # Project documentation
+├── curator/              # Application package (organized modules)
+│   ├── core/             # Models, validation, nlp
+│   ├── services/         # Analyzer, parser, news source
+│   └── web/              # Web layer (future use)
 ├── templates/            # Jinja2 templates
 │   └── .gitkeep
 ├── static/               # Static assets
@@ -47,7 +51,13 @@ ai-content-curator/
    # Edit .env file with your actual configuration values
    ```
 
-5. **Run the development server:**
+5. **Create and activate a local virtual environment (recommended):**
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # Windows: .venv\\Scripts\\activate
+   ```
+
+6. **Run the development server:**
    ```bash
    python app.py
    ```
@@ -64,17 +74,28 @@ Copy `.env.template` to `.env` and configure the following variables:
 - `MIN_WORD_COUNT`: Minimum word count for article quality (default: 300)
 - Scoring weights for the composite algorithm (should sum to 1.0)
 
+## API Endpoints
+
+- `POST /analyze`
+  - Body: `{ "url": string, "query"?: string }`
+  - Validates URL, parses article, runs NER, sentiment, TF-IDF relevance, recency and readability, returns a scorecard.
+
+- `POST /curate-topic`
+  - Body: `{ "topic": string, "max_articles"?: number }`
+  - Fetches article URLs from NewsAPI, parses and analyzes, then returns ranked results by overall score.
+
 ## Development Status
 
 This project is currently in development. The basic Flask application structure has been set up with:
 
 - ✅ Project directory structure
 - ✅ Core dependencies configuration
-- ✅ Basic Flask application with routing stubs
+- ✅ Basic Flask application with integrated routes
 - ✅ Environment configuration management
-- ⏳ Article parsing and analysis (pending)
-- ⏳ NewsAPI integration (pending)
-- ⏳ NLP processing components (pending)
+- ✅ Article parsing and analysis (newspaper3k)
+- ✅ NewsAPI integration module with retries and validation
+- ✅ NLP utility setup (spaCy NER, NLTK VADER sentiment)
+- ✅ TF-IDF relevance and composite scoring engine
 - ⏳ User interface templates (pending)
 
 ## Next Steps
