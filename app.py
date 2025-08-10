@@ -26,16 +26,100 @@ def create_app():
         return render_template('index.html')
     
     @app.route('/analyze', methods=['POST'])
-    def analyze_article():
+    def analyze_article_route():
         """Manual article analysis endpoint"""
-        # TODO: Implement article analysis logic
-        return jsonify({'message': 'Article analysis endpoint - to be implemented'})
+        from analyzer import analyze_article as analyze_fn
+        from config import load_scoring_config
+        from validation import validate_url
+
+        data = request.get_json(silent=True) or request.form
+        url = (data.get('url') if data else None) or ''
+        query = (data.get('query') if data else None) or ''
+
+        is_valid, error = validate_url(url)
+        if not is_valid:
+            return jsonify({'error': error or 'Invalid URL'}), 400
+
+        try:
+            config = load_scoring_config()
+        except Exception as e:
+            return jsonify({'error': f'Configuration error: {str(e)}'}), 500
+
+        try:
+            scorecard = analyze_fn(url=url, query=query, config=config)
+            result = {
+                'overall_score': scorecard.overall_score,
+                'readability_score': scorecard.readability_score,
+                'ner_density_score': scorecard.ner_density_score,
+                'sentiment_score': scorecard.sentiment_score,
+                'tfidf_relevance_score': scorecard.tfidf_relevance_score,
+                'recency_score': scorecard.recency_score,
+                'article': {
+                    'url': scorecard.article.url,
+                    'title': scorecard.article.title,
+                    'author': scorecard.article.author,
+                    'summary': scorecard.article.summary,
+                }
+            }
+            return jsonify(result)
+        except Exception as e:
+            return jsonify({'error': f'Analysis failed: {str(e)}'}), 500
     
     @app.route('/curate-topic', methods=['POST'])
     def curate_topic():
         """Topic-based curation endpoint"""
-        # TODO: Implement topic curation logic
-        return jsonify({'message': 'Topic curation endpoint - to be implemented'})
+        from analyzer import batch_analyze
+        from config import load_scoring_config
+        from validation import validate_topic_keywords
+        from news_source import NewsSource
+
+        data = request.get_json(silent=True) or request.form
+        topic = (data.get('topic') if data else None) or ''
+        max_articles = data.get('max_articles')
+        try:
+            max_articles = int(max_articles) if max_articles is not None else None
+        except Exception:
+            return jsonify({'error': 'max_articles must be an integer'}), 400
+
+        is_valid, error = validate_topic_keywords(topic)
+        if not is_valid:
+            return jsonify({'error': error or 'Invalid topic'}), 400
+
+        try:
+            config = load_scoring_config()
+        except Exception as e:
+            return jsonify({'error': f'Configuration error: {str(e)}'}), 500
+
+        try:
+            # Fetch URLs
+            api_key = os.environ.get('NEWS_API_KEY', 'test-api-key')
+            source = NewsSource(api_key=api_key)
+            urls = source.get_article_urls(topic, max_articles=max_articles or config.max_articles_per_topic)
+
+            # Analyze
+            results = batch_analyze(urls, query=topic, config=config)
+            # Sort by overall_score descending
+            results.sort(key=lambda r: r.overall_score, reverse=True)
+            payload = [
+                {
+                    'overall_score': r.overall_score,
+                    'readability_score': r.readability_score,
+                    'ner_density_score': r.ner_density_score,
+                    'sentiment_score': r.sentiment_score,
+                    'tfidf_relevance_score': r.tfidf_relevance_score,
+                    'recency_score': r.recency_score,
+                    'article': {
+                        'url': r.article.url,
+                        'title': r.article.title,
+                        'author': r.article.author,
+                        'summary': r.article.summary,
+                    }
+                }
+                for r in results
+            ]
+            return jsonify({'count': len(payload), 'results': payload})
+        except Exception as e:
+            return jsonify({'error': f'Curation failed: {str(e)}'}), 500
     
     # Error handlers
     @app.errorhandler(400)

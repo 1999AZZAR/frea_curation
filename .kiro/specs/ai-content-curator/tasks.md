@@ -22,7 +22,7 @@
   - Write unit tests for parsing functionality with mocked article content
   - _Requirements: 1.1, 6.2, 6.4_
 
-- [-] 4. Develop NewsAPI integration module
+- [x] 4. Develop NewsAPI integration module
   - Create NewsSource class with methods for fetching articles by topic
   - Implement API key authentication and request parameter configuration
   - Add rate limiting handling and retry logic with exponential backoff
@@ -75,7 +75,7 @@
   - _Requirements: 1.2, 2.2, 6.2_
 
 - [ ] 7. Integrate Flask routes with analysis pipeline
-- [ ] 7.1 Implement manual article analysis endpoint
+- [x] 7.1 Implement manual article analysis endpoint
   - Integrate article parsing and scoring pipeline into POST /analyze route
   - Add URL validation using existing validation functions
   - Implement error handling for invalid URLs and parsing failures
@@ -83,7 +83,7 @@
   - Write unit tests for analysis endpoint with various input scenarios
   - _Requirements: 1.1, 1.3, 1.4, 1.5, 6.1, 6.4_
 
-- [ ] 7.2 Build topic-based curation endpoint
+- [x] 7.2 Build topic-based curation endpoint
   - Integrate NewsAPI fetching with article parsing and scoring pipeline into POST /curate-topic route
   - Add topic keyword validation using existing validation functions
   - Implement batch processing for multiple articles with progress tracking

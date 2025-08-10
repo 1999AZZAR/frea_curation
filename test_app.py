@@ -1,0 +1,64 @@
+import unittest
+from unittest.mock import patch, Mock
+import os
+
+from app import app as flask_app
+from models import ScoringConfig
+
+
+class TestAppRoutes(unittest.TestCase):
+    def setUp(self):
+        self.app = flask_app.test_client()
+
+    def test_analyze_missing_url(self):
+        resp = self.app.post('/analyze', json={'url': ''})
+        self.assertEqual(resp.status_code, 400)
+
+    @patch('config.load_scoring_config')
+    @patch('validation.validate_url')
+    @patch('analyzer.analyze_article')
+    def test_analyze_success_mock(self, mock_analyze, mock_validate, mock_load):
+        # Setup mocks
+        mock_validate.return_value = (True, None)
+        mock_load.return_value = ScoringConfig()
+        from models import Article, ScoreCard
+        article = Article(url='https://example.com', title='t')
+        mock_analyze.return_value = ScoreCard(90, 80, 70, 60, 50, 40, article)
+
+        resp = self.app.post('/analyze', json={'url': 'https://example.com', 'query': 'ai'})
+        self.assertEqual(resp.status_code, 200)
+        data = resp.get_json()
+        self.assertEqual(data['overall_score'], 90)
+
+    @patch('news_source.NewsSource')
+    @patch('analyzer.batch_analyze')
+    def test_curate_topic_success(self, mock_batch, mock_source):
+        mock_instance = Mock()
+        mock_instance.get_article_urls.return_value = [
+            'https://example.com/1', 'https://example.com/2'
+        ]
+        mock_source.return_value = mock_instance
+        # Mock analyzed results with scores to verify sorting
+        from models import Article, ScoreCard
+        a1 = Article(url='https://example.com/1', title='a1')
+        a2 = Article(url='https://example.com/2', title='a2')
+        r1 = ScoreCard(90, 80, 70, 60, 50, 40, a1)
+        r2 = ScoreCard(95, 80, 70, 60, 50, 40, a2)
+        mock_batch.return_value = [r1, r2]
+
+        resp = self.app.post('/curate-topic', json={'topic': 'ai', 'max_articles': 2})
+        self.assertEqual(resp.status_code, 200)
+        data = resp.get_json()
+        self.assertEqual(data['count'], 2)
+        # Ensure sorted descending by overall_score (r2 first)
+        self.assertEqual(data['results'][0]['article']['title'], 'a2')
+
+    def test_curate_topic_invalid(self):
+        resp = self.app.post('/curate-topic', json={'topic': ''})
+        self.assertEqual(resp.status_code, 400)
+
+
+if __name__ == '__main__':
+    unittest.main()
+
+

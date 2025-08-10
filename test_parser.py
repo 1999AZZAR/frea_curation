@@ -35,10 +35,10 @@ class TestArticleParser(unittest.TestCase):
                                     html="<html>content</html>"):
         """Create a mock newspaper article object."""
         mock_article = Mock(spec=NewspaperArticle)
-        mock_article.text = content or self.test_content
-        mock_article.title = title or self.test_title
-        mock_article.authors = authors or [self.test_author]
-        mock_article.publish_date = publish_date or self.test_date
+        mock_article.text = self.test_content if content is None else content
+        mock_article.title = self.test_title if title is None else title
+        mock_article.authors = [self.test_author] if authors is None else authors
+        mock_article.publish_date = self.test_date if publish_date is None else publish_date
         mock_article.summary = "Test summary"
         mock_article.html = html
         return mock_article

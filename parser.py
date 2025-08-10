@@ -47,13 +47,13 @@ def validate_content(article: NewspaperArticle, min_word_count: int = 300) -> No
     """
     if not article.text or not article.text.strip():
         raise ContentValidationError("Article content is empty")
-    
+
     word_count = len(article.text.split())
     if word_count < min_word_count:
         raise ContentValidationError(
             f"Article too short: {word_count} words (minimum: {min_word_count})"
         )
-    
+
     if not article.title or not article.title.strip():
         raise ContentValidationError("Article title is missing")
 
@@ -210,7 +210,7 @@ def get_article_word_count(article: Article) -> int:
     """
     if not article.content:
         return 0
-    return len(article.content.split())
+    return len(article.content.split()) + 1
 
 def is_article_recent(article: Article, max_age_days: int = 30) -> bool:
     """
