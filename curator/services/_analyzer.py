@@ -14,7 +14,7 @@ Provides orchestrator functions for single and batch analysis.
 from __future__ import annotations
 
 import math
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Optional
 
 from curator.core.models import Article, ScoreCard, ScoringConfig
@@ -78,8 +78,22 @@ def compute_tfidf_relevance_score(article: Article, query: str) -> float:
 def compute_recency_score(article: Article, now: Optional[datetime] = None, half_life_days: float = 7.0) -> float:
     if article.publish_date is None:
         return 100.0
-    now_dt = now or datetime.now()
-    age_days = max(0.0, (now_dt - article.publish_date).total_seconds() / 86400.0)
+    # Normalize datetimes to UTC-aware to avoid naive/aware subtraction errors
+    pub = article.publish_date
+    if pub.tzinfo is None or pub.tzinfo.utcoffset(pub) is None:
+        pub_utc = pub.replace(tzinfo=timezone.utc)
+    else:
+        pub_utc = pub.astimezone(timezone.utc)
+
+    if now is None:
+        now_utc = datetime.now(timezone.utc)
+    else:
+        if now.tzinfo is None or now.tzinfo.utcoffset(now) is None:
+            now_utc = now.replace(tzinfo=timezone.utc)
+        else:
+            now_utc = now.astimezone(timezone.utc)
+
+    age_days = max(0.0, (now_utc - pub_utc).total_seconds() / 86400.0)
     if half_life_days <= 0:
         return 100.0 if age_days == 0 else 0.0
     decay = math.pow(2.0, -age_days / half_life_days)

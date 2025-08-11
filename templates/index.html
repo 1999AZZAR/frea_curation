@@ -1,55 +1,147 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AI Content Curator</title>
-  <link rel="stylesheet" href="/static/css/styles.css" />
-</head>
-<body>
-  <header>
-    <h1>AI Content Curator</h1>
-    <p>Analyze a single article or curate top articles for a topic.</p>
-  </header>
+{% extends 'base.html' %}
 
-  <main class="container">
-    <section class="card">
-      <h2>Analyze Article</h2>
-      <form id="analyze-form">
-        <label>
-          Article URL
-          <input type="url" id="analyze-url" placeholder="https://example.com/article" required />
-        </label>
-        <label>
-          Query (optional)
-          <input type="text" id="analyze-query" placeholder="e.g., artificial intelligence" />
-        </label>
-        <button type="submit">Analyze</button>
-      </form>
-      <pre id="analyze-result" class="result"></pre>
-    </section>
+{% block title %}AI Content Curator{% endblock %}
 
-    <section class="card">
-      <h2>Curate Topic</h2>
-      <form id="curate-form">
-        <label>
-          Topic Keywords
-          <input type="text" id="curate-topic" placeholder="e.g., climate change" required />
-        </label>
-        <label>
-          Max Articles (optional)
-          <input type="number" id="curate-max" min="1" max="100" />
-        </label>
-        <button type="submit">Curate</button>
-      </form>
-      <div id="curate-result" class="result-list"></div>
-    </section>
-  </main>
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <section id="analyze" class="card-surface p-5">
+    <div class="flex items-center gap-3 mb-2">
+      <i class="fa-solid fa-magnifying-glass-chart text-indigo-400"></i>
+      <h2 class="text-xl font-semibold">Analyze Article</h2>
+    </div>
+    <p class="text-slate-400 mb-4">Extract key signals from a single article and compute a composite quality score.</p>
+    <form id="analyze-form" class="space-y-3">
+      <div>
+        <label for="analyze-url" class="block text-sm text-slate-600">Article URL</label>
+        <input type="url" id="analyze-url" class="mt-1 input input-indigo" placeholder="https://example.com/article" required>
+      </div>
+      <div>
+        <label for="analyze-query" class="block text-sm text-slate-600">Query (optional)</label>
+        <input type="text" id="analyze-query" class="mt-1 input input-indigo" placeholder="e.g., artificial intelligence">
+      </div>
+      <div class="flex items-center gap-3">
+        <button type="submit" class="btn btn-primary">
+          <i class="fa-solid fa-chart-line"></i>
+          Analyze
+        </button>
+        <span id="analyze-loading" class="hidden text-sm text-slate-500">Analyzing…</span>
+      </div>
+      <p id="analyze-error" class="hidden rounded-lg border border-rose-200 bg-rose-50 p-3 text-rose-700 text-sm"></p>
+    </form>
 
-  <footer>
-    <small>Powered by Flask • NLP (spaCy/VADER) • TF‑IDF • NewsAPI</small>
-  </footer>
+    <div id="analyze-result-card" class="mt-5 hidden">
+      <div class="card-surface p-4">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h3 id="an-title" class="text-lg font-semibold"></h3>
+            <p id="an-meta" class="text-sm text-slate-500"></p>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="relative grid place-items-center">
+              <div class="h-20 w-20 rounded-full border border-slate-200 bg-slate-100 grid place-items-center">
+                <span id="an-overall" class="text-xl font-bold"></span>
+              </div>
+            </div>
+            <div class="text-sm text-slate-600">Overall Score</div>
+          </div>
+        </div>
+        <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <div class="flex justify-between text-xs text-slate-500"><span>Readability</span><span id="an-readability-v"></span></div>
+            <div class="progress-rail"><div id="an-readability" class="progress-fill bg-sky-600" style="width:0%"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between text-xs text-slate-500"><span>NER Density</span><span id="an-ner-v"></span></div>
+            <div class="progress-rail"><div id="an-ner" class="progress-fill bg-emerald-600" style="width:0%"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between text-xs text-slate-500"><span>Sentiment (neutrality)</span><span id="an-sentiment-v"></span></div>
+            <div class="progress-rail"><div id="an-sentiment" class="progress-fill bg-amber-600" style="width:0%"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between text-xs text-slate-500"><span>TF‑IDF Relevance</span><span id="an-tfidf-v"></span></div>
+            <div class="progress-rail"><div id="an-tfidf" class="progress-fill bg-indigo-600" style="width:0%"></div></div>
+          </div>
+          <div class="sm:col-span-2">
+            <div class="flex justify-between text-xs text-slate-500"><span>Recency</span><span id="an-recency-v"></span></div>
+            <div class="progress-rail"><div id="an-recency" class="progress-fill bg-fuchsia-600" style="width:0%"></div></div>
+          </div>
+        </div>
+        <p id="an-summary" class="mt-4 prose-summary"></p>
+        <div id="an-entities" class="mt-3 hidden">
+          <h4 class="text-sm font-semibold text-slate-700 mb-2">Entities</h4>
+          <div id="an-entities-list" class="flex flex-wrap gap-2"></div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  <script src="/static/js/app.js"></script>
-</body>
-</html>
+  <section id="curate" class="card-surface p-5">
+    <div class="flex items-center gap-3 mb-2">
+      <i class="fa-solid fa-layer-group text-sky-400"></i>
+      <h2 class="text-xl font-semibold">Curate Topic</h2>
+    </div>
+    <p class="text-slate-400 mb-4">Fetch, analyze, and rank multiple articles for a topic.</p>
+    <form id="curate-form" class="space-y-3">
+      <div>
+        <label for="curate-topic" class="block text-sm text-slate-600">Topic Keywords</label>
+        <input type="text" id="curate-topic" class="mt-1 input input-sky" placeholder="e.g., climate change" required>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div>
+          <label for="curate-max" class="block text-sm text-slate-600">Max Articles (optional)</label>
+          <input type="number" id="curate-max" min="1" max="100" class="mt-1 input">
+        </div>
+        <div>
+          <label for="curate-sort" class="block text-sm text-slate-600">Sort By</label>
+          <select id="curate-sort" class="mt-1 input">
+            <option value="score_desc">Score: High → Low</option>
+            <option value="score_asc">Score: Low → High</option>
+          </select>
+        </div>
+        <div>
+          <label for="curate-min-score" class="block text-sm text-slate-600">Min Score</label>
+          <input type="number" id="curate-min-score" min="0" max="100" value="0" class="mt-1 input">
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button type="submit" class="btn btn-primary">
+          <i class="fa-regular fa-newspaper"></i>
+          Curate
+        </button>
+        <span id="curate-loading" class="hidden text-sm text-slate-500">Curating…</span>
+      </div>
+      <p id="curate-error" class="hidden rounded-lg border border-rose-200 bg-rose-50 p-3 text-rose-700 text-sm"></p>
+    </form>
+
+    <div class="mt-5">
+      <div class="flex flex-col gap-3 mb-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="text-sm text-slate-400"><span id="curate-count">0</span> results</div>
+          <div class="flex items-center gap-3">
+            <label class="hidden sm:block text-xs text-slate-400">Search</label>
+            <input id="curate-search" type="text" placeholder="Search title…" class="w-full sm:w-64 rounded-lg border border-slate-700 bg-slate-800/60 p-2 text-sm outline-none focus:ring-2 focus:ring-sky-500" />
+          </div>
+        </div>
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2 text-sm">
+            <label for="curate-page-size" class="text-slate-600">Per page</label>
+            <select id="curate-page-size" class="rounded-lg border border-slate-300 bg-white p-2">
+              <option value="5">5</option>
+              <option value="10" selected>10</option>
+              <option value="20">20</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="curate-prev" class="btn btn-secondary px-3 py-1 text-sm" type="button"><i class="fa-solid fa-chevron-left"></i></button>
+            <span id="curate-page-info" class="text-xs text-slate-600">Page 1 / 1</span>
+            <button id="curate-next" class="btn btn-secondary px-3 py-1 text-sm" type="button"><i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+        </div>
+      </div>
+      <div id="curate-result" class="grid grid-cols-1 gap-3"></div>
+    </div>
+  </section>
+</div>
+{% endblock %}
+

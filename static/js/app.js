@@ -11,63 +11,163 @@ async function postJson(url, body){
   return data;
 }
 
-function formatScorecard(card){
-  return JSON.stringify(card, null, 2);
+function setText(id, text){
+  const el = document.getElementById(id);
+  if(el){ el.textContent = text; }
 }
 
-function makeResultItem(r){
-  const div = document.createElement('div');
-  div.className = 'result-item';
-  div.innerHTML = `
-    <h3><a href="${r.article.url}" target="_blank" rel="noopener noreferrer">${r.article.title || r.article.url}</a></h3>
-    <div class="meta">
-      <span class="score">Score: ${r.overall_score}</span>
-      • Readability ${r.readability_score}
-      • NER ${r.ner_density_score}
-      • Sentiment ${r.sentiment_score}
-      • TF-IDF ${r.tfidf_relevance_score}
-      • Recency ${r.recency_score}
+function setBar(id, value){
+  const el = document.getElementById(id);
+  if(el){ el.style.width = `${Math.max(0, Math.min(100, value))}%`; }
+}
+
+function show(id){ const el = document.getElementById(id); if(el){ el.classList.remove('hidden'); } }
+function hide(id){ const el = document.getElementById(id); if(el){ el.classList.add('hidden'); } }
+
+function createCurationCard(r){
+  const safeTitle = r.article.title || r.article.url;
+  const wrap = document.createElement('div');
+  wrap.className = 'rounded-xl border border-slate-800 bg-slate-900/60 p-4 hover:border-slate-700 transition';
+  wrap.innerHTML = `
+    <div class="flex items-start justify-between gap-3">
+      <div>
+        <a href="${r.article.url}" target="_blank" rel="noopener" class="text-base font-semibold hover:underline">${safeTitle}</a>
+        <div class="mt-1 text-xs text-slate-400">
+          <span class="font-semibold text-emerald-400">${r.overall_score}</span>
+          • Read ${r.readability_score}
+          • NER ${r.ner_density_score}
+          • Sent ${r.sentiment_score}
+          • TF‑IDF ${r.tfidf_relevance_score}
+          • Recency ${r.recency_score}
+        </div>
+      </div>
+      <div class="h-10 w-10 rounded-lg bg-slate-800/60 grid place-items-center text-sm font-bold">${r.overall_score}</div>
     </div>
-    <p>${r.article.summary || ''}</p>
+    <p class="mt-2 text-sm text-slate-300">${r.article.summary || ''}</p>
   `;
-  return div;
+  return wrap;
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+  // Analyze form behavior
   const analyzeForm = document.getElementById('analyze-form');
-  const analyzeResult = document.getElementById('analyze-result');
-  analyzeForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    analyzeResult.textContent = 'Analyzing…';
-    const url = document.getElementById('analyze-url').value.trim();
-    const query = document.getElementById('analyze-query').value.trim();
-    try{
-      const data = await postJson('/analyze', { url, query });
-      analyzeResult.textContent = formatScorecard(data);
-    }catch(err){
-      analyzeResult.textContent = `Error: ${err.message}`;
-    }
-  });
+  if(analyzeForm){
+    analyzeForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hide('analyze-error');
+      show('analyze-loading');
+      const url = document.getElementById('analyze-url').value.trim();
+      const query = document.getElementById('analyze-query').value.trim();
+      try{
+        const data = await postJson('/analyze', { url, query });
+        // Fill UI
+        setText('an-title', data.article.title || data.article.url || 'Article');
+        setText('an-meta', data.article.author ? `By ${data.article.author}` : '');
+        setText('an-overall', Math.round(data.overall_score));
 
+        setText('an-readability-v', `${data.readability_score}`);
+        setBar('an-readability', data.readability_score);
+        setText('an-ner-v', `${data.ner_density_score}`);
+        setBar('an-ner', data.ner_density_score);
+        setText('an-sentiment-v', `${data.sentiment_score}`);
+        setBar('an-sentiment', data.sentiment_score);
+        setText('an-tfidf-v', `${data.tfidf_relevance_score}`);
+        setBar('an-tfidf', data.tfidf_relevance_score);
+        setText('an-recency-v', `${data.recency_score}`);
+        setBar('an-recency', data.recency_score);
+
+        setText('an-summary', data.article.summary || '');
+        // Entities placeholder (not provided by API yet). Hide section.
+        hide('an-entities');
+
+        show('analyze-result-card');
+      }catch(err){
+        const el = document.getElementById('analyze-error');
+        if(el){ el.textContent = `Error: ${err.message}`; show('analyze-error'); }
+      }finally{
+        hide('analyze-loading');
+      }
+    });
+  }
+
+  // Curation behavior
   const curateForm = document.getElementById('curate-form');
   const curateResult = document.getElementById('curate-result');
-  curateForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    curateResult.innerHTML = '<pre class="result">Curating…</pre>';
-    const topic = document.getElementById('curate-topic').value.trim();
-    const maxArticlesStr = document.getElementById('curate-max').value;
-    const max_articles = maxArticlesStr ? parseInt(maxArticlesStr, 10) : undefined;
-    try{
-      const data = await postJson('/curate-topic', { topic, max_articles });
-      curateResult.innerHTML = '';
-      (data.results || []).forEach(r => {
-        curateResult.appendChild(makeResultItem(r));
-      });
-      if((data.results || []).length === 0){
-        curateResult.innerHTML = '<pre class="result">No results</pre>';
-      }
-    }catch(err){
-      curateResult.innerHTML = `<pre class="result">Error: ${err.message}</pre>`;
+  const curateSort = document.getElementById('curate-sort');
+  const curateMinScore = document.getElementById('curate-min-score');
+  const curateSearch = document.getElementById('curate-search');
+  const curatePrev = document.getElementById('curate-prev');
+  const curateNext = document.getElementById('curate-next');
+  const curatePageInfo = document.getElementById('curate-page-info');
+  const curatePageSize = document.getElementById('curate-page-size');
+  let curateData = [];
+  let currentPage = 1;
+
+  function renderCuration(){
+    if(!curateResult) return;
+    const minScore = Math.max(0, Math.min(100, parseInt(curateMinScore?.value || '0', 10) || 0));
+    const search = (curateSearch?.value || '').toLowerCase();
+    let results = [...curateData];
+    results = results.filter(r => r.overall_score >= minScore);
+    if(search){
+      results = results.filter(r => (r.article.title || r.article.url || '').toLowerCase().includes(search));
     }
-  });
+    const sortVal = curateSort?.value || 'score_desc';
+    results.sort((a,b) => sortVal === 'score_asc' ? a.overall_score - b.overall_score : b.overall_score - a.overall_score);
+
+    // Pagination
+    const pageSize = parseInt(curatePageSize?.value || '10', 10) || 10;
+    const totalPages = Math.max(1, Math.ceil(results.length / pageSize));
+    if(currentPage > totalPages) currentPage = totalPages;
+    if(currentPage < 1) currentPage = 1;
+    const start = (currentPage - 1) * pageSize;
+    const pageItems = results.slice(start, start + pageSize);
+
+    setText('curate-count', String(results.length));
+    if(curatePageInfo){ curatePageInfo.textContent = `Page ${currentPage} / ${totalPages}`; }
+    if(curatePrev){ curatePrev.disabled = currentPage <= 1; }
+    if(curateNext){ curateNext.disabled = currentPage >= totalPages; }
+
+    curateResult.innerHTML = '';
+    if(pageItems.length === 0){
+      const empty = document.createElement('div');
+      empty.className = 'rounded-lg border border-slate-800 bg-slate-900/60 p-4 text-sm text-slate-400';
+      empty.textContent = 'No results';
+      curateResult.appendChild(empty);
+      return;
+    }
+    pageItems.forEach(r => curateResult.appendChild(createCurationCard(r)));
+  }
+
+  function attachCurationFilters(){
+    if(curateSort){ curateSort.addEventListener('change', renderCuration); }
+    if(curateMinScore){ curateMinScore.addEventListener('input', renderCuration); }
+    if(curateSearch){ curateSearch.addEventListener('input', renderCuration); }
+    if(curatePageSize){ curatePageSize.addEventListener('change', () => { currentPage = 1; renderCuration(); }); }
+    if(curatePrev){ curatePrev.addEventListener('click', () => { currentPage = Math.max(1, currentPage - 1); renderCuration(); }); }
+    if(curateNext){ curateNext.addEventListener('click', () => { currentPage = currentPage + 1; renderCuration(); }); }
+  }
+
+  if(curateForm){
+    attachCurationFilters();
+    curateForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hide('curate-error');
+      show('curate-loading');
+      const topic = document.getElementById('curate-topic').value.trim();
+      const maxStr = document.getElementById('curate-max').value;
+      const max_articles = maxStr ? parseInt(maxStr, 10) : undefined;
+      try{
+        const data = await postJson('/curate-topic', { topic, max_articles });
+        curateData = data.results || [];
+        currentPage = 1;
+        renderCuration();
+      }catch(err){
+        const el = document.getElementById('curate-error');
+        if(el){ el.textContent = `Error: ${err.message}`; show('curate-error'); }
+      }finally{
+        hide('curate-loading');
+      }
+    });
+  }
 });

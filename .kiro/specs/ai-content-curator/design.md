@@ -85,11 +85,12 @@ sequenceDiagram
 #### 1. Flask Application Router (`app.py`)
 - **Purpose**: HTTP request handling and route management
 - **Key Routes**:
-  - `GET /` - Homepage with input forms
-  - `POST /analyze` - Manual article analysis endpoint
-  - `POST /curate-topic` - Topic-based curation endpoint
+  - `GET /` - Homepage with input forms (Analyze & Curate)
+  - `POST /analyze` - Manual analysis: returns JSON for JSON requests; otherwise renders `results.html`
+  - `POST /curate-topic` - Topic curation: returns JSON for JSON requests; otherwise renders `curation_results.html`
 - **Dependencies**: Flask, python-dotenv for configuration
-- **Error Handling**: Custom error pages for 400/500 status codes
+- **Error Handling**: Custom error pages for 400/500/404 status codes; consistent UI via base template
+- **Requirements Mapping**: 1.1, 1.3, 2.2, 4.1, 6.4
 
 #### 2. Content Analyzer (`analyzer.py`)
 - **Purpose**: Core scoring logic and NLP processing orchestration
@@ -98,19 +99,22 @@ sequenceDiagram
   - `batch_analyze(articles)` - Multiple article processing
   - `calculate_composite_score(metrics)` - Weighted score calculation
 - **Scoring Components**:
-  - Readability Score (word count, content depth)
-  - NER Density Score (spaCy named entity recognition)
-  - Sentiment Score (NLTK VADER sentiment analysis)
+  - Readability Score (word count threshold with normalization)
+  - NER Density Score (spaCy entities per 100 words)
+  - Sentiment Score (NLTK VADER, neutrality favored)
   - TF-IDF Relevance Score (scikit-learn cosine similarity)
-  - Recency Score (publication date decay function)
+  - Recency Score (publication date with exponential decay, timezone-safe)
+- **Requirements Mapping**: 3.1–3.6
 
 #### 3. News Source Manager (`news_source.py`)
 - **Purpose**: NewsAPI integration and article URL management
 - **Key Methods**:
-  - `fetch_articles_by_topic(topic, region='id')` - Topic-based article retrieval
-  - `validate_response(response)` - API response validation
-  - `handle_rate_limits()` - Rate limiting and retry logic
+  - `fetch_articles_by_topic(topic)` - Topic-based article retrieval with validation
+  - `get_article_urls(topic, max_articles)` - Extract valid URLs with size cap
+  - `check_api_status()` - Health probe for integration diagnostics
+- **Resilience**: Rate limiting with backoff, retries, and consistent error modeling
 - **Configuration**: API key management, request parameters, error handling
+- **Requirements Mapping**: 2.1, 2.4, 2.5, 6.3
 
 ### Data Models and Structures
 
@@ -169,9 +173,31 @@ class ScoringConfig:
 - **Library**: newspaper3k
 - **Input**: Article URL
 - **Output**: Structured article data (title, content, metadata)
-- **Error Handling**: Parsing failures, timeout handling, encoding issues
+- **Error Handling**: Parsing failures, timeout handling, encoding issues, retries with varied user agents
+- **Requirements Mapping**: 1.1, 6.2, 6.4
 
-## Data Models
+## Presentation Layer Design
+
+### Templates and UI Behavior
+- `base.html` provides a dark, professional theme (glassmorphism), responsive nav, and Inter font
+- `index.html` includes two clear entry points:
+  - Analyze: URL input + optional query, loading states, inline errors, and an on-page result card with progress bars
+  - Curate: topic input, max articles, sorting, min-score filter, search, and pagination; results rendered as ranked cards
+- `results.html` displays a single analysis scorecard: overall score + component bars and summary
+- `curation_results.html` displays a ranked list of articles with scores and summaries
+- Error templates `400.html`, `404.html`, `500.html` extend base for consistent UI
+
+### Client-Side Enhancements
+- JS enhances UX without breaking API contracts:
+  - Analyze: populates the scorecard card and progress bars
+  - Curate: sorting (asc/desc), min-score filter, search, and pagination
+  - Loading and error states for both forms
+
+### Accessibility & Responsiveness
+- Mobile-first layout, accessible contrast, and keyboard-focusable controls
+
+### Requirements Mapping
+- 4.1, 4.2, 4.3, 4.4 satisfied via the above templates and behaviors
 
 ### Database Schema (Future Enhancement)
 While the initial implementation uses in-memory processing, the design supports future database integration:

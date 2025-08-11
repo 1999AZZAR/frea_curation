@@ -1,67 +1,15 @@
-# Environment variables
+node_modules/
+static/css/tailwind.css
+
 .env
-
-# Python
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# Virtual environments
-venv/
-env/
-ENV/
-env.bak/
-venv.bak/
-
-# IDE
+.DS_Store
+.venv/
 .vscode/
 .idea/
-*.swp
-*.swo
-*~
-
-# OS
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Flask
-instance/
-.webassets-cache
-
-# Testing
-.coverage
 .pytest_cache/
-.tox/
-htmlcov/
-
-# Logs
-*.log
-
-# spaCy models (will be downloaded during setup)
-*.tar.gz
-
-# NLTK data (will be downloaded during setup)
-nltk_data/
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/

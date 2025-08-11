@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}AI Content Curator{% endblock %}</title>
+  <meta name="color-scheme" content="dark light">
+  <!-- Compiled Tailwind CSS -->
+  <link rel="stylesheet" href="/static/css/tailwind.css" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-5o4kFfN2+6V2hK0m0m9mH7jJc4Q0D3ZP1T0p7l+zjz0xZPjZcQx2C3q2C2x0iXlJ0h3m8b3zJv9s8c6yEo6bWg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <!-- Inter font for professional typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  {% block head %}{% endblock %}
+</head>
+<body class="h-full bg-white text-slate-900">
+  <div class="min-h-full backdrop-blur-sm">
+    <nav class="sticky top-0 z-40 bg-white/80 border-b border-slate-200 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+      <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <div class="flex h-14 items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="h-8 w-8 rounded-xl bg-black text-white flex items-center justify-center">
+              <i class="fa-solid fa-pen-nib"></i>
+            </div>
+            <a href="/" class="text-base font-semibold tracking-wide text-slate-900">AI Content Curator</a>
+          </div>
+          <div class="flex items-center gap-4 text-sm text-slate-600">
+            <a href="#analyze" class="hover:text-slate-900 flex items-center gap-2"><i class="fa-solid fa-magnifying-glass-chart"></i> Analyze</a>
+            <a href="#curate" class="hover:text-slate-900 flex items-center gap-2"><i class="fa-solid fa-layer-group"></i> Curate</a>
+            <a href="https://newsapi.org/" target="_blank" rel="noopener" class="hidden sm:inline hover:text-slate-900"><i class="fa-regular fa-newspaper"></i></a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="mx-auto max-w-5xl p-4 sm:p-6 lg:p-8">
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="mt-10 py-6 text-center text-sm text-slate-500">
+      <div class="mx-auto max-w-5xl px-4">
+        <p class="text-slate-500">Powered by Flask • spaCy • VADER • scikit‑learn • NewsAPI</p>
+      </div>
+    </footer>
+  </div>
+
+  {% block scripts %}
+  <script src="/static/js/app.js"></script>
+  {% endblock %}
+</body>
+</html>
+

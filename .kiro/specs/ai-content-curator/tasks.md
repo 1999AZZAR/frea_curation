@@ -91,48 +91,43 @@
   - Write unit tests for curation endpoint with mocked NewsAPI responses
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
 
-- [ ] 8. Design and implement user interface templates
-- [ ] 8.1 Create base template with modern styling
-  - Set up Tailwind CSS integration for utility-first styling approach
-  - Create base.html template with dark mode theme and glassmorphism effects
-  - Implement responsive navigation and layout structure using mobile-first design
-  - Add Font Awesome icons integration for visual elements
-  - _Requirements: 4.4_
+- [x] 8. Design and implement user interface templates
+  - [x] 8.1 Create base template with modern styling
+    - Set up Tailwind CSS integration (compiled) for utility-first styling approach
+    - Create `base.html` with dark theme and glassmorphism effects
+    - Implement responsive navigation and layout (mobile-first)
+    - Add Font Awesome icons integration for visual elements
+    - _Requirements: 4.4_
 
-- [ ] 8.2 Build homepage interface
-  - Create index.html template with two clear entry points for manual and topic analysis
-  - Implement form validation and user input handling with proper error messaging
-  - Add loading states and user feedback for form submissions
-  - Ensure responsive design works across desktop and mobile devices
-  - _Requirements: 4.1_
+  - [x] 8.2 Build homepage interface
+    - Create `index.html` with two clear entry points: Analyze and Curate
+    - Implement client-side validation, loading states, and error feedback
+    - Ensure responsive design across devices
+    - _Requirements: 4.1_
 
-- [ ] 8.3 Design scorecard results interface
-  - Create results.html template for displaying individual article analysis
-  - Implement prominent score display with visual progress bars or radial gauges
-  - Add component score breakdowns with clear visual hierarchy
-  - Display named entities as categorized tags with proper styling
-  - _Requirements: 1.3, 4.2_
+  - [x] 8.3 Design scorecard results interface
+    - Create `results.html` for individual analysis
+    - Prominent overall score with progress bars for each component
+    - Component breakdowns with clear visual hierarchy
+    - Placeholder for entities (hidden until back-end provides data)
+    - _Requirements: 1.3, 4.2_
 
-- [ ] 8.4 Build topic curation results interface
-  - Create curation_results.html template for displaying ranked article lists
-  - Implement article cards with title, score, summary, and source link
-  - Add sorting and filtering capabilities for better user experience
-  - Ensure proper pagination or infinite scroll for large result sets
-  - _Requirements: 2.3, 4.3_
+  - [x] 8.4 Build topic curation results interface
+    - Create `curation_results.html` for ranked article lists
+    - Article cards with title, score, summary, and source link
+    - Sorting and min-score filtering, search, and pagination controls
+    - _Requirements: 2.3, 4.3_
 
-- [ ] 9. Create custom error page templates
-  - Design and implement 400.html template for client errors with helpful messaging
-  - Create 500.html template for server errors with fallback options
-  - Add 404.html template for not found errors with navigation suggestions
-  - Implement error logging with appropriate detail levels for debugging
-  - _Requirements: 6.4_
+  - [x] 9. Create custom error page templates
+    - `400.html`, `404.html`, `500.html` extend base template
+    - Consistent UI and helpful messaging
+    - _Requirements: 6.4_
 
-- [ ] 10. Add static assets and styling
-  - Process and optimize Tailwind CSS for production use with custom configuration
-  - Add responsive images and icons for better visual appeal
-  - Implement CSS animations and transitions for smooth user interactions
-  - Optimize static asset loading and caching for better performance
-  - _Requirements: 4.4_
+  - [x] 10. Add static assets and styling
+    - Tailwind CSS build pipeline (assets -> compiled `static/css/tailwind.css`)
+    - Inter font and refined typography for professional look
+    - Minor transitions and hover states aligned with glassmorphism
+    - _Requirements: 4.4_
 
 - [ ] 11. Create integration tests for complete workflows
   - Create end-to-end tests for complete user workflows using Flask test client
@@ -153,3 +148,18 @@
   - Add code comments and docstrings following PEP8 standards
   - Perform final integration testing and bug fixes before deployment
   - _Requirements: 5.4, 5.5_
+
+- [x] 14. Preserve API compatibility alongside UI
+  - Keep JSON responses for `POST /analyze` and `POST /curate-topic` when `Content-Type: application/json` is used
+  - Render server-side templates for non-JSON form submissions
+  - _Requirements: 1.1, 2.2, 4.1_
+
+- [x] 15. Front-end UX enhancements
+  - Loading indicators and inline error messages for both forms
+  - Client-side sorting, filtering, search, and pagination for curated results
+  - _Requirements: 4.3_
+
+- [x] 16. Bugfix: timezone-safe recency scoring
+  - Normalize naive/aware datetimes to UTC in `compute_recency_score`
+  - Prevents offset-naive/aware subtraction errors
+  - _Requirements: 3.5_

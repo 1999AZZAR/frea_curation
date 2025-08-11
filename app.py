@@ -4,7 +4,7 @@ Main application entry point with routing and configuration
 """
 
 import os
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -38,12 +38,17 @@ def create_app():
 
         is_valid, error = validate_url(url)
         if not is_valid:
-            return jsonify({'error': error or 'Invalid URL'}), 400
+            # If request is JSON, return JSON error; else render 400
+            if request.is_json:
+                return jsonify({'error': error or 'Invalid URL'}), 400
+            return render_template('errors/400.html', message=error or 'Invalid URL'), 400
 
         try:
             config = load_scoring_config()
         except Exception as e:
-            return jsonify({'error': f'Configuration error: {str(e)}'}), 500
+            if request.is_json:
+                return jsonify({'error': f'Configuration error: {str(e)}'}), 500
+            return render_template('errors/500.html', message=f'Configuration error: {str(e)}'), 500
 
         try:
             # Optional NLP components
@@ -66,9 +71,14 @@ def create_app():
                     'summary': scorecard.article.summary,
                 }
             }
-            return jsonify(result)
+            if request.is_json:
+                return jsonify(result)
+            # Render server view
+            return render_template('results.html', card=scorecard)
         except Exception as e:
-            return jsonify({'error': f'Analysis failed: {str(e)}'}), 500
+            if request.is_json:
+                return jsonify({'error': f'Analysis failed: {str(e)}'}), 500
+            return render_template('errors/500.html', message=f'Analysis failed: {str(e)}'), 500
     
     @app.route('/curate-topic', methods=['POST'])
     def curate_topic():
@@ -84,16 +94,22 @@ def create_app():
         try:
             max_articles = int(max_articles) if max_articles is not None else None
         except Exception:
-            return jsonify({'error': 'max_articles must be an integer'}), 400
+            if request.is_json:
+                return jsonify({'error': 'max_articles must be an integer'}), 400
+            return render_template('errors/400.html', message='max_articles must be an integer'), 400
 
         is_valid, error = validate_topic_keywords(topic)
         if not is_valid:
-            return jsonify({'error': error or 'Invalid topic'}), 400
+            if request.is_json:
+                return jsonify({'error': error or 'Invalid topic'}), 400
+            return render_template('errors/400.html', message=error or 'Invalid topic'), 400
 
         try:
             config = load_scoring_config()
         except Exception as e:
-            return jsonify({'error': f'Configuration error: {str(e)}'}), 500
+            if request.is_json:
+                return jsonify({'error': f'Configuration error: {str(e)}'}), 500
+            return render_template('errors/500.html', message=f'Configuration error: {str(e)}'), 500
 
         try:
             # Fetch URLs
@@ -108,26 +124,32 @@ def create_app():
             results = batch_analyze(urls, query=topic, config=config, nlp=nlp_model, vader_analyzer=vader)
             # Sort by overall_score descending
             results.sort(key=lambda r: r.overall_score, reverse=True)
-            payload = [
-                {
-                    'overall_score': r.overall_score,
-                    'readability_score': r.readability_score,
-                    'ner_density_score': r.ner_density_score,
-                    'sentiment_score': r.sentiment_score,
-                    'tfidf_relevance_score': r.tfidf_relevance_score,
-                    'recency_score': r.recency_score,
-                    'article': {
-                        'url': r.article.url,
-                        'title': r.article.title,
-                        'author': r.article.author,
-                        'summary': r.article.summary,
+
+            if request.is_json:
+                payload = [
+                    {
+                        'overall_score': r.overall_score,
+                        'readability_score': r.readability_score,
+                        'ner_density_score': r.ner_density_score,
+                        'sentiment_score': r.sentiment_score,
+                        'tfidf_relevance_score': r.tfidf_relevance_score,
+                        'recency_score': r.recency_score,
+                        'article': {
+                            'url': r.article.url,
+                            'title': r.article.title,
+                            'author': r.article.author,
+                            'summary': r.article.summary,
+                        }
                     }
-                }
-                for r in results
-            ]
-            return jsonify({'count': len(payload), 'results': payload})
+                    for r in results
+                ]
+                return jsonify({'count': len(payload), 'results': payload})
+            # Render server-side list
+            return render_template('curation_results.html', topic=topic, results=results)
         except Exception as e:
-            return jsonify({'error': f'Curation failed: {str(e)}'}), 500
+            if request.is_json:
+                return jsonify({'error': f'Curation failed: {str(e)}'}), 500
+            return render_template('errors/500.html', message=f'Curation failed: {str(e)}'), 500
     
     # Error handlers
     @app.errorhandler(400)

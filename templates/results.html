@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Analysis Result • AI Content Curator{% endblock %}
+
+{% block content %}
+<section class="card-surface p-6">
+  <div class="flex items-center gap-3 mb-4">
+    <i class="fa-solid fa-magnifying-glass-chart text-indigo-400"></i>
+    <h1 class="text-2xl font-semibold">Analysis Result</h1>
+  </div>
+
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+      <h2 class="text-xl font-semibold">{{ card.article.title or card.article.url }}</h2>
+      {% if card.article.author %}
+      <p class="text-sm text-slate-400">By {{ card.article.author }}</p>
+      {% endif %}
+      <p class="mt-3 text-slate-300 text-sm">{{ card.article.summary }}</p>
+    </div>
+    <div class="flex items-center gap-4">
+      <div class="h-24 w-24 rounded-full border border-slate-200 bg-slate-100 grid place-items-center text-2xl font-bold">
+        {{ '%.0f' % card.overall_score }}
+      </div>
+      <div class="text-sm text-slate-400">Overall Score</div>
+    </div>
+  </div>
+
+  <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <div class="flex justify-between text-xs text-slate-400"><span>Readability</span><span>{{ '%.2f' % card.readability_score }}</span></div>
+      <div class="progress-rail"><div class="progress-fill bg-sky-600" style="width: {{ card.readability_score }}%"></div></div>
+    </div>
+    <div>
+      <div class="flex justify-between text-xs text-slate-400"><span>NER Density</span><span>{{ '%.2f' % card.ner_density_score }}</span></div>
+      <div class="progress-rail"><div class="progress-fill bg-emerald-600" style="width: {{ card.ner_density_score }}%"></div></div>
+    </div>
+    <div>
+      <div class="flex justify-between text-xs text-slate-400"><span>Sentiment (neutrality)</span><span>{{ '%.2f' % card.sentiment_score }}</span></div>
+      <div class="progress-rail"><div class="progress-fill bg-amber-600" style="width: {{ card.sentiment_score }}%"></div></div>
+    </div>
+    <div>
+      <div class="flex justify-between text-xs text-slate-400"><span>TF‑IDF Relevance</span><span>{{ '%.2f' % card.tfidf_relevance_score }}</span></div>
+      <div class="progress-rail"><div class="progress-fill bg-indigo-600" style="width: {{ card.tfidf_relevance_score }}%"></div></div>
+    </div>
+    <div class="sm:col-span-2">
+      <div class="flex justify-between text-xs text-slate-400"><span>Recency</span><span>{{ '%.2f' % card.recency_score }}</span></div>
+      <div class="progress-rail"><div class="progress-fill bg-fuchsia-600" style="width: {{ card.recency_score }}%"></div></div>
+    </div>
+  </div>
+
+  <div class="mt-6 flex items-center gap-3">
+    <a class="rounded-lg border border-slate-800 bg-slate-900/60 px-4 py-2 text-sm hover:bg-slate-800" href="{{ card.article.url }}" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square mr-2"></i>Open Source</a>
+    <a class="rounded-lg border border-slate-800 bg-slate-900/60 px-4 py-2 text-sm hover:bg-slate-800" href="/"><i class="fa-solid fa-house mr-2"></i>Home</a>
+  </div>
+</section>
+{% endblock %}
+
+
