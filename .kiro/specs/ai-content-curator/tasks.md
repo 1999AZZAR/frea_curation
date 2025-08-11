@@ -30,7 +30,7 @@
   - Write unit tests using mocked API responses
   - _Requirements: 2.1, 2.4, 2.5, 5.3, 6.3_
 
-- [ ] 5. Implement NLP processing components
+- [x] 5. Implement NLP processing components
 - [x] 5.1 Set up spaCy named entity recognition
   - Download and configure spaCy language model for entity extraction
   - Implement NER processing function to extract and categorize named entities
@@ -67,7 +67,7 @@
   - Write comprehensive unit tests for composite scoring with various input combinations
   - _Requirements: 3.6_
 
-- [ ] 6.3 Integrate complete analysis pipeline
+- [x] 6.3 Integrate complete analysis pipeline
   - Create main analyze_article function that orchestrates all scoring components
   - Implement batch_analyze function for processing multiple articles efficiently
   - Add comprehensive error handling and graceful degradation for partial failures

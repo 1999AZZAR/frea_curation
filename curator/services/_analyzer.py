@@ -20,6 +20,7 @@ from typing import Dict, List, Optional, Tuple
 
 from curator.core.models import Article, ScoreCard, ScoringConfig, Entity
 from curator.services.parser import parse_article, batch_parse_articles, get_article_word_count
+from curator.services._parser import ArticleParsingError
 from curator.core.nlp import get_sentence_transformer
 
 
@@ -195,19 +196,80 @@ def analyze_article(
     nlp=None,
     vader_analyzer=None,
 ) -> ScoreCard:
+    """
+    Main orchestrator function for analyzing a single article.
+    
+    Implements comprehensive error handling and graceful degradation:
+    - If parsing fails, raises ArticleParsingError
+    - If individual scoring components fail, uses fallback scores
+    - Ensures all scores are valid (0-100 range)
+    
+    Args:
+        url: Article URL to analyze
+        query: Optional query for relevance scoring
+        config: Scoring configuration (uses defaults if None)
+        nlp: Optional spaCy model for NER
+        vader_analyzer: Optional VADER sentiment analyzer
+        
+    Returns:
+        ScoreCard with all scoring components
+        
+    Raises:
+        ArticleParsingError: If article cannot be parsed
+        ValueError: If URL is invalid
+    """
     if config is None:
         config = ScoringConfig()
+    
+    # Parse article - this can raise ArticleParsingError
     parsed = parse_article(url, min_word_count=config.min_word_count)
-    # Enrich with entities if possible
-    extract_entities(parsed, nlp=nlp)
-    metrics = {
-        "readability": compute_readability_score(parsed, min_word_count=config.min_word_count),
-        "ner_density": compute_ner_density_score(parsed, nlp=nlp),
-        "sentiment": compute_sentiment_score(parsed, vader_analyzer=vader_analyzer),
-        # Keep key name for backward compatibility in API even if using embeddings under the hood
-        "tfidf_relevance": compute_relevance_score(parsed, query or ""),
-        "recency": compute_recency_score(parsed),
-    }
+    
+    # Enrich with entities if possible (graceful degradation)
+    try:
+        extract_entities(parsed, nlp=nlp)
+    except Exception as e:
+        # Log but don't fail - entities are optional
+        import logging
+        logging.getLogger(__name__).warning(f"Entity extraction failed for {url}: {e}")
+    
+    # Calculate individual scores with graceful degradation
+    metrics = {}
+    
+    # Readability score (should always work)
+    try:
+        metrics["readability"] = compute_readability_score(parsed, min_word_count=config.min_word_count)
+    except Exception:
+        metrics["readability"] = 0.0
+    
+    # NER density score (graceful degradation if spaCy unavailable)
+    try:
+        metrics["ner_density"] = compute_ner_density_score(parsed, nlp=nlp)
+    except Exception:
+        metrics["ner_density"] = 0.0
+    
+    # Sentiment score (graceful degradation if VADER unavailable)
+    try:
+        metrics["sentiment"] = compute_sentiment_score(parsed, vader_analyzer=vader_analyzer)
+    except Exception:
+        metrics["sentiment"] = 50.0  # Neutral fallback
+    
+    # Relevance score (graceful degradation)
+    try:
+        metrics["tfidf_relevance"] = compute_relevance_score(parsed, query or "")
+    except Exception:
+        metrics["tfidf_relevance"] = 0.0
+    
+    # Recency score (should always work)
+    try:
+        metrics["recency"] = compute_recency_score(parsed)
+    except Exception:
+        metrics["recency"] = 100.0  # Assume recent if date parsing fails
+    
+    # Ensure all scores are valid
+    for key, value in metrics.items():
+        if not isinstance(value, (int, float)) or not (0.0 <= value <= 100.0):
+            metrics[key] = 0.0
+    
     overall = calculate_composite_score(metrics, config)
     return ScoreCard(
         overall_score=overall,
@@ -228,39 +290,121 @@ def batch_analyze(
     vader_analyzer=None,
     apply_diversity: Optional[bool] = None,
 ) -> List[ScoreCard]:
+    """
+    Batch processing function for analyzing multiple articles efficiently.
+    
+    Implements comprehensive error handling and graceful degradation:
+    - Continues processing even if individual articles fail
+    - Uses fallback scores for failed scoring components
+    - Logs failures for debugging without stopping the batch
+    
+    Args:
+        urls: List of article URLs to analyze
+        query: Optional query for relevance scoring
+        config: Scoring configuration (uses defaults if None)
+        nlp: Optional spaCy model for NER
+        vader_analyzer: Optional VADER sentiment analyzer
+        apply_diversity: Whether to apply diversity filtering (auto-detect if None)
+        
+    Returns:
+        List of ScoreCard objects for successfully processed articles
+    """
     if not urls:
         return []
     if config is None:
         config = ScoringConfig()
+    
+    import logging
+    logger = logging.getLogger(__name__)
+    
     results: List[ScoreCard] = []
+    
+    # Parse articles in batch - this handles individual failures gracefully
     parsed_articles = batch_parse_articles(urls, min_word_count=config.min_word_count)
-    for article in parsed_articles:
-        extract_entities(article, nlp=nlp)
-        metrics = {
-            "readability": compute_readability_score(article, min_word_count=config.min_word_count),
-            "ner_density": compute_ner_density_score(article, nlp=nlp),
-            "sentiment": compute_sentiment_score(article, vader_analyzer=vader_analyzer),
-            # Keep key name for backward compatibility in API even if using embeddings under the hood
-            "tfidf_relevance": compute_relevance_score(article, query or ""),
-            "recency": compute_recency_score(article),
-        }
-        overall = calculate_composite_score(metrics, config)
-        results.append(
-            ScoreCard(
-                overall_score=overall,
-                readability_score=metrics["readability"],
-                ner_density_score=metrics["ner_density"],
-                sentiment_score=metrics["sentiment"],
-                tfidf_relevance_score=metrics["tfidf_relevance"],
-                recency_score=metrics["recency"],
-                article=article,
+    
+    logger.info(f"Successfully parsed {len(parsed_articles)}/{len(urls)} articles for batch analysis")
+    
+    for i, article in enumerate(parsed_articles):
+        try:
+            # Enrich with entities if possible (graceful degradation)
+            try:
+                extract_entities(article, nlp=nlp)
+            except Exception as e:
+                logger.warning(f"Entity extraction failed for article {i+1}: {e}")
+            
+            # Calculate individual scores with graceful degradation
+            metrics = {}
+            
+            # Readability score (should always work)
+            try:
+                metrics["readability"] = compute_readability_score(article, min_word_count=config.min_word_count)
+            except Exception as e:
+                logger.warning(f"Readability scoring failed for article {i+1}: {e}")
+                metrics["readability"] = 0.0
+            
+            # NER density score (graceful degradation if spaCy unavailable)
+            try:
+                metrics["ner_density"] = compute_ner_density_score(article, nlp=nlp)
+            except Exception as e:
+                logger.warning(f"NER density scoring failed for article {i+1}: {e}")
+                metrics["ner_density"] = 0.0
+            
+            # Sentiment score (graceful degradation if VADER unavailable)
+            try:
+                metrics["sentiment"] = compute_sentiment_score(article, vader_analyzer=vader_analyzer)
+            except Exception as e:
+                logger.warning(f"Sentiment scoring failed for article {i+1}: {e}")
+                metrics["sentiment"] = 50.0  # Neutral fallback
+            
+            # Relevance score (graceful degradation)
+            try:
+                metrics["tfidf_relevance"] = compute_relevance_score(article, query or "")
+            except Exception as e:
+                logger.warning(f"Relevance scoring failed for article {i+1}: {e}")
+                metrics["tfidf_relevance"] = 0.0
+            
+            # Recency score (should always work)
+            try:
+                metrics["recency"] = compute_recency_score(article)
+            except Exception as e:
+                logger.warning(f"Recency scoring failed for article {i+1}: {e}")
+                metrics["recency"] = 100.0  # Assume recent if date parsing fails
+            
+            # Ensure all scores are valid
+            for key, value in metrics.items():
+                if not isinstance(value, (int, float)) or not (0.0 <= value <= 100.0):
+                    logger.warning(f"Invalid score {key}={value} for article {i+1}, using 0.0")
+                    metrics[key] = 0.0
+            
+            overall = calculate_composite_score(metrics, config)
+            results.append(
+                ScoreCard(
+                    overall_score=overall,
+                    readability_score=metrics["readability"],
+                    ner_density_score=metrics["ner_density"],
+                    sentiment_score=metrics["sentiment"],
+                    tfidf_relevance_score=metrics["tfidf_relevance"],
+                    recency_score=metrics["recency"],
+                    article=article,
+                )
             )
-        )
+            
+        except Exception as e:
+            # Log the error but continue with other articles
+            logger.error(f"Failed to analyze article {i+1} ({article.url}): {e}")
+            continue
+    
+    logger.info(f"Successfully analyzed {len(results)}/{len(parsed_articles)} parsed articles")
+    
     # Optionally apply duplicate collapse and domain diversity caps
     if apply_diversity is None:
         apply_diversity = os.environ.get("DIVERSIFY_RESULTS", "1").strip().lower() in {"1", "true", "yes", "on"}
     if apply_diversity:
-        return _apply_diversity_and_dedup(results)
+        try:
+            return _apply_diversity_and_dedup(results)
+        except Exception as e:
+            logger.warning(f"Diversity filtering failed: {e}, returning unfiltered results")
+            return results
     return results
 
 

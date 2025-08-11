@@ -9,7 +9,7 @@ import unittest
 from unittest.mock import Mock, patch
 from datetime import datetime, timedelta
 
-from models import Article, ScoringConfig
+from curator.core.models import Article, ScoringConfig
 from curator.services.analyzer import (
     compute_readability_score,
     compute_ner_density_score,
