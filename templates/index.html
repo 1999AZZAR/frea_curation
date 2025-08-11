@@ -27,7 +27,7 @@
         <span id="analyze-loading" class="hidden text-sm text-slate-500">Analyzing…</span>
       </div>
       <p id="analyze-error" class="hidden rounded-lg border border-rose-200 bg-rose-50 p-3 text-rose-700 text-sm"></p>
-    </form>
+      </form>
 
     <div id="analyze-result-card" class="mt-5 hidden">
       <div class="card-surface p-4">
@@ -74,7 +74,7 @@
         </div>
       </div>
     </div>
-  </section>
+    </section>
 
   <section id="curate" class="card-surface p-5">
     <div class="flex items-center gap-3 mb-2">
@@ -103,6 +103,10 @@
           <label for="curate-min-score" class="block text-sm text-slate-600">Min Score</label>
           <input type="number" id="curate-min-score" min="0" max="100" value="0" class="mt-1 input">
         </div>
+        <div class="sm:col-span-3 flex items-center gap-2">
+          <input id="curate-diversify" type="checkbox" checked class="h-4 w-4">
+          <label for="curate-diversify" class="text-sm text-slate-600">Diversify results (deduplicate near-similar and cap per domain)</label>
+        </div>
       </div>
       <div class="flex items-center gap-3">
         <button type="submit" class="btn btn-primary">
@@ -112,7 +116,7 @@
         <span id="curate-loading" class="hidden text-sm text-slate-500">Curating…</span>
       </div>
       <p id="curate-error" class="hidden rounded-lg border border-rose-200 bg-rose-50 p-3 text-rose-700 text-sm"></p>
-    </form>
+      </form>
 
     <div class="mt-5">
       <div class="flex flex-col gap-3 mb-3">
@@ -141,7 +145,7 @@
       </div>
       <div id="curate-result" class="grid grid-cols-1 gap-3"></div>
     </div>
-  </section>
+    </section>
 </div>
 {% endblock %}
 

@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
+from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -180,7 +181,20 @@ class NewsSource:
             page_size=page_size,
             sort_by='relevancy',
         )
-        urls = [article['url'] for article in articles[:max_articles]]
+        # Canonicalize and deduplicate while preserving order
+        seen = set()
+        urls: List[str] = []
+        for article in articles:
+            url = article.get('url') or ''
+            if not url:
+                continue
+            cu = self._canonicalize_url(url)
+            if cu in seen:
+                continue
+            seen.add(cu)
+            urls.append(cu)
+            if len(urls) >= max_articles:
+                break
         logger.info(f"Extracted {len(urls)} URLs for topic: {topic}")
         return urls
 
@@ -199,3 +213,38 @@ class NewsSource:
         except Exception as e:
             logger.error(f"API status check failed: {str(e)}")
             raise NewsAPIError(f"Status check failed: {str(e)}")
+
+    @staticmethod
+    def _canonicalize_url(url: str) -> str:
+        """Normalize URL to reduce duplicates from tracking params, fragments, and case.
+
+        - Lowercase scheme and host
+        - Strip fragment
+        - Remove common tracking query params (utm_*, gclid, fbclid)
+        - Sort remaining query parameters for stability
+        """
+        try:
+            parsed = urlparse(url)
+            scheme = (parsed.scheme or 'https').lower()
+            netloc = (parsed.netloc or '').lower()
+            if netloc.startswith('www.'):
+                netloc = netloc[4:]
+            # Filter query params
+            params = []
+            for k, v in parse_qsl(parsed.query, keep_blank_values=True):
+                lk = k.lower()
+                if lk.startswith('utm_') or lk in {'gclid', 'fbclid', 'mc_eid', 'mc_cid'}:
+                    continue
+                params.append((k, v))
+            params.sort()
+            canonical = urlunparse((
+                scheme,
+                netloc,
+                parsed.path or '/',
+                '',
+                urlencode(params, doseq=True),
+                ''  # no fragment
+            ))
+            return canonical
+        except Exception:
+            return url

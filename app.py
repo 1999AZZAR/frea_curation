@@ -91,6 +91,7 @@ def create_app():
         data = request.get_json(silent=True) or request.form
         topic = (data.get('topic') if data else None) or ''
         max_articles = data.get('max_articles')
+        apply_diversity = data.get('apply_diversity')
         try:
             max_articles = int(max_articles) if max_articles is not None else None
         except Exception:
@@ -121,10 +122,10 @@ def create_app():
             from curator.core.nlp import get_spacy_model, get_vader_analyzer
             nlp_model = get_spacy_model()
             vader = get_vader_analyzer()
-            results = batch_analyze(urls, query=topic, config=config, nlp=nlp_model, vader_analyzer=vader)
+            results = batch_analyze(urls, query=topic, config=config, nlp=nlp_model, vader_analyzer=vader, apply_diversity=(str(apply_diversity).lower() in {'1','true','yes','on'} if apply_diversity is not None else None))
             # Sort by overall_score descending
             results.sort(key=lambda r: r.overall_score, reverse=True)
-
+            
             if request.is_json:
                 payload = [
                     {

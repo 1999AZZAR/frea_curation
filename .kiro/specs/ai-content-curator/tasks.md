@@ -163,3 +163,81 @@
   - Normalize naive/aware datetimes to UTC in `compute_recency_score`
   - Prevents offset-naive/aware subtraction errors
   - _Requirements: 3.5_
+
+- [ ] 17. Upgrade relevance scoring to embeddings
+  - Integrate SentenceTransformers (MiniLM) for semantic similarity
+  - Add lazy model initialization and config flag to fallback to TF‑IDF
+  - Write unit tests with mocked embeddings to verify ranking improvements
+  - _Requirements: 3.4, 3.6_
+
+- [ ] 18. Duplicate detection and diversity controls
+  - URL canonicalization (strip UTM, normalize hosts) before parsing
+  - Near‑duplicate collapse using simhash or embedding threshold
+  - Domain diversity cap in final ranking (e.g., max 2 per domain)
+  - _Requirements: 2.3, 7.1_
+
+- [ ] 19. Topic‑aware recency calibration
+  - Add per‑topic half‑life config (e.g., finance=1d, tech=3d, research=14d)
+  - Pass calibrated half‑life into `compute_recency_score`
+  - _Requirements: 3.5, 5.2_
+
+- [ ] 20. Parser resilience improvements
+  - Add `readability-lxml` fallback when newspaper3k fails
+  - Harden retry/backoff and user‑agent rotation
+  - Expand error messages for better UX and logs
+  - _Requirements: 1.1, 6.2, 6.4_
+
+- [ ] 21. Source reputation and credibility signals
+  - Maintain domain reputation table and optional author reputation
+  - Add reputation weight into composite score via `ScoringConfig`
+  - _Requirements: 3.6_
+
+- [ ] 22. Topic coherence and coverage
+  - Keyword coverage ratio and keyphrase extraction (e.g., YAKE)
+  - Blend as an additional metric in composite score
+  - _Requirements: 3.4, 3.6_
+
+- [ ] 23. Summarization for display
+  - Add summarization utility (extractive or lightweight abstractive)
+  - Use when newspaper3k summary is missing/low quality
+  - _Requirements: 1.3, 4.2_
+
+- [ ] 24. Diversity‑constrained ranking
+  - Cluster by embeddings and cap results per cluster/domain
+  - Ensure varied perspectives in top‑N
+  - _Requirements: 2.3, 7.1_
+
+- [ ] 25. Caching layer
+  - Redis cache for parsed articles and scorecards with TTLs
+  - Wrapper utilities and cache keys by URL/hash
+  - _Requirements: 7.1, 7.2_
+
+- [ ] 26. Background jobs for batch processing
+  - Celery + Redis worker for `batch_analyze`
+  - Add status endpoints and progress polling in UI
+  - _Requirements: 7.1, 7.2_
+
+- [ ] 27. Persistence layer
+  - Store `Article`, `ScoreCard`, `Entity` in Postgres via SQLAlchemy
+  - Simple migrations and retention policy
+  - _Requirements: 5.1, 5.2_
+
+- [ ] 28. Feedback loop and learning‑to‑rank
+  - Endpoints to capture clicks/saves/likes
+  - Periodic job to tune `ScoringConfig` weights from feedback
+  - _Requirements: 5.4, 7.3_
+
+- [ ] 29. Observability and quality monitoring
+  - Add Sentry for errors, Prometheus metrics for timings and success rates
+  - Structured logs for parsing/scoring outcomes
+  - _Requirements: 6.4, 7.3_
+
+- [ ] 30. UI enhancements (professional editorial UX)
+  - Refine article card typography and spacing; add faceted filters (domain/date/word count)
+  - Actions: save to list, copy/share links
+  - _Requirements: 4.1, 4.3, 4.4_
+
+- [ ] 31. CI/CD and deployment hardening
+  - Dockerfile and docker‑compose with Redis/Postgres profiles
+  - GitHub Actions for tests and build; environment‑specific configs
+  - _Requirements: 5.1, 5.2, 5.3_

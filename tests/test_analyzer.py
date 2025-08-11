@@ -56,6 +56,12 @@ class TestScoringFunctions(unittest.TestCase):
         self.assertGreaterEqual(score, 0)
         self.assertLessEqual(score, 100)
 
+    def test_embeddings_relevance_score_fallback(self):
+        # Even if embeddings not available, compute_relevance_score must return valid 0-100
+        from curator.services._analyzer import compute_relevance_score
+        s = compute_relevance_score(self.article, query="Apple event")
+        self.assertTrue(0 <= s <= 100)
+
     def test_recency_score(self):
         s = compute_recency_score(self.article, now=self.article.publish_date + timedelta(days=1))
         self.assertGreaterEqual(s, 0)

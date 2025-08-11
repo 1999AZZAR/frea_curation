@@ -77,6 +77,7 @@ def batch_analyze(
     config: Optional[ScoringConfig] = None,
     nlp=None,
     vader_analyzer=None,
+    apply_diversity: Optional[bool] = None,
 ) -> List[ScoreCard]:
     return _impl.batch_analyze(
         urls=urls,
@@ -84,4 +85,5 @@ def batch_analyze(
         config=config,
         nlp=nlp,
         vader_analyzer=vader_analyzer,
+        apply_diversity=apply_diversity,
     )

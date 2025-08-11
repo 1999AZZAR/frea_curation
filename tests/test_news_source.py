@@ -292,7 +292,9 @@ class TestNewsSource(unittest.TestCase):
     @patch.object(NewsSource, 'fetch_articles_by_topic')
     def test_get_article_urls_success(self, mock_fetch):
         """Test successful URL extraction."""
-        mock_fetch.return_value = [self.sample_article]
+        # include tracking parameters and mixed casing to verify canonicalization
+        a = self.sample_article.copy(); a['url'] = 'https://WWW.Example.com/article?utm_source=x&gclid=123'
+        mock_fetch.return_value = [a, self.sample_article]
         
         urls = self.news_source.get_article_urls("technology", max_articles=5)
         

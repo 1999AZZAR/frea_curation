@@ -96,6 +96,8 @@ window.addEventListener('DOMContentLoaded', () => {
   const curateSort = document.getElementById('curate-sort');
   const curateMinScore = document.getElementById('curate-min-score');
   const curateSearch = document.getElementById('curate-search');
+  // Optional controls (may not exist)
+  const curateDiversify = document.getElementById('curate-diversify');
   const curatePrev = document.getElementById('curate-prev');
   const curateNext = document.getElementById('curate-next');
   const curatePageInfo = document.getElementById('curate-page-info');
@@ -157,8 +159,9 @@ window.addEventListener('DOMContentLoaded', () => {
       const topic = document.getElementById('curate-topic').value.trim();
       const maxStr = document.getElementById('curate-max').value;
       const max_articles = maxStr ? parseInt(maxStr, 10) : undefined;
+      const apply_diversity = curateDiversify ? !!curateDiversify.checked : true;
       try{
-        const data = await postJson('/curate-topic', { topic, max_articles });
+        const data = await postJson('/curate-topic', { topic, max_articles, apply_diversity });
         curateData = data.results || [];
         currentPage = 1;
         renderCuration();

@@ -34,6 +34,13 @@
       {% if r.article.summary %}
       <p class="mt-2 text-sm text-slate-300">{{ r.article.summary }}</p>
       {% endif %}
+      {% if r.article.entities %}
+      <div class="mt-2 flex flex-wrap gap-2">
+        {% for e in r.article.entities[:8] %}
+        <span class="rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-700">{{ e.label }}: {{ e.text }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
     </article>
     {% endfor %}
   </div>
