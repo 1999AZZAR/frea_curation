@@ -164,7 +164,7 @@
   - Prevents offset-naive/aware subtraction errors
   - _Requirements: 3.5_
 
-- [ ] 17. Upgrade relevance scoring to embeddings
+- [x] 17. Upgrade relevance scoring to embeddings
   - Integrate SentenceTransformers (MiniLM) for semantic similarity
   - Add lazy model initialization and config flag to fallback to TF‑IDF
   - Write unit tests with mocked embeddings to verify ranking improvements

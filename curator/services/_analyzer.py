@@ -20,6 +20,7 @@ from typing import Dict, List, Optional, Tuple
 
 from curator.core.models import Article, ScoreCard, ScoringConfig, Entity
 from curator.services.parser import parse_article, batch_parse_articles, get_article_word_count
+from curator.core.nlp import get_sentence_transformer
 
 
 def compute_readability_score(article: Article, min_word_count: int = 300) -> float:
@@ -106,18 +107,13 @@ _EMBED_MODEL = None  # Lazy global cache for sentence-transformers model
 
 
 def _get_sentence_transformer(model_name: str = "all-MiniLM-L6-v2"):
+    """Get cached sentence transformer model with lazy initialization."""
     global _EMBED_MODEL
     if _EMBED_MODEL is not None:
         return _EMBED_MODEL
-    try:
-        from sentence_transformers import SentenceTransformer  # type: ignore
-    except Exception:
-        return None
-    try:
-        _EMBED_MODEL = SentenceTransformer(model_name)
-        return _EMBED_MODEL
-    except Exception:
-        return None
+    
+    _EMBED_MODEL = get_sentence_transformer(model_name)
+    return _EMBED_MODEL
 
 
 def compute_embeddings_relevance_score(article: Article, query: str) -> float:

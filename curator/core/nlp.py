@@ -1,5 +1,5 @@
 """
-NLP utilities for spaCy and NLTK VADER initialization under package namespace.
+NLP utilities for spaCy, NLTK VADER, and SentenceTransformers initialization under package namespace.
 """
 
 from __future__ import annotations
@@ -35,6 +35,19 @@ def get_vader_analyzer() -> Optional[Any]:
         except Exception:
             return None
         return SentimentIntensityAnalyzer()
+    except Exception:
+        return None
+
+
+def get_sentence_transformer(model_name: str = "all-MiniLM-L6-v2") -> Optional[Any]:
+    """Return a SentenceTransformer model instance or None if unavailable."""
+    try:
+        from sentence_transformers import SentenceTransformer  # type: ignore
+    except Exception:
+        return None
+
+    try:
+        return SentenceTransformer(model_name)
     except Exception:
         return None
 

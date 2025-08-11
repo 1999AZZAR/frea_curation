@@ -16,6 +16,8 @@ __all__ = [
     "compute_ner_density_score",
     "compute_sentiment_score",
     "compute_tfidf_relevance_score",
+    "compute_embeddings_relevance_score",
+    "compute_relevance_score",
     "compute_recency_score",
     "calculate_composite_score",
     "analyze_article",
@@ -43,6 +45,14 @@ def compute_sentiment_score(article: Article, vader_analyzer=None) -> float:
 
 def compute_tfidf_relevance_score(article: Article, query: str) -> float:
     return _impl.compute_tfidf_relevance_score(article, query)
+
+
+def compute_embeddings_relevance_score(article: Article, query: str) -> float:
+    return _impl.compute_embeddings_relevance_score(article, query)
+
+
+def compute_relevance_score(article: Article, query: str) -> float:
+    return _impl.compute_relevance_score(article, query)
 
 
 def compute_recency_score(

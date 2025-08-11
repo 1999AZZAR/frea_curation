@@ -435,3 +435,8 @@ class DevelopmentConfig:
 - **Application Metrics**: Response times, error rates
 - **Business Metrics**: Articles processed, user engagement
 - **Infrastructure Metrics**: CPU, memory, network usage
+
+#### Notes
+- **Use the venv (.venv) everytime need to run the python code**
+- **Always Put and edit code on its Apropriate location**
+- **Using PEP8 are must**
