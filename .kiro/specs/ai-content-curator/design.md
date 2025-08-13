@@ -177,6 +177,23 @@ class ScoringConfig:
 - **Requirements Mapping**: 1.1, 6.2, 6.4
 
 ## Presentation Layer Design
+### API (SaaS/IaaS) Specification
+
+The service exposes a REST API suitable for SaaS/IaaS integration. A full OpenAPI 3.0 document is provided at `./openapi.yaml`.
+
+Key endpoints:
+- POST `/analyze` — Single-article analysis (supports `use_embeddings` toggle)
+- POST `/curate-topic` — Topic-based curation and ranking
+- POST `/compare` — Pairwise similarity (URLs or raw text), TF‑IDF baseline with optional embeddings
+- GET `/health` — Health check
+
+Authentication:
+- API key via `X-API-Key` header (see `components.securitySchemes.ApiKeyAuth`)
+
+Schemas:
+- `AnalyzeRequest`, `AnalyzeResponse`, `CurateRequest`, `CurateResponse`, `CompareRequest`, `CompareResponse`, plus shared `Article`, `Entity`, and `ScoreCard` types.
+
+This API design enables programmatic consumption for downstream products and integrations.
 
 ### Templates and UI Behavior
 - `base.html` provides a light, professional theme, responsive nav, Inter font, and full-width layout with centered content containers

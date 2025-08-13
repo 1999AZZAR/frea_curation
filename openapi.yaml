@@ -1,0 +1,277 @@
+openapi: 3.0.3
+info:
+  title: AI Content Curator API
+  version: "1.0.0"
+  description: |
+    REST API for the AI Content Curator. Supports single-article analysis, topic curation,
+    and pairwise similarity comparison. Designed for SaaS/IaaS consumption.
+
+servers:
+  - url: https://api.example.com
+    description: Production
+  - url: http://localhost:5000
+    description: Local development
+
+tags:
+  - name: Analyze
+    description: Single-article analysis
+  - name: Curate
+    description: Topic-based curation
+  - name: Compare
+    description: Similarity comparison
+  - name: System
+    description: Health and metadata
+
+paths:
+  /analyze:
+    post:
+      tags: [Analyze]
+      summary: Analyze a single article
+      operationId: analyzeArticle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalyzeRequest'
+            example:
+              url: "https://example.com/article"
+              query: "artificial intelligence"
+              use_embeddings: true
+      responses:
+        '200':
+          description: Analysis result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyzeResponse'
+        '400':
+          description: Invalid input
+        '500':
+          description: Analysis failed
+      security:
+        - ApiKeyAuth: []
+
+  /curate-topic:
+    post:
+      tags: [Curate]
+      summary: Curate and rank articles for a topic
+      operationId: curateTopic
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CurateRequest'
+            example:
+              topic: "climate change"
+              max_articles: 25
+              apply_diversity: true
+      responses:
+        '200':
+          description: Curated results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurateResponse'
+        '400':
+          description: Invalid input
+        '500':
+          description: Curation failed
+      security:
+        - ApiKeyAuth: []
+
+  /compare:
+    post:
+      tags: [Compare]
+      summary: Compare similarity between two inputs (URLs or raw text)
+      operationId: compareSimilarity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompareRequest'
+            examples:
+              urls:
+                summary: Compare by URLs
+                value:
+                  a_url: "https://example.com/a"
+                  b_url: "https://example.com/b"
+                  use_embeddings: true
+              raw:
+                summary: Compare by raw text
+                value:
+                  a_text: "OpenAI announced a new model..."
+                  b_text: "A new AI model was introduced by..."
+                  use_embeddings: false
+      responses:
+        '200':
+          description: Similarity results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompareResponse'
+        '400':
+          description: Invalid input
+        '500':
+          description: Comparison failed
+      security:
+        - ApiKeyAuth: []
+
+  /health:
+    get:
+      tags: [System]
+      summary: Health check
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+  schemas:
+    Entity:
+      type: object
+      properties:
+        text: { type: string }
+        label: { type: string, description: "PERSON, ORG, GPE, etc." }
+        confidence: { type: number, format: float, minimum: 0, maximum: 1 }
+
+    Article:
+      type: object
+      properties:
+        url: { type: string }
+        title: { type: string }
+        author: { type: string }
+        publish_date: { type: string, format: date-time, nullable: true }
+        content: { type: string, nullable: true }
+        summary: { type: string, nullable: true }
+        entities:
+          type: array
+          items: { $ref: '#/components/schemas/Entity' }
+
+    ScoreCard:
+      type: object
+      properties:
+        overall_score: { type: number, format: float }
+        readability_score: { type: number, format: float }
+        ner_density_score: { type: number, format: float }
+        sentiment_score: { type: number, format: float }
+        tfidf_relevance_score: { type: number, format: float }
+        recency_score: { type: number, format: float }
+        article: { $ref: '#/components/schemas/Article' }
+
+    AnalyzeRequest:
+      type: object
+      required: [url]
+      properties:
+        url: { type: string, description: "Article URL" }
+        query: { type: string, nullable: true }
+        use_embeddings: { type: boolean, nullable: true }
+
+    AnalyzeResponse:
+      type: object
+      properties:
+        overall_score: { type: number, format: float }
+        readability_score: { type: number, format: float }
+        ner_density_score: { type: number, format: float }
+        sentiment_score: { type: number, format: float }
+        tfidf_relevance_score: { type: number, format: float }
+        recency_score: { type: number, format: float }
+        stats:
+          type: object
+          properties:
+            word_count: { type: integer }
+            entity_count: { type: integer }
+            domain: { type: string }
+            relevance_method: { type: string, enum: [tfidf, embeddings] }
+        article: { $ref: '#/components/schemas/Article' }
+
+    CurateRequest:
+      type: object
+      required: [topic]
+      properties:
+        topic: { type: string }
+        max_articles: { type: integer, minimum: 1, nullable: true }
+        apply_diversity: { type: boolean, nullable: true }
+
+    CurationItem:
+      type: object
+      properties:
+        overall_score: { type: number, format: float }
+        readability_score: { type: number, format: float }
+        ner_density_score: { type: number, format: float }
+        sentiment_score: { type: number, format: float }
+        tfidf_relevance_score: { type: number, format: float }
+        recency_score: { type: number, format: float }
+        domain: { type: string }
+        word_count: { type: integer }
+        article:
+          type: object
+          properties:
+            url: { type: string }
+            title: { type: string }
+            author: { type: string }
+            summary: { type: string, nullable: true }
+            publish_date: { type: string, format: date-time, nullable: true }
+
+    CurateResponse:
+      type: object
+      properties:
+        count: { type: integer }
+        results:
+          type: array
+          items: { $ref: '#/components/schemas/CurationItem' }
+
+    CompareRequest:
+      type: object
+      properties:
+        a_url: { type: string, nullable: true }
+        b_url: { type: string, nullable: true }
+        a_text: { type: string, nullable: true }
+        b_text: { type: string, nullable: true }
+        use_embeddings: { type: boolean, nullable: true }
+      description: "Provide URLs or raw text for A and B. At least one of (a_url, a_text) and (b_url, b_text) should be provided."
+
+    CompareResponse:
+      type: object
+      properties:
+        a:
+          type: object
+          properties:
+            title: { type: string }
+            url: { type: string }
+        b:
+          type: object
+          properties:
+            title: { type: string }
+            url: { type: string }
+        tfidf:
+          type: object
+          properties:
+            a_to_b: { type: number, format: float }
+            b_to_a: { type: number, format: float }
+            avg: { type: number, format: float }
+        embeddings:
+          type: object
+          nullable: true
+          properties:
+            a_to_b: { type: number, format: float }
+            b_to_a: { type: number, format: float }
+            avg: { type: number, format: float }
+
+
