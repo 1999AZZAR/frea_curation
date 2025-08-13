@@ -27,23 +27,23 @@ function hide(id){ const el = document.getElementById(id); if(el){ el.classList.
 function createCurationCard(r){
   const safeTitle = r.article.title || r.article.url;
   const wrap = document.createElement('div');
-  wrap.className = 'rounded-xl border border-slate-800 bg-slate-900/60 p-4 hover:border-slate-700 transition';
+  wrap.className = 'list-card';
   wrap.innerHTML = `
     <div class="flex items-start justify-between gap-3">
       <div>
         <a href="${r.article.url}" target="_blank" rel="noopener" class="text-base font-semibold hover:underline">${safeTitle}</a>
-        <div class="mt-1 text-xs text-slate-400">
-          <span class="font-semibold text-emerald-400">${r.overall_score}</span>
-          • Read ${r.readability_score}
-          • NER ${r.ner_density_score}
-          • Sent ${r.sentiment_score}
-          • TF‑IDF ${r.tfidf_relevance_score}
-          • Recency ${r.recency_score}
+        <div class="mt-1 meta-row">
+          <span class="font-bold" style="color:#16a34a">${Math.round(r.overall_score)}</span>
+          • Read ${Math.round(r.readability_score)}
+          • NER ${Math.round(r.ner_density_score)}
+          • Sent ${Math.round(r.sentiment_score)}
+          • Relevance ${Math.round(r.tfidf_relevance_score)}
+          • Recency ${Math.round(r.recency_score)}
         </div>
       </div>
-      <div class="h-10 w-10 rounded-lg bg-slate-800/60 grid place-items-center text-sm font-bold">${r.overall_score}</div>
+      <div class="badge-score-lg">${Math.round(r.overall_score)}</div>
     </div>
-    <p class="mt-2 text-sm text-slate-300">${r.article.summary || ''}</p>
+    ${r.article.summary ? `<p class="mt-2 text-sm" style="color:#334155">${r.article.summary}</p>` : ''}
   `;
   return wrap;
 }
@@ -57,7 +57,11 @@ window.addEventListener('DOMContentLoaded', () => {
       hide('analyze-error');
       show('analyze-loading');
       const url = document.getElementById('analyze-url').value.trim();
-      const query = document.getElementById('analyze-query').value.trim();
+      let query = document.getElementById('analyze-query').value.trim();
+      if(!query){
+        const t = document.getElementById('analyze-url').value.trim();
+        try{ const u = new URL(t); query = u.hostname.replace(/^www\./,''); }catch(_){ /* ignore */ }
+      }
       try{
         const data = await postJson('/analyze', { url, query });
         // Fill UI
@@ -71,7 +75,7 @@ window.addEventListener('DOMContentLoaded', () => {
         setBar('an-ner', data.ner_density_score);
         setText('an-sentiment-v', `${data.sentiment_score}`);
         setBar('an-sentiment', data.sentiment_score);
-        setText('an-tfidf-v', `${data.tfidf_relevance_score}`);
+         setText('an-tfidf-v', `${data.tfidf_relevance_score}`);
         setBar('an-tfidf', data.tfidf_relevance_score);
         setText('an-recency-v', `${data.recency_score}`);
         setBar('an-recency', data.recency_score);
@@ -133,7 +137,7 @@ window.addEventListener('DOMContentLoaded', () => {
     curateResult.innerHTML = '';
     if(pageItems.length === 0){
       const empty = document.createElement('div');
-      empty.className = 'rounded-lg border border-slate-800 bg-slate-900/60 p-4 text-sm text-slate-400';
+      empty.className = 'list-card';
       empty.textContent = 'No results';
       curateResult.appendChild(empty);
       return;

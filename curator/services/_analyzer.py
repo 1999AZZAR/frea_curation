@@ -88,19 +88,54 @@ def compute_sentiment_score(article: Article, vader_analyzer=None) -> float:
 
 
 def compute_tfidf_relevance_score(article: Article, query: str) -> float:
-    if not article.content or not query or not query.strip():
+    """Robust TF‑IDF similarity between article text and query.
+
+    Uses multiple configurations to reduce frequent zeros when the query is short:
+    - Word 1–2 grams with English stopwords (primary)
+    - Char 3–5 grams as a fallback when word overlap is minimal
+    Scores are normalized to 0–100.
+    """
+    # Build richer doc and query texts
+    doc_text = " ".join(filter(None, [article.title or "", article.summary or "", article.content or ""]))
+    qry_text = (query or "").strip() or (article.title or "").strip()
+    if not doc_text.strip() or not qry_text:
         return 0.0
     try:
         from sklearn.feature_extraction.text import TfidfVectorizer
         from sklearn.metrics.pairwise import cosine_similarity
-        corpus = [article.content, query]
-        vectorizer = TfidfVectorizer(stop_words="english")
-        tfidf = vectorizer.fit_transform(corpus)
-        sim = float(cosine_similarity(tfidf[0:1], tfidf[1:2])[0][0])
+
+        def _cos_sim(vect):
+            m = vect.fit_transform([doc_text, qry_text])
+            return float(cosine_similarity(m[0:1], m[1:2])[0][0])
+
+        # Primary: word unigrams+bigrams with stopwords removed
+        sim_primary = 0.0
+        try:
+            sim_primary = _cos_sim(TfidfVectorizer(stop_words="english", ngram_range=(1, 2), lowercase=True))
+        except Exception:
+            sim_primary = 0.0
+
+        # Fallback: character n-grams to capture partial overlaps and morphology
+        sim_fallback = 0.0
+        try:
+            sim_fallback = _cos_sim(TfidfVectorizer(analyzer="char_wb", ngram_range=(3, 5), lowercase=True))
+        except Exception:
+            sim_fallback = 0.0
+
+        # Last-resort lexical overlap (Jaccard on words) to avoid hard zeros
+        sim_jaccard = 0.0
+        try:
+            ws = lambda s: {w for w in s.lower().split() if w}
+            dset, qset = ws(doc_text), ws(qry_text)
+            inter = len(dset & qset)
+            union = max(1, len(dset | qset))
+            sim_jaccard = inter / float(union)
+        except Exception:
+            sim_jaccard = 0.0
+
+        sim = max(sim_primary, sim_fallback, sim_jaccard)
         return round(max(0.0, min(1.0, sim)) * 100.0, 2)
-    except ValueError:
-        return 0.0
-    except ModuleNotFoundError:
+    except (ValueError, ModuleNotFoundError):
         return 0.0
 
 
@@ -146,11 +181,13 @@ def compute_relevance_score(article: Article, query: str) -> float:
     model is available, use embeddings; otherwise fall back to TF-IDF.
     """
     use_embeddings = os.environ.get("USE_EMBEDDINGS_RELEVANCE", "").strip().lower() in {"1", "true", "yes", "on"}
+    # Fallback query: use title when explicit query is empty, to avoid constant zeros
+    effective_query = (query or "").strip() or (article.title or "").strip()
     if use_embeddings:
-        score = compute_embeddings_relevance_score(article, query)
+        score = compute_embeddings_relevance_score(article, effective_query)
         if score > 0.0:
             return score
-    return compute_tfidf_relevance_score(article, query)
+    return compute_tfidf_relevance_score(article, effective_query)
 
 
 def compute_recency_score(article: Article, now: Optional[datetime] = None, half_life_days: float = 7.0) -> float:

@@ -7,6 +7,8 @@
   <meta name="color-scheme" content="dark light">
   <!-- Compiled Tailwind CSS -->
   <link rel="stylesheet" href="/static/css/tailwind.css" />
+  <!-- App UI overrides -->
+  <link rel="stylesheet" href="/static/css/ui.css" />
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-5o4kFfN2+6V2hK0m0m9mH7jJc4Q0D3ZP1T0p7l+zjz0xZPjZcQx2C3q2C2x0iXlJ0h3m8b3zJv9s8c6yEo6bWg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <!-- Inter font for professional typography -->
@@ -26,10 +28,10 @@
             </div>
             <a href="/" class="text-base font-semibold tracking-wide text-slate-900">AI Content Curator</a>
           </div>
-          <div class="flex items-center gap-4 text-sm text-slate-600">
-            <a href="#analyze" class="hover:text-slate-900 flex items-center gap-2"><i class="fa-solid fa-magnifying-glass-chart"></i> Analyze</a>
-            <a href="#curate" class="hover:text-slate-900 flex items-center gap-2"><i class="fa-solid fa-layer-group"></i> Curate</a>
-            <a href="https://newsapi.org/" target="_blank" rel="noopener" class="hidden sm:inline hover:text-slate-900"><i class="fa-regular fa-newspaper"></i></a>
+          <div class="menu items-center gap-4 text-sm text-slate-600 hidden sm:flex">
+            <a href="#analyze" class="flex items-center gap-2"><i class="fa-solid fa-magnifying-glass-chart"></i> Analyze</a>
+            <a href="#curate" class="flex items-center gap-2"><i class="fa-solid fa-layer-group"></i> Curate</a>
+            <a href="https://newsapi.org/" target="_blank" rel="noopener" class="flex items-center"><i class="fa-regular fa-newspaper"></i></a>
           </div>
         </div>
       </div>
@@ -48,6 +50,24 @@
 
   {% block scripts %}
   <script src="/static/js/app.js"></script>
+  <script>
+    (function(){
+      var links = document.querySelectorAll('nav a[href="#analyze"], nav a[href="#curate"]');
+      links.forEach(function(a){
+        a.addEventListener('click', function(e){
+          var hash = a.getAttribute('href');
+          var tab = hash && hash.replace('#','');
+          var btn = document.querySelector('.tab-btn[data-tab="'+tab+'"]');
+          var panel = document.getElementById('panel-' + tab);
+          if(btn && panel){
+            e.preventDefault();
+            btn.click();
+            window.scrollTo({top: 0, behavior: 'smooth'});
+          }
+        });
+      });
+    })();
+  </script>
   {% endblock %}
 </body>
 </html>
