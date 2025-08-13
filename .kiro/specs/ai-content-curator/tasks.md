@@ -108,8 +108,8 @@
   - [x] 8.3 Design scorecard results interface
     - Create `results.html` for individual analysis
     - Prominent overall score with progress bars for each component
-    - Component breakdowns with clear visual hierarchy
-    - Placeholder for entities (hidden until back-end provides data)
+  - Component breakdowns with clear visual hierarchy
+  - Entities rendered as chips (backend now provides `article.entities`)
     - _Requirements: 1.3, 4.2_
 
   - [x] 8.4 Build topic curation results interface
@@ -117,6 +117,13 @@
     - Article cards with title, score, summary, and source link
     - Sorting and min-score filtering, search, and pagination controls
     - _Requirements: 2.3, 4.3_
+
+  - [x] 8.5 Add similarity comparison page
+    - New menu item "Compare" in navbar
+    - `GET /compare` renders `compare.html` with two inputs (URLs or raw text)
+    - `POST /compare` computes A→B and B→A similarity (TF‑IDF; optional embeddings)
+    - Visualize A→B/B→A/Avg for TF‑IDF and embeddings via progress bars
+    - _Requirements: 1.3, 3.4, 4.1_
 
   - [x] 9. Create custom error page templates
     - `400.html`, `404.html`, `500.html` extend base template
@@ -159,6 +166,17 @@
   - Client-side sorting, filtering, search, and pagination for curated results
   - _Requirements: 4.3_
 
+- [x] 15.1 Analysis stats and semantic relevance toggle
+  - Expose additional stats in Analyze: word count, entity count, source domain, publish date, relevance method
+  - Add per-request "Use semantic relevance (embeddings)" toggle in UI and route handling
+  - Render entities as chips when available
+  - _Requirements: 1.3, 3.4, 3.6, 4.2_
+
+- [x] 15.2 Export and faceted filters
+  - Export JSON/CSV for Analyze result card and Curate results
+  - Faceted filters for Curate: domain, date range, min/max word count
+  - _Requirements: 4.3, 4.4_
+
 - [x] 16. Bugfix: timezone-safe recency scoring
   - Normalize naive/aware datetimes to UTC in `compute_recency_score`
   - Prevents offset-naive/aware subtraction errors
@@ -169,6 +187,12 @@
   - Add lazy model initialization and config flag to fallback to TF‑IDF
   - Write unit tests with mocked embeddings to verify ranking improvements
   - _Requirements: 3.4, 3.6_
+
+- [x] 17.1 Robust TF‑IDF fallback and query heuristics
+  - Use article title as fallback when query is empty
+  - Enhance TF‑IDF with word 1–2 grams and char 3–5 grams; add Jaccard lexical overlap fallback
+  - Normalize final relevance score to 0–100
+  - _Requirements: 3.4_
 
 - [ ] 18. Duplicate detection and diversity controls
   - URL canonicalization (strip UTM, normalize hosts) before parsing
@@ -235,6 +259,8 @@
 - [ ] 30. UI enhancements (professional editorial UX)
   - Refine article card typography and spacing; add faceted filters (domain/date/word count)
   - Actions: save to list, copy/share links
+  - Widen layout to utilize viewport with a centered 1280px content container for readability
+  - Rename "TF‑IDF Relevance" to "Relevance" in UI
   - _Requirements: 4.1, 4.3, 4.4_
 
 - [ ] 31. CI/CD and deployment hardening

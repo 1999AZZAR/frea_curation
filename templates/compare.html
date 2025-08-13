@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}Compare • AI Content Curator{% endblock %}
+
+{% block content %}
+<section class="hero mb-4" style="max-width:1280px;margin:0 auto;">
+  <h1 class="font-semibold">Similarity & Comparison</h1>
+  <p>Compare two articles or paste raw text to see lexical and semantic similarity.</p>
+  <div class="mt-3 meta-row">TF‑IDF baseline • Optional embeddings</div>
+  </section>
+
+<div class="card-surface p-6" style="max-width:1280px;margin:0 auto;">
+  <form id="compare-form" class="grid" style="gap:12px;grid-template-columns:1fr 1fr;align-items:start">
+    <div>
+      <label class="text-sm" style="color:#334155" for="cmp-a-url">A: URL</label>
+      <input id="cmp-a-url" type="url" class="input mt-1" placeholder="https://example.com/a">
+      <label class="text-sm mt-3" style="color:#334155" for="cmp-a-text">A: Raw text (optional)</label>
+      <textarea id="cmp-a-text" class="input mt-1" rows="6" placeholder="Paste text for A..."></textarea>
+    </div>
+    <div>
+      <label class="text-sm" style="color:#334155" for="cmp-b-url">B: URL</label>
+      <input id="cmp-b-url" type="url" class="input mt-1" placeholder="https://example.com/b">
+      <label class="text-sm mt-3" style="color:#334155" for="cmp-b-text">B: Raw text (optional)</label>
+      <textarea id="cmp-b-text" class="input mt-1" rows="6" placeholder="Paste text for B..."></textarea>
+    </div>
+    <div class="flex items-center gap-2" style="grid-column:1/-1">
+      <input type="checkbox" id="cmp-use-embeddings" class="h-4 w-4" />
+      <label for="cmp-use-embeddings" class="text-sm" style="color:#334155">Use semantic relevance (embeddings)</label>
+    </div>
+    <div class="flex items-center gap-3" style="grid-column:1/-1">
+      <button type="submit" class="btn btn-primary"><i class="fa-solid fa-code-compare"></i> Compare</button>
+      <span id="cmp-loading" class="hidden text-sm" style="color:#64748b">Comparing…</span>
+      <p id="cmp-error" class="hidden rounded-lg border p-3 text-sm" style="background:#fef2f2;color:#991b1b;border-color:#fecaca"></p>
+    </div>
+  </form>
+
+  <div id="cmp-result" class="mt-5 hidden">
+    <div class="list-card">
+      <div class="grid" style="gap:12px;grid-template-columns:1fr 1fr">
+        <div>
+          <div class="text-sm" style="color:#64748b">A → B TF‑IDF</div>
+          <div class="progress-rail"><div id="cmp-tfidf-ab" class="progress-fill" style="background:#6366f1;width:0%"></div></div>
+        </div>
+        <div>
+          <div class="text-sm" style="color:#64748b">B → A TF‑IDF</div>
+          <div class="progress-rail"><div id="cmp-tfidf-ba" class="progress-fill" style="background:#6366f1;width:0%"></div></div>
+        </div>
+        <div style="grid-column:1/-1">
+          <div class="text-sm" style="color:#64748b">Avg TF‑IDF</div>
+          <div class="progress-rail"><div id="cmp-tfidf-avg" class="progress-fill" style="background:#4f46e5;width:0%"></div></div>
+        </div>
+        <div id="cmp-embeds" class="hidden" style="grid-column:1/-1">
+          <div class="grid" style="gap:12px;grid-template-columns:1fr 1fr">
+            <div>
+              <div class="text-sm" style="color:#64748b">A → B Embeddings</div>
+              <div class="progress-rail"><div id="cmp-emb-ab" class="progress-fill" style="background:#22c55e;width:0%"></div></div>
+            </div>
+            <div>
+              <div class="text-sm" style="color:#64748b">B → A Embeddings</div>
+              <div class="progress-rail"><div id="cmp-emb-ba" class="progress-fill" style="background:#22c55e;width:0%"></div></div>
+            </div>
+            <div style="grid-column:1/-1">
+              <div class="text-sm" style="color:#64748b">Avg Embeddings</div>
+              <div class="progress-rail"><div id="cmp-emb-avg" class="progress-fill" style="background:#16a34a;width:0%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const form = document.getElementById('compare-form');
+  if(!form) return;
+  const show = id => document.getElementById(id)?.classList.remove('hidden');
+  const hide = id => document.getElementById(id)?.classList.add('hidden');
+  const setBar = (id, v) => { const el = document.getElementById(id); if(el){ el.style.width = `${Math.max(0, Math.min(100, v))}%`; }}
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hide('cmp-error'); show('cmp-loading');
+    const a_url = document.getElementById('cmp-a-url').value.trim();
+    const b_url = document.getElementById('cmp-b-url').value.trim();
+    const a_text = document.getElementById('cmp-a-text').value;
+    const b_text = document.getElementById('cmp-b-text').value;
+    const use_embeddings = document.getElementById('cmp-use-embeddings').checked;
+    try{
+      const res = await fetch('/compare', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ a_url, b_url, a_text, b_text, use_embeddings }) });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error || 'Compare failed');
+      setBar('cmp-tfidf-ab', data.tfidf.a_to_b || 0);
+      setBar('cmp-tfidf-ba', data.tfidf.b_to_a || 0);
+      setBar('cmp-tfidf-avg', data.tfidf.avg || 0);
+      if(data.embeddings){
+        setBar('cmp-emb-ab', data.embeddings.a_to_b || 0);
+        setBar('cmp-emb-ba', data.embeddings.b_to_a || 0);
+        setBar('cmp-emb-avg', data.embeddings.avg || 0);
+        show('cmp-embeds');
+      } else {
+        hide('cmp-embeds');
+      }
+      show('cmp-result');
+    }catch(err){
+      const el = document.getElementById('cmp-error'); if(el){ el.textContent = `Error: ${err.message}`; show('cmp-error'); }
+    }finally{
+      hide('cmp-loading');
+    }
+  });
+})();
+</script>
+{% endblock %}
+
+

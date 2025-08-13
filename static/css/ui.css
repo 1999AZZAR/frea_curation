@@ -246,6 +246,16 @@ button:active:not(:disabled) {
 
 .tab-panel { padding: 1rem; }
 
+/* Responsive grid helpers for wide screens */
+.grid-wide-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+@media (max-width: 900px){
+    .grid-wide-2 { grid-template-columns: 1fr; }
+}
+
 /* --- Cards & Lists --- */
 .list-card {
     border: 1px solid rgba(226,232,240,1);

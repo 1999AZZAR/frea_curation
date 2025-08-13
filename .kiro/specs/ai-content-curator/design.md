@@ -179,22 +179,26 @@ class ScoringConfig:
 ## Presentation Layer Design
 
 ### Templates and UI Behavior
-- `base.html` provides a dark, professional theme (glassmorphism), responsive nav, and Inter font
-- `index.html` includes two clear entry points:
-  - Analyze: URL input + optional query, loading states, inline errors, and an on-page result card with progress bars
+- `base.html` provides a light, professional theme, responsive nav, Inter font, and full-width layout with centered content containers
+- `index.html` includes two clear entry points with tabbed navigation:
+  - Analyze: URL input + optional query, embeddings toggle, loading states, inline errors, and an on-page result card with progress bars
+    - Additional stats surfaced: word count, entity count, source domain, publish date, and which relevance method was used
+    - Entities rendered as compact chips
   - Curate: topic input, max articles, sorting, min-score filter, search, and pagination; results rendered as ranked cards
-- `results.html` displays a single analysis scorecard: overall score + component bars and summary
-- `curation_results.html` displays a ranked list of articles with scores and summaries
+- `results.html` displays a single analysis scorecard: overall score + component bars, summary, and harmonized visual style
+- `curation_results.html` displays a ranked list of articles with scores and summaries; cards aligned with the new design system
+- `compare.html` provides a two-column comparison UI for similarity checks between two inputs (URLs or raw texts), with TF‑IDF baseline and optional embeddings visualization
 - Error templates `400.html`, `404.html`, `500.html` extend base for consistent UI
 
 ### Client-Side Enhancements
 - JS enhances UX without breaking API contracts:
-  - Analyze: populates the scorecard card and progress bars
+  - Analyze: populates the scorecard card, progress bars, and stats; renders entities as chips; optional embeddings toggle passed per request
   - Curate: sorting (asc/desc), min-score filter, search, and pagination
+  - Compare: posts inputs to `/compare` and renders A→B/B→A/Avg scores (TF‑IDF and embeddings)
   - Loading and error states for both forms
 
 ### Accessibility & Responsiveness
-- Mobile-first layout, accessible contrast, and keyboard-focusable controls
+- Mobile-first layout, accessible contrast, keyboard-focusable controls, and centered max-width containers on wide screens
 
 ### Requirements Mapping
 - 4.1, 4.2, 4.3, 4.4 satisfied via the above templates and behaviors
@@ -275,10 +279,12 @@ def calculate_composite_score(metrics: Dict[str, float], config: ScoringConfig) 
 - Neutral sentiment preference for news content
 - Extreme sentiment penalty for bias detection
 
-**TF-IDF Relevance Score**:
-- Cosine similarity between article and query terms
-- Term frequency weighting
-- Document frequency normalization
+**Relevance Score** (TF‑IDF baseline with semantic option):
+- TF‑IDF cosine similarity between article and query, with fallbacks
+  - Word 1–2 grams with English stopwords
+  - Character 3–5 grams fallback
+  - Jaccard lexical overlap fallback
+- Optional semantic relevance via embeddings (SentenceTransformers), controlled by flag or per-request toggle
 
 **Recency Score**:
 - Exponential decay function based on publication date

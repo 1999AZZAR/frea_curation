@@ -24,13 +24,79 @@ def create_app():
     def index():
         """Homepage with input forms for manual analysis and topic curation"""
         return render_template('index.html')
+
+    @app.route('/compare', methods=['GET'])
+    def compare_page():
+        """Similarity comparison page."""
+        return render_template('compare.html')
+
+    @app.route('/compare', methods=['POST'])
+    def compare_api():
+        """Compute similarity between two URLs or raw texts."""
+        from curator.services.parser import parse_article
+        from curator.core.validation import validate_url
+        from curator.services._analyzer import compute_tfidf_relevance_score, compute_embeddings_relevance_score
+        from curator.core.models import Article
+        import os
+
+        data = request.get_json(silent=True) or request.form
+        a_url = (data.get('a_url') or '').strip()
+        b_url = (data.get('b_url') or '').strip()
+        a_text = (data.get('a_text') or '').strip()
+        b_text = (data.get('b_text') or '').strip()
+        use_embeddings = str(data.get('use_embeddings', '')).strip().lower() in {'1','true','yes','on'}
+
+        # Prepare articles
+        try:
+            if a_url:
+                ok, err = validate_url(a_url)
+                if not ok:
+                    return jsonify({'error': f'Invalid A URL: {err}'}), 400
+                a_article = parse_article(a_url)
+            else:
+                a_article = Article(url='about:blank', title='Input A', content=a_text)
+
+            if b_url:
+                ok, err = validate_url(b_url)
+                if not ok:
+                    return jsonify({'error': f'Invalid B URL: {err}'}), 400
+                b_article = parse_article(b_url)
+            else:
+                b_article = Article(url='about:blank', title='Input B', content=b_text)
+        except Exception as e:
+            return jsonify({'error': f'Parsing failed: {str(e)}'}), 500
+
+        # Compute similarities both ways using A content vs B title/content proxy query
+        def sim_scores(a: Article, b: Article):
+            query = (b.title or '').strip() or (b.content[:200] if b.content else '')
+            tfidf = compute_tfidf_relevance_score(a, query)
+            embed = 0.0
+            if use_embeddings:
+                embed = compute_embeddings_relevance_score(a, query)
+            return tfidf, embed
+
+        tfidf_ab, embed_ab = sim_scores(a_article, b_article)
+        tfidf_ba, embed_ba = sim_scores(b_article, a_article)
+        response = {
+            'a': {'title': a_article.title, 'url': a_article.url},
+            'b': {'title': b_article.title, 'url': b_article.url},
+            'tfidf': {'a_to_b': tfidf_ab, 'b_to_a': tfidf_ba, 'avg': round((tfidf_ab + tfidf_ba)/2.0, 2)},
+            'embeddings': {'a_to_b': embed_ab, 'b_to_a': embed_ba, 'avg': round((embed_ab + embed_ba)/2.0, 2)} if use_embeddings else None,
+        }
+        return jsonify(response)
     
     @app.route('/analyze', methods=['POST'])
     def analyze_article_route():
         """Manual article analysis endpoint"""
         from curator.services.analyzer import analyze_article as analyze_fn
+        from curator.services.analyzer import (
+            compute_embeddings_relevance_score,
+            compute_tfidf_relevance_score,
+        )
         from config import load_scoring_config
         from curator.core.validation import validate_url
+        from urllib.parse import urlparse
+        from curator.services.parser import get_article_word_count
 
         data = request.get_json(silent=True) or request.form
         url = (data.get('url') if data else None) or ''
@@ -56,7 +122,44 @@ def create_app():
             nlp_model = get_spacy_model()
             vader = get_vader_analyzer()
 
+            # Optional per-request override for embeddings usage
+            use_embeddings_param = str((request.get_json(silent=True) or {}).get('use_embeddings', '')).strip().lower()
+            original_env = os.environ.get('USE_EMBEDDINGS_RELEVANCE')
+            if use_embeddings_param in {'1', 'true', 'yes', 'on'}:
+                os.environ['USE_EMBEDDINGS_RELEVANCE'] = 'true'
+            elif use_embeddings_param in {'0', 'false', 'no', 'off'}:
+                os.environ['USE_EMBEDDINGS_RELEVANCE'] = 'false'
+
             scorecard = analyze_fn(url=url, query=query, config=config, nlp=nlp_model, vader_analyzer=vader)
+
+            # Restore environment after call
+            if original_env is None:
+                os.environ.pop('USE_EMBEDDINGS_RELEVANCE', None)
+            else:
+                os.environ['USE_EMBEDDINGS_RELEVANCE'] = original_env
+
+            # Derived stats
+            wc = get_article_word_count(scorecard.article)
+            ent_count = len(scorecard.article.entities or [])
+            try:
+                netloc = urlparse(scorecard.article.url).netloc.lower()
+                domain = netloc[4:] if netloc.startswith('www.') else netloc
+            except Exception:
+                domain = ''
+            effective_query = (query or '').strip() or (scorecard.article.title or '').strip()
+            # Determine relevance method used
+            method = 'tfidf'
+            try:
+                emb_score = compute_embeddings_relevance_score(scorecard.article, effective_query)
+                if os.environ.get('USE_EMBEDDINGS_RELEVANCE', '').strip().lower() in {'1','true','yes','on'} and emb_score > 0:
+                    method = 'embeddings'
+                else:
+                    # Compare which score matches card more closely
+                    tf_score = compute_tfidf_relevance_score(scorecard.article, effective_query)
+                    method = 'embeddings' if abs(emb_score - scorecard.tfidf_relevance_score) < abs(tf_score - scorecard.tfidf_relevance_score) and emb_score > 0 else 'tfidf'
+            except Exception:
+                method = 'tfidf'
+
             result = {
                 'overall_score': scorecard.overall_score,
                 'readability_score': scorecard.readability_score,
@@ -69,12 +172,20 @@ def create_app():
                     'title': scorecard.article.title,
                     'author': scorecard.article.author,
                     'summary': scorecard.article.summary,
+                    'publish_date': scorecard.article.publish_date.isoformat() if scorecard.article.publish_date else None,
+                    'entities': [{'text': e.text, 'label': e.label} for e in (scorecard.article.entities or [])],
                 }
+            }
+            result['stats'] = {
+                'word_count': wc,
+                'entity_count': ent_count,
+                'domain': domain,
+                'relevance_method': method,
             }
             if request.is_json:
                 return jsonify(result)
             # Render server view
-            return render_template('results.html', card=scorecard)
+            return render_template('results.html', card=scorecard, stats=result['stats'])
         except Exception as e:
             if request.is_json:
                 return jsonify({'error': f'Analysis failed: {str(e)}'}), 500
@@ -87,6 +198,8 @@ def create_app():
         from config import load_scoring_config
         from curator.core.validation import validate_topic_keywords
         from curator.services.news_source import NewsSource
+        from urllib.parse import urlparse
+        from curator.services.parser import get_article_word_count
 
         data = request.get_json(silent=True) or request.form
         topic = (data.get('topic') if data else None) or ''
@@ -127,23 +240,31 @@ def create_app():
             results.sort(key=lambda r: r.overall_score, reverse=True)
             
             if request.is_json:
-                payload = [
-                    {
+                payload = []
+                for r in results:
+                    try:
+                        netloc = urlparse(r.article.url).netloc.lower()
+                        domain = netloc[4:] if netloc.startswith('www.') else netloc
+                    except Exception:
+                        domain = ''
+                    wc = get_article_word_count(r.article)
+                    payload.append({
                         'overall_score': r.overall_score,
                         'readability_score': r.readability_score,
                         'ner_density_score': r.ner_density_score,
                         'sentiment_score': r.sentiment_score,
                         'tfidf_relevance_score': r.tfidf_relevance_score,
                         'recency_score': r.recency_score,
+                        'domain': domain,
+                        'word_count': wc,
                         'article': {
                             'url': r.article.url,
                             'title': r.article.title,
                             'author': r.article.author,
                             'summary': r.article.summary,
+                            'publish_date': r.article.publish_date.isoformat() if r.article.publish_date else None,
                         }
-                    }
-                    for r in results
-                ]
+                    })
                 return jsonify({'count': len(payload), 'results': payload})
             # Render server-side list
             return render_template('curation_results.html', topic=topic, results=results)
