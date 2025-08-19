@@ -136,7 +136,7 @@
     - Minor transitions and hover states aligned with glassmorphism
     - _Requirements: 4.4_
 
-- [ ] 11. Create integration tests for complete workflows
+- [x] 11. Create integration tests for complete workflows
   - Create end-to-end tests for complete user workflows using Flask test client
   - Test external service integration with mocked responses using responses library
   - Implement performance tests to ensure response time requirements are met
@@ -194,7 +194,7 @@
   - Normalize final relevance score to 0–100
   - _Requirements: 3.4_
 
-- [ ] 18. Duplicate detection and diversity controls
+- [x] 18. Duplicate detection and diversity controls
   - URL canonicalization (strip UTM, normalize hosts) before parsing
   - Near‑duplicate collapse using simhash or embedding threshold
   - Domain diversity cap in final ranking (e.g., max 2 per domain)

@@ -446,21 +446,17 @@ def batch_analyze(
 
 
 def _extract_domain(url: str) -> str:
-    try:
-        from urllib.parse import urlparse
-        netloc = urlparse(url).netloc.lower()
-        return netloc[4:] if netloc.startswith('www.') else netloc
-    except Exception:
-        return ""
+    """Extract domain from URL. Delegates to utility function."""
+    from curator.core.utils import extract_domain
+    return extract_domain(url)
 
 
 def _apply_diversity_and_dedup(cards: List[ScoreCard], domain_cap: Optional[int] = None, sim_threshold: Optional[float] = None) -> List[ScoreCard]:
     """Collapse near-duplicates and cap per-domain items to improve diversity.
 
     - Domain cap: limit how many items from the same domain appear
-    - Near-duplicate collapse: if embeddings are available, suppress items whose
-      cosine similarity to a kept item exceeds sim_threshold.
-    Fallback to simple URL-based dedup if embeddings are unavailable.
+    - Near-duplicate collapse: uses embeddings (preferred), simhash (fallback), or basic text comparison
+    - Preserves highest-scoring articles when duplicates are found
     """
     if not cards:
         return []
@@ -479,53 +475,144 @@ def _apply_diversity_and_dedup(cards: List[ScoreCard], domain_cap: Optional[int]
 
     kept: List[ScoreCard] = []
     domain_counts: Dict[str, int] = {}
-    # Prepare embeddings if available
-    model = _get_sentence_transformer(os.environ.get("EMBEDDINGS_MODEL_NAME", "all-MiniLM-L6-v2"))
-    embeddings: List[Tuple[ScoreCard, List[float]]] = []
-    if model is not None:
-        try:
-            texts = [c.article.content or c.article.title or c.article.url for c in cards]
-            vecs = model.encode(texts, normalize_embeddings=True)
-            embeddings = list(zip(cards, vecs))
-        except Exception:
-            embeddings = []
+    
+    # Try embeddings first (most accurate)
+    embeddings_available = _try_embeddings_dedup(cards, sim_threshold)
+    
+    # Fallback to simhash if embeddings unavailable
+    simhash_available = False
+    if not embeddings_available:
+        simhash_available = _try_simhash_dedup(cards, sim_threshold)
 
     # Iterate in descending overall score order for stable suppression
     cards_sorted = sorted(cards, key=lambda c: c.overall_score, reverse=True)
-    kept_vecs: List[List[float]] = []
+    
     for card in cards_sorted:
         domain = _extract_domain(card.article.url)
+        
+        # Apply domain diversity cap
         if domain and domain_counts.get(domain, 0) >= domain_cap:
             continue
-        # Duplicate suppression
+        
+        # Check for duplicates
         is_duplicate = False
-        if embeddings:
-            try:
-                idx = cards.index(card)
-                vec = embeddings[idx][1]
-                # Compare with kept vectors
-                for kv in kept_vecs:
-                    # cosine sim for normalized vectors is dot product
-                    sim = float(sum(a*b for a, b in zip(vec, kv)))
-                    if sim >= sim_threshold:
-                        is_duplicate = True
-                        break
-                if is_duplicate:
-                    continue
-            except Exception:
-                # Fallback to simple check by title/url
-                pass
+        
+        if embeddings_available:
+            is_duplicate = _is_duplicate_embeddings(card, kept, sim_threshold)
+        elif simhash_available:
+            is_duplicate = _is_duplicate_simhash(card, kept, sim_threshold)
         else:
-            # Basic fallback: duplicate by exact title or URL
-            if any(k.article.url == card.article.url or k.article.title == card.article.title for k in kept):
-                continue
+            # Basic fallback: duplicate by exact title or canonicalized URL
+            is_duplicate = _is_duplicate_basic(card, kept)
+        
+        if is_duplicate:
+            continue
 
         kept.append(card)
         domain_counts[domain] = domain_counts.get(domain, 0) + 1
-        if embeddings:
-            try:
-                idx = cards.index(card)
-                kept_vecs.append(embeddings[idx][1])
-            except Exception:
-                pass
+    
     return kept
+
+
+def _try_embeddings_dedup(cards: List[ScoreCard], sim_threshold: float) -> bool:
+    """Try to prepare embeddings for duplicate detection. Returns True if successful."""
+    try:
+        model = _get_sentence_transformer(os.environ.get("EMBEDDINGS_MODEL_NAME", "all-MiniLM-L6-v2"))
+        if model is None:
+            return False
+        
+        texts = [c.article.content or c.article.title or c.article.url for c in cards]
+        vecs = model.encode(texts, normalize_embeddings=True)
+        
+        # Store embeddings in card objects for later use
+        for card, vec in zip(cards, vecs):
+            card._embedding = vec
+        
+        return True
+    except Exception:
+        return False
+
+
+def _try_simhash_dedup(cards: List[ScoreCard], sim_threshold: float) -> bool:
+    """Try to prepare simhash for duplicate detection. Returns True if successful."""
+    try:
+        from simhash import Simhash
+        
+        # Calculate simhash for each article
+        for card in cards:
+            text = card.article.content or card.article.title or ""
+            if text.strip():
+                card._simhash = Simhash(text)
+            else:
+                card._simhash = None
+        
+        return True
+    except ImportError:
+        return False
+    except Exception:
+        return False
+
+
+def _is_duplicate_embeddings(card: ScoreCard, kept: List[ScoreCard], sim_threshold: float) -> bool:
+    """Check if card is duplicate using embeddings."""
+    try:
+        if not hasattr(card, '_embedding') or card._embedding is None:
+            return False
+        
+        for kept_card in kept:
+            if not hasattr(kept_card, '_embedding') or kept_card._embedding is None:
+                continue
+            
+            # Cosine similarity for normalized vectors is dot product
+            sim = float(sum(a * b for a, b in zip(card._embedding, kept_card._embedding)))
+            if sim >= sim_threshold:
+                return True
+        
+        return False
+    except Exception:
+        return False
+
+
+def _is_duplicate_simhash(card: ScoreCard, kept: List[ScoreCard], sim_threshold: float) -> bool:
+    """Check if card is duplicate using simhash."""
+    try:
+        if not hasattr(card, '_simhash') or card._simhash is None:
+            return False
+        
+        # Convert similarity threshold to hamming distance threshold
+        # Simhash uses hamming distance (lower = more similar)
+        # Convert 0.97 similarity to ~2 bit difference threshold
+        hamming_threshold = int((1.0 - sim_threshold) * 64)  # 64-bit simhash
+        
+        for kept_card in kept:
+            if not hasattr(kept_card, '_simhash') or kept_card._simhash is None:
+                continue
+            
+            hamming_distance = card._simhash.distance(kept_card._simhash)
+            if hamming_distance <= hamming_threshold:
+                return True
+        
+        return False
+    except Exception:
+        return False
+
+
+def _is_duplicate_basic(card: ScoreCard, kept: List[ScoreCard]) -> bool:
+    """Check if card is duplicate using basic text comparison."""
+    try:
+        # Canonicalize URLs for comparison
+        from curator.core.utils import canonicalize_url
+        card_url = canonicalize_url(card.article.url)
+        
+        for kept_card in kept:
+            kept_url = canonicalize_url(kept_card.article.url)
+            
+            # Check for exact URL match or title match
+            if (card_url == kept_url or 
+                (card.article.title and kept_card.article.title and 
+                 card.article.title.strip().lower() == kept_card.article.title.strip().lower())):
+                return True
+        
+        return False
+    except Exception:
+        return False

@@ -8,3 +8,6 @@ python-dotenv
 validators
 gunicorn
 sentence-transformers
+simhash
+responses
+psutil

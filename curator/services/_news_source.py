@@ -188,7 +188,8 @@ class NewsSource:
             url = article.get('url') or ''
             if not url:
                 continue
-            cu = self._canonicalize_url(url)
+            from curator.core.utils import canonicalize_url
+            cu = canonicalize_url(url)
             if cu in seen:
                 continue
             seen.add(cu)
@@ -216,35 +217,6 @@ class NewsSource:
 
     @staticmethod
     def _canonicalize_url(url: str) -> str:
-        """Normalize URL to reduce duplicates from tracking params, fragments, and case.
-
-        - Lowercase scheme and host
-        - Strip fragment
-        - Remove common tracking query params (utm_*, gclid, fbclid)
-        - Sort remaining query parameters for stability
-        """
-        try:
-            parsed = urlparse(url)
-            scheme = (parsed.scheme or 'https').lower()
-            netloc = (parsed.netloc or '').lower()
-            if netloc.startswith('www.'):
-                netloc = netloc[4:]
-            # Filter query params
-            params = []
-            for k, v in parse_qsl(parsed.query, keep_blank_values=True):
-                lk = k.lower()
-                if lk.startswith('utm_') or lk in {'gclid', 'fbclid', 'mc_eid', 'mc_cid'}:
-                    continue
-                params.append((k, v))
-            params.sort()
-            canonical = urlunparse((
-                scheme,
-                netloc,
-                parsed.path or '/',
-                '',
-                urlencode(params, doseq=True),
-                ''  # no fragment
-            ))
-            return canonical
-        except Exception:
-            return url
+        """Normalize URL to reduce duplicates. Delegates to utility function."""
+        from curator.core.utils import canonicalize_url
+        return canonicalize_url(url)
