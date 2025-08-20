@@ -3,67 +3,197 @@
 {% block title %}Compare • AI Content Curator{% endblock %}
 
 {% block content %}
-<section class="hero mb-4" style="max-width:1280px;margin:0 auto;">
-  <h1 class="font-semibold">Similarity & Comparison</h1>
-  <p>Compare two articles or paste raw text to see lexical and semantic similarity.</p>
-  <div class="mt-3 meta-row">TF‑IDF baseline • Optional embeddings</div>
-  </section>
+<div class="max-w-6xl mx-auto">
+  <!-- Header -->
+  <div class="text-center mb-12">
+    <div class="flex items-center justify-center gap-3 mb-4">
+      <div class="h-12 w-12 rounded-xl bg-gradient-to-br from-green-600 to-teal-600 flex items-center justify-center">
+        <i class="fa-solid fa-code-compare text-white text-lg"></i>
+      </div>
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Content Comparison</h1>
+        <p class="text-gray-600">Compare articles or text for similarity analysis</p>
+      </div>
+    </div>
+    <div class="flex flex-wrap justify-center gap-6 text-sm text-gray-500">
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-chart-bar text-blue-500"></i>
+        <span>TF-IDF Analysis</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-brain text-purple-500"></i>
+        <span>Semantic Embeddings</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-balance-scale text-green-500"></i>
+        <span>Bidirectional Comparison</span>
+      </div>
+    </div>
+  </div>
 
-<div class="card-surface p-6" style="max-width:1280px;margin:0 auto;">
-  <form id="compare-form" class="grid" style="gap:12px;grid-template-columns:1fr 1fr;align-items:start">
-    <div>
-      <label class="text-sm" style="color:#334155" for="cmp-a-url">A: URL</label>
-      <input id="cmp-a-url" type="url" class="input mt-1" placeholder="https://example.com/a">
-      <label class="text-sm mt-3" style="color:#334155" for="cmp-a-text">A: Raw text (optional)</label>
-      <textarea id="cmp-a-text" class="input mt-1" rows="6" placeholder="Paste text for A..."></textarea>
-    </div>
-    <div>
-      <label class="text-sm" style="color:#334155" for="cmp-b-url">B: URL</label>
-      <input id="cmp-b-url" type="url" class="input mt-1" placeholder="https://example.com/b">
-      <label class="text-sm mt-3" style="color:#334155" for="cmp-b-text">B: Raw text (optional)</label>
-      <textarea id="cmp-b-text" class="input mt-1" rows="6" placeholder="Paste text for B..."></textarea>
-    </div>
-    <div class="flex items-center gap-2" style="grid-column:1/-1">
-      <input type="checkbox" id="cmp-use-embeddings" class="h-4 w-4" />
-      <label for="cmp-use-embeddings" class="text-sm" style="color:#334155">Use semantic relevance (embeddings)</label>
-    </div>
-    <div class="flex items-center gap-3" style="grid-column:1/-1">
-      <button type="submit" class="btn btn-primary"><i class="fa-solid fa-code-compare"></i> Compare</button>
-      <span id="cmp-loading" class="hidden text-sm" style="color:#64748b">Comparing…</span>
-      <p id="cmp-error" class="hidden rounded-lg border p-3 text-sm" style="background:#fef2f2;color:#991b1b;border-color:#fecaca"></p>
-    </div>
-  </form>
-
-  <div id="cmp-result" class="mt-5 hidden">
-    <div class="list-card">
-      <div class="grid" style="gap:12px;grid-template-columns:1fr 1fr">
-        <div>
-          <div class="text-sm" style="color:#64748b">A → B TF‑IDF</div>
-          <div class="progress-rail"><div id="cmp-tfidf-ab" class="progress-fill" style="background:#6366f1;width:0%"></div></div>
-        </div>
-        <div>
-          <div class="text-sm" style="color:#64748b">B → A TF‑IDF</div>
-          <div class="progress-rail"><div id="cmp-tfidf-ba" class="progress-fill" style="background:#6366f1;width:0%"></div></div>
-        </div>
-        <div style="grid-column:1/-1">
-          <div class="text-sm" style="color:#64748b">Avg TF‑IDF</div>
-          <div class="progress-rail"><div id="cmp-tfidf-avg" class="progress-fill" style="background:#4f46e5;width:0%"></div></div>
-        </div>
-        <div id="cmp-embeds" class="hidden" style="grid-column:1/-1">
-          <div class="grid" style="gap:12px;grid-template-columns:1fr 1fr">
-            <div>
-              <div class="text-sm" style="color:#64748b">A → B Embeddings</div>
-              <div class="progress-rail"><div id="cmp-emb-ab" class="progress-fill" style="background:#22c55e;width:0%"></div></div>
+  <!-- Main Interface -->
+  <div class="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden mb-8">
+    <div class="p-8">
+      <form id="compare-form" class="space-y-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <!-- Content A -->
+          <div class="space-y-4">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="h-8 w-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold">A</div>
+              <h3 class="text-lg font-semibold text-gray-900">First Content</h3>
             </div>
-            <div>
-              <div class="text-sm" style="color:#64748b">B → A Embeddings</div>
-              <div class="progress-rail"><div id="cmp-emb-ba" class="progress-fill" style="background:#22c55e;width:0%"></div></div>
+            
+            <div class="space-y-2">
+              <label for="cmp-a-url" class="block text-sm font-medium text-gray-700">URL</label>
+              <input id="cmp-a-url" type="url" class="form-input" placeholder="https://example.com/article-a">
             </div>
-            <div style="grid-column:1/-1">
-              <div class="text-sm" style="color:#64748b">Avg Embeddings</div>
-              <div class="progress-rail"><div id="cmp-emb-avg" class="progress-fill" style="background:#16a34a;width:0%"></div></div>
+            
+            <div class="space-y-2">
+              <label for="cmp-a-text" class="block text-sm font-medium text-gray-700">Raw Text (optional)</label>
+              <textarea id="cmp-a-text" class="form-input" rows="6" placeholder="Paste text content for comparison..."></textarea>
             </div>
           </div>
+
+          <!-- Content B -->
+          <div class="space-y-4">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="h-8 w-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center font-bold">B</div>
+              <h3 class="text-lg font-semibold text-gray-900">Second Content</h3>
+            </div>
+            
+            <div class="space-y-2">
+              <label for="cmp-b-url" class="block text-sm font-medium text-gray-700">URL</label>
+              <input id="cmp-b-url" type="url" class="form-input" placeholder="https://example.com/article-b">
+            </div>
+            
+            <div class="space-y-2">
+              <label for="cmp-b-text" class="block text-sm font-medium text-gray-700">Raw Text (optional)</label>
+              <textarea id="cmp-b-text" class="form-input" rows="6" placeholder="Paste text content for comparison..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="border-t border-gray-200 pt-6">
+          <div class="flex items-center space-x-3 mb-6">
+            <input type="checkbox" id="cmp-use-embeddings" class="form-checkbox">
+            <label for="cmp-use-embeddings" class="text-sm text-gray-700">Use semantic embeddings for deeper similarity analysis</label>
+          </div>
+
+          <div class="flex items-center space-x-4">
+            <button type="submit" class="btn-primary">
+              <i class="fa-solid fa-code-compare"></i>
+              <span>Compare Content</span>
+            </button>
+            <div id="cmp-loading" class="hidden flex items-center space-x-2 text-green-600">
+              <div class="animate-spin rounded-full h-4 w-4 border-2 border-green-600 border-t-transparent"></div>
+              <span class="text-sm">Comparing...</span>
+            </div>
+          </div>
+
+          <div id="cmp-error" class="hidden alert-error mt-4"></div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Results Section -->
+  <div id="cmp-result" class="hidden">
+    <div class="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+      <div class="p-8">
+        <div class="flex items-center gap-3 mb-8">
+          <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-green-600 to-teal-600 flex items-center justify-center">
+            <i class="fa-solid fa-chart-line text-white"></i>
+          </div>
+          <div>
+            <h2 class="text-2xl font-bold text-gray-900">Similarity Analysis</h2>
+            <p class="text-gray-600">Bidirectional content comparison results</p>
+          </div>
+        </div>
+
+        <!-- TF-IDF Results -->
+        <div class="mb-8">
+          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+            <i class="fa-solid fa-chart-bar text-blue-600"></i>
+            TF-IDF Similarity
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="metric-card">
+              <div class="flex justify-between items-center mb-3">
+                <span class="metric-label">A → B Similarity</span>
+                <span id="cmp-tfidf-ab-val" class="metric-value">0%</span>
+              </div>
+              <div class="progress-bar">
+                <div id="cmp-tfidf-ab" class="progress-fill bg-blue-500"></div>
+              </div>
+            </div>
+            <div class="metric-card">
+              <div class="flex justify-between items-center mb-3">
+                <span class="metric-label">B → A Similarity</span>
+                <span id="cmp-tfidf-ba-val" class="metric-value">0%</span>
+              </div>
+              <div class="progress-bar">
+                <div id="cmp-tfidf-ba" class="progress-fill bg-blue-500"></div>
+              </div>
+            </div>
+          </div>
+          <div class="metric-card bg-blue-50 border-blue-200">
+            <div class="flex justify-between items-center mb-3">
+              <span class="metric-label text-blue-800">Average TF-IDF Similarity</span>
+              <span id="cmp-tfidf-avg-val" class="metric-value text-blue-900">0%</span>
+            </div>
+            <div class="progress-bar">
+              <div id="cmp-tfidf-avg" class="progress-fill bg-blue-600"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Embeddings Results -->
+        <div id="cmp-embeds" class="hidden">
+          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+            <i class="fa-solid fa-brain text-purple-600"></i>
+            Semantic Similarity (Embeddings)
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="metric-card">
+              <div class="flex justify-between items-center mb-3">
+                <span class="metric-label">A → B Semantic</span>
+                <span id="cmp-emb-ab-val" class="metric-value">0%</span>
+              </div>
+              <div class="progress-bar">
+                <div id="cmp-emb-ab" class="progress-fill bg-purple-500"></div>
+              </div>
+            </div>
+            <div class="metric-card">
+              <div class="flex justify-between items-center mb-3">
+                <span class="metric-label">B → A Semantic</span>
+                <span id="cmp-emb-ba-val" class="metric-value">0%</span>
+              </div>
+              <div class="progress-bar">
+                <div id="cmp-emb-ba" class="progress-fill bg-purple-500"></div>
+              </div>
+            </div>
+          </div>
+          <div class="metric-card bg-purple-50 border-purple-200">
+            <div class="flex justify-between items-center mb-3">
+              <span class="metric-label text-purple-800">Average Semantic Similarity</span>
+              <span id="cmp-emb-avg-val" class="metric-value text-purple-900">0%</span>
+            </div>
+            <div class="progress-bar">
+              <div id="cmp-emb-avg" class="progress-fill bg-purple-600"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap gap-3 pt-6 border-t border-gray-200">
+          <button onclick="window.location.reload()" class="btn-secondary">
+            <i class="fa-solid fa-arrow-rotate-right"></i>
+            <span>New Comparison</span>
+          </button>
+          <a href="/" class="btn-secondary">
+            <i class="fa-solid fa-house"></i>
+            <span>Back to Home</span>
+          </a>
         </div>
       </div>
     </div>
@@ -71,28 +201,48 @@
 </div>
 
 <script>
-(function(){
+document.addEventListener('DOMContentLoaded', function() {
   const form = document.getElementById('compare-form');
-  if(!form) return;
+  if (!form) return;
+  
   const show = id => document.getElementById(id)?.classList.remove('hidden');
   const hide = id => document.getElementById(id)?.classList.add('hidden');
-  const setBar = (id, v) => { const el = document.getElementById(id); if(el){ el.style.width = `${Math.max(0, Math.min(100, v))}%`; }}
+  const setBar = (id, v) => {
+    const el = document.getElementById(id);
+    const valEl = document.getElementById(id + '-val');
+    if (el) {
+      const percentage = Math.max(0, Math.min(100, v));
+      el.style.width = `${percentage}%`;
+      if (valEl) valEl.textContent = `${percentage.toFixed(1)}%`;
+    }
+  };
+  
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    hide('cmp-error'); show('cmp-loading');
+    hide('cmp-error');
+    show('cmp-loading');
+    
     const a_url = document.getElementById('cmp-a-url').value.trim();
     const b_url = document.getElementById('cmp-b-url').value.trim();
     const a_text = document.getElementById('cmp-a-text').value;
     const b_text = document.getElementById('cmp-b-text').value;
     const use_embeddings = document.getElementById('cmp-use-embeddings').checked;
-    try{
-      const res = await fetch('/compare', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ a_url, b_url, a_text, b_text, use_embeddings }) });
+    
+    try {
+      const res = await fetch('/compare', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ a_url, b_url, a_text, b_text, use_embeddings })
+      });
+      
       const data = await res.json();
-      if(!res.ok) throw new Error(data.error || 'Compare failed');
+      if (!res.ok) throw new Error(data.error || 'Comparison failed');
+      
       setBar('cmp-tfidf-ab', data.tfidf.a_to_b || 0);
       setBar('cmp-tfidf-ba', data.tfidf.b_to_a || 0);
       setBar('cmp-tfidf-avg', data.tfidf.avg || 0);
-      if(data.embeddings){
+      
+      if (data.embeddings) {
         setBar('cmp-emb-ab', data.embeddings.a_to_b || 0);
         setBar('cmp-emb-ba', data.embeddings.b_to_a || 0);
         setBar('cmp-emb-avg', data.embeddings.avg || 0);
@@ -100,14 +250,20 @@
       } else {
         hide('cmp-embeds');
       }
+      
       show('cmp-result');
-    }catch(err){
-      const el = document.getElementById('cmp-error'); if(el){ el.textContent = `Error: ${err.message}`; show('cmp-error'); }
-    }finally{
+      document.getElementById('cmp-result').scrollIntoView({ behavior: 'smooth' });
+    } catch (err) {
+      const el = document.getElementById('cmp-error');
+      if (el) {
+        el.textContent = `Error: ${err.message}`;
+        show('cmp-error');
+      }
+    } finally {
       hide('cmp-loading');
     }
   });
-})();
+});
 </script>
 {% endblock %}
 

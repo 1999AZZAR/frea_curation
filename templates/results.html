@@ -3,62 +3,133 @@
 {% block title %}Analysis Result • AI Content Curator{% endblock %}
 
 {% block content %}
-<section class="card-surface p-6" style="max-width:1280px;margin:0 auto;">
-  <div class="flex items-center gap-3 mb-4">
-    <i class="fa-solid fa-magnifying-glass-chart" style="color:#6366f1"></i>
-    <h1 class="text-2xl font-semibold">Analysis Result</h1>
+<div class="max-w-4xl mx-auto">
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
+        <i class="fa-solid fa-magnifying-glass-chart text-white text-lg"></i>
+      </div>
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Analysis Result</h1>
+        <p class="text-gray-600">Comprehensive content analysis and quality assessment</p>
+      </div>
+    </div>
   </div>
 
-  <div class="flex items-start justify-between gap-4">
-    <div>
-      <h2 class="text-xl font-semibold">{{ card.article.title or card.article.url }}</h2>
-      {% if card.article.author %}
-      <p class="text-sm" style="color:#64748b">By {{ card.article.author }}</p>
+  <!-- Main Result Card -->
+  <div class="result-card mb-8">
+    <div class="flex items-start justify-between gap-6 mb-6">
+      <div class="flex-1">
+        <h2 class="text-2xl font-bold text-gray-900 mb-3">{{ card.article.title or card.article.url }}</h2>
+        {% if card.article.author or card.article.publish_date %}
+        <div class="text-sm text-gray-600 mb-4">
+          {% if card.article.author %}By {{ card.article.author }}{% endif %}
+          {% if card.article.author and card.article.publish_date %} • {% endif %}
+          {% if card.article.publish_date %}{{ card.article.publish_date }}{% endif %}
+        </div>
+        {% endif %}
+        {% if card.article.summary %}
+        <p class="prose-content">{{ card.article.summary }}</p>
+        {% endif %}
+      </div>
+      <div class="score-badge-large">{{ '%.0f' % card.overall_score }}</div>
+    </div>
+
+    <!-- Metrics Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div class="metric-card">
+        <div class="flex justify-between items-center mb-3">
+          <span class="metric-label">Readability</span>
+          <span class="metric-value">{{ '%.1f' % card.readability_score }}</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill bg-blue-500" style="width: {{ card.readability_score }}%"></div>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="flex justify-between items-center mb-3">
+          <span class="metric-label">NER Density</span>
+          <span class="metric-value">{{ '%.1f' % card.ner_density_score }}</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill bg-green-500" style="width: {{ card.ner_density_score }}%"></div>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="flex justify-between items-center mb-3">
+          <span class="metric-label">Sentiment</span>
+          <span class="metric-value">{{ '%.1f' % card.sentiment_score }}</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill bg-orange-500" style="width: {{ card.sentiment_score }}%"></div>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="flex justify-between items-center mb-3">
+          <span class="metric-label">Relevance</span>
+          <span class="metric-value">{{ '%.1f' % card.tfidf_relevance_score }}</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill bg-purple-500" style="width: {{ card.tfidf_relevance_score }}%"></div>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="flex justify-between items-center mb-3">
+          <span class="metric-label">Recency</span>
+          <span class="metric-value">{{ '%.1f' % card.recency_score }}</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill bg-pink-500" style="width: {{ card.recency_score }}%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional Information -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <div class="stats-section">
+        <h3 class="section-title">Article Statistics</h3>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <span class="stat-label">Word Count:</span>
+            <span class="stat-value">{{ card.article.text.split()|length if card.article.text else 'N/A' }}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Entities Found:</span>
+            <span class="stat-value">{{ card.article.entities|length if card.article.entities else 0 }}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Source Domain:</span>
+            <span class="stat-value">{{ card.article.url.split('/')[2] if card.article.url else 'N/A' }}</span>
+          </div>
+        </div>
+      </div>
+      
+      {% if card.article.entities %}
+      <div class="entities-section">
+        <h3 class="section-title">Named Entities</h3>
+        <div class="entities-list">
+          {% for e in card.article.entities[:12] %}
+            <span class="entity-chip">{{ e.label }}: {{ e.text }}</span>
+          {% endfor %}
+        </div>
+      </div>
       {% endif %}
-      <p class="mt-3 text-sm" style="color:#334155">{{ card.article.summary }}</p>
     </div>
-    <div class="badge-score-lg">{{ '%.0f' % card.overall_score }}</div>
-  </div>
 
-  <div class="mt-6 grid" style="gap:16px;grid-template-columns:1fr 1fr;">
-    <div>
-      <div class="flex justify-between text-xs" style="color:#64748b"><span>Readability</span><span>{{ '%.2f' % card.readability_score }}</span></div>
-      <div class="progress-rail"><div class="progress-fill" style="background:#0284c7;width: {{ card.readability_score }}%"></div></div>
-    </div>
-    <div>
-      <div class="flex justify-between text-xs" style="color:#64748b"><span>NER Density</span><span>{{ '%.2f' % card.ner_density_score }}</span></div>
-      <div class="progress-rail"><div class="progress-fill" style="background:#059669;width: {{ card.ner_density_score }}%"></div></div>
-    </div>
-    <div>
-      <div class="flex justify-between text-xs" style="color:#64748b"><span>Sentiment (neutrality)</span><span>{{ '%.2f' % card.sentiment_score }}</span></div>
-      <div class="progress-rail"><div class="progress-fill" style="background:#d97706;width: {{ card.sentiment_score }}%"></div></div>
-    </div>
-    <div>
-      <div class="flex justify-between text-xs" style="color:#64748b"><span>Relevance</span><span>{{ '%.2f' % card.tfidf_relevance_score }}</span></div>
-      <div class="progress-rail"><div class="progress-fill" style="background:#6366f1;width: {{ card.tfidf_relevance_score }}%"></div></div>
-    </div>
-    <div style="grid-column:1/-1">
-      <div class="flex justify-between text-xs" style="color:#64748b"><span>Recency</span><span>{{ '%.2f' % card.recency_score }}</span></div>
-      <div class="progress-rail"><div class="progress-fill" style="background:#a21caf;width: {{ card.recency_score }}%"></div></div>
+    <!-- Action Buttons -->
+    <div class="flex flex-wrap gap-3 pt-6 border-t border-gray-200">
+      <a href="{{ card.article.url }}" target="_blank" rel="noopener" class="btn-primary">
+        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+        <span>View Original Article</span>
+      </a>
+      <a href="/" class="btn-secondary">
+        <i class="fa-solid fa-house"></i>
+        <span>Back to Home</span>
+      </a>
     </div>
   </div>
-
-  {% if card.article.entities %}
-  <div class="mt-6">
-    <h3 class="text-sm font-semibold" style="color:#0f172a;margin-bottom:0.5rem">Entities</h3>
-    <div style="display:flex;flex-wrap:wrap;gap:8px">
-      {% for e in card.article.entities %}
-        <span class="chip">{{ e.label }}: {{ e.text }}</span>
-      {% endfor %}
-    </div>
-  </div>
-  {% endif %}
-
-  <div class="mt-6 flex items-center gap-3">
-    <a class="rounded-lg border px-4 py-2 text-sm" style="border-color:#e2e8f0;background:#ffffff" href="{{ card.article.url }}" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square" style="margin-right:0.5rem"></i>Open Source</a>
-    <a class="rounded-lg border px-4 py-2 text-sm" style="border-color:#e2e8f0;background:#ffffff" href="/"><i class="fa-solid fa-house" style="margin-right:0.5rem"></i>Home</a>
-  </div>
-</section>
+</div>
 {% endblock %}
 
 

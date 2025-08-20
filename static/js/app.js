@@ -27,23 +27,38 @@ function hide(id){ const el = document.getElementById(id); if(el){ el.classList.
 function createCurationCard(r){
   const safeTitle = r.article.title || r.article.url;
   const wrap = document.createElement('div');
-  wrap.className = 'list-card';
+  wrap.className = 'article-card';
+  
+  // Format publish date
+  const publishDate = r.article.publish_date ? new Date(r.article.publish_date).toLocaleDateString() : '';
+  const author = r.article.author ? `By ${r.article.author}` : '';
+  const domain = r.domain || '';
+  const metaInfo = [author, publishDate, domain].filter(Boolean).join(' • ');
+  
   wrap.innerHTML = `
-    <div class="flex items-start justify-between gap-3">
-      <div>
-        <a href="${r.article.url}" target="_blank" rel="noopener" class="text-base font-semibold hover:underline">${safeTitle}</a>
-        <div class="mt-1 meta-row">
-          <span class="font-bold" style="color:#16a34a">${Math.round(r.overall_score)}</span>
-          • Read ${Math.round(r.readability_score)}
-          • NER ${Math.round(r.ner_density_score)}
-          • Sent ${Math.round(r.sentiment_score)}
-          • Relevance ${Math.round(r.tfidf_relevance_score)}
-          • Recency ${Math.round(r.recency_score)}
+    <div class="flex items-start justify-between gap-4 mb-4">
+      <div class="flex-1">
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">
+          <a href="${r.article.url}" target="_blank" rel="noopener" class="hover:text-blue-600 transition-colors">${safeTitle}</a>
+        </h3>
+        ${metaInfo ? `<p class="text-sm text-gray-500 mb-2">${metaInfo}</p>` : ''}
+        <div class="flex flex-wrap gap-2 text-xs text-gray-600">
+          <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">Score: ${Math.round(r.overall_score)}</span>
+          <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">Read: ${Math.round(r.readability_score)}</span>
+          <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded-full">NER: ${Math.round(r.ner_density_score)}</span>
+          <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full">Sent: ${Math.round(r.sentiment_score)}</span>
+          <span class="bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full">Rel: ${Math.round(r.tfidf_relevance_score)}</span>
+          <span class="bg-pink-100 text-pink-800 px-2 py-1 rounded-full">Rec: ${Math.round(r.recency_score)}</span>
         </div>
       </div>
-      <div class="badge-score-lg">${Math.round(r.overall_score)}</div>
+      <div class="score-badge">${Math.round(r.overall_score)}</div>
     </div>
-    ${r.article.summary ? `<p class="mt-2 text-sm" style="color:#334155">${r.article.summary}</p>` : ''}
+    ${r.article.summary ? `<p class="text-sm text-gray-600 leading-relaxed mb-4">${r.article.summary}</p>` : ''}
+    ${r.article.entities && r.article.entities.length ? `
+      <div class="flex flex-wrap gap-1">
+        ${r.article.entities.slice(0, 8).map(e => `<span class="entity-chip">${e.label}: ${e.text}</span>`).join('')}
+      </div>
+    ` : ''}
   `;
   return wrap;
 }
@@ -91,7 +106,7 @@ window.addEventListener('DOMContentLoaded', () => {
           entsList.innerHTML = '';
           data.article.entities.slice(0, 12).forEach(e => {
             const span = document.createElement('span');
-            span.className = 'chip';
+            span.className = 'entity-chip';
             span.textContent = `${e.label}: ${e.text}`;
             entsList.appendChild(span);
           });
@@ -225,8 +240,13 @@ window.addEventListener('DOMContentLoaded', () => {
     curateResult.innerHTML = '';
     if(pageItems.length === 0){
       const empty = document.createElement('div');
-      empty.className = 'list-card';
-      empty.textContent = 'No results';
+      empty.className = 'article-card text-center py-8';
+      empty.innerHTML = `
+        <div class="text-gray-400 mb-2">
+          <i class="fa-solid fa-search text-2xl"></i>
+        </div>
+        <p class="text-gray-600">No articles found matching your criteria</p>
+      `;
       curateResult.appendChild(empty);
       return;
     }

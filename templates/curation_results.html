@@ -3,52 +3,111 @@
 {% block title %}Curation Results • AI Content Curator{% endblock %}
 
 {% block content %}
-<section class="card-surface p-6" style="max-width:1280px;margin:0 auto;">
-  <div class="flex items-center gap-3 mb-4">
-    <i class="fa-regular fa-newspaper" style="color:#0ea5e9"></i>
-    <h1 class="text-2xl font-semibold">Curation Results</h1>
-  </div>
-
-  <div class="flex items-center justify-between gap-3 mb-4">
-    <div class="text-sm" style="color:#64748b">Topic: <span class="font-semibold" style="color:#0f172a">{{ topic }}</span></div>
-    <div class="text-sm" style="color:#64748b">{{ results|length }} results</div>
-  </div>
-
-  <div class="grid" style="gap:12px">
-    {% for r in results %}
-    <article class="list-card">
-      <div class="flex items-start justify-between gap-3">
+<div class="max-w-6xl mx-auto">
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
+        <i class="fa-regular fa-newspaper text-white text-lg"></i>
+      </div>
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Curation Results</h1>
+        <p class="text-gray-600">Curated and ranked articles for your topic</p>
+      </div>
+    </div>
+    
+    <div class="bg-white rounded-lg border border-gray-200 p-4 mb-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <a href="{{ r.article.url }}" target="_blank" rel="noopener" class="text-base font-semibold hover:underline">{{ r.article.title or r.article.url }}</a>
-          <div class="mt-1 meta-row">
-            <span class="font-bold" style="color:#16a34a">{{ '%.0f' % r.overall_score }}</span>
-            • Read {{ '%.0f' % r.readability_score }}
-            • NER {{ '%.0f' % r.ner_density_score }}
-            • Sent {{ '%.0f' % r.sentiment_score }}
-            • Relevance {{ '%.0f' % r.tfidf_relevance_score }}
-            • Recency {{ '%.0f' % r.recency_score }}
+          <span class="text-sm text-gray-500">Topic:</span>
+          <span class="ml-2 text-lg font-semibold text-gray-900">{{ topic }}</span>
+        </div>
+        <div class="flex items-center gap-4 text-sm text-gray-600">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-newspaper text-blue-600"></i>
+            <span>{{ results|length }} articles found</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-chart-line text-green-600"></i>
+            <span>Ranked by quality score</span>
           </div>
         </div>
-        <div class="badge-score-lg">{{ '%.0f' % r.overall_score }}</div>
       </div>
+    </div>
+  </div>
+
+  <!-- Results Grid -->
+  <div class="space-y-6">
+    {% for r in results %}
+    <article class="article-card">
+      <div class="flex items-start justify-between gap-6 mb-4">
+        <div class="flex-1">
+          <h3 class="text-xl font-bold text-gray-900 mb-3">
+            <a href="{{ r.article.url }}" target="_blank" rel="noopener" class="hover:text-blue-600 transition-colors">
+              {{ r.article.title or r.article.url }}
+            </a>
+          </h3>
+          
+          <div class="flex flex-wrap gap-2 text-xs mb-3">
+            {% if r.article.author %}
+            <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded-full">{{ r.article.author }}</span>
+            {% endif %}
+            {% if r.article.publish_date %}
+            <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded-full">{{ r.article.publish_date }}</span>
+            {% endif %}
+            {% if r.domain %}
+            <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded-full">{{ r.domain }}</span>
+            {% endif %}
+          </div>
+          
+          <div class="flex flex-wrap gap-2 text-xs mb-4">
+            <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">Overall: {{ '%.0f' % r.overall_score }}</span>
+            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">Readability: {{ '%.0f' % r.readability_score }}</span>
+            <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded-full">NER: {{ '%.0f' % r.ner_density_score }}</span>
+            <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full">Sentiment: {{ '%.0f' % r.sentiment_score }}</span>
+            <span class="bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full">Relevance: {{ '%.0f' % r.tfidf_relevance_score }}</span>
+            <span class="bg-pink-100 text-pink-800 px-2 py-1 rounded-full">Recency: {{ '%.0f' % r.recency_score }}</span>
+          </div>
+        </div>
+        <div class="score-badge">{{ '%.0f' % r.overall_score }}</div>
+      </div>
+      
       {% if r.article.summary %}
-      <p class="mt-2 text-sm" style="color:#334155">{{ r.article.summary }}</p>
+      <p class="text-gray-600 leading-relaxed mb-4">{{ r.article.summary }}</p>
       {% endif %}
+      
       {% if r.article.entities %}
-      <div class="mt-2" style="display:flex;flex-wrap:wrap;gap:8px">
+      <div class="flex flex-wrap gap-1 mb-4">
         {% for e in r.article.entities[:8] %}
-        <span class="chip">{{ e.label }}: {{ e.text }}</span>
+        <span class="entity-chip">{{ e.label }}: {{ e.text }}</span>
         {% endfor %}
+        {% if r.article.entities|length > 8 %}
+        <span class="text-xs text-gray-500 px-2 py-1">+{{ r.article.entities|length - 8 }} more</span>
+        {% endif %}
       </div>
       {% endif %}
+      
+      <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+        <a href="{{ r.article.url }}" target="_blank" rel="noopener" class="btn-secondary-sm">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          <span>Read Article</span>
+        </a>
+        <div class="text-xs text-gray-500">
+          {% if r.word_count %}{{ r.word_count }} words{% endif %}
+        </div>
+      </div>
     </article>
     {% endfor %}
   </div>
 
-  <div class="mt-6">
-    <a class="rounded-lg border px-4 py-2 text-sm" style="border-color:#e2e8f0;background:#ffffff" href="/"><i class="fa-solid fa-house" style="margin-right:0.5rem"></i>Home</a>
+  <!-- Navigation -->
+  <div class="mt-12 text-center">
+    <a href="/" class="btn-primary">
+      <i class="fa-solid fa-house"></i>
+      <span>Back to Home</span>
+    </a>
   </div>
-</section>
+</div>
 {% endblock %}
 
 

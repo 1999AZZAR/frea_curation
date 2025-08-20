@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}AI Content Curator{% endblock %}</title>
-  <meta name="color-scheme" content="dark light">
+  <meta name="color-scheme" content="light">
   <!-- Compiled Tailwind CSS -->
   <link rel="stylesheet" href="/static/css/tailwind.css" />
   <!-- App UI overrides -->
@@ -14,37 +14,79 @@
   <!-- Inter font for professional typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..900;1,14..32,300..900&display=swap" rel="stylesheet">
   {% block head %}{% endblock %}
 </head>
-<body class="h-full bg-white text-slate-900">
-  <div class="min-h-full backdrop-blur-sm">
-    <nav class="sticky top-0 z-40 bg-white/80 border-b border-slate-200 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-      <div class="w-full px-4 sm:px-6 lg:px-8">
-        <div class="flex h-14 items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="h-8 w-8 rounded-xl bg-black text-white flex items-center justify-center">
-              <i class="fa-solid fa-pen-nib"></i>
+<body class="h-full bg-gray-50 text-gray-900 font-inter">
+  <div class="min-h-full">
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex h-16 items-center justify-between">
+          <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-3">
+              <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-lg">
+                <i class="fa-solid fa-brain text-white text-lg"></i>
+              </div>
+              <div>
+                <a href="/" class="text-xl font-bold text-gray-900 tracking-tight">AI Content Curator</a>
+                <p class="text-xs text-gray-500 font-medium">Intelligent Content Analysis</p>
+              </div>
             </div>
-            <a href="/" class="text-base font-semibold tracking-wide text-slate-900">AI Content Curator</a>
           </div>
-          <div class="menu flex items-center gap-4 text-sm text-slate-600">
-            <a href="#analyze" class="flex items-center gap-2"><i class="fa-solid fa-magnifying-glass-chart"></i> Analyze</a>
-            <a href="#curate" class="flex items-center gap-2"><i class="fa-solid fa-layer-group"></i> Curate</a>
-            <a href="/compare" class="flex items-center gap-2"><i class="fa-solid fa-code-compare"></i> Compare</a>
-            <a href="https://newsapi.org/" target="_blank" rel="noopener" class="flex items-center"><i class="fa-regular fa-newspaper"></i></a>
+          <div class="hidden md:flex items-center space-x-8">
+            <a href="#analyze" class="nav-link group">
+              <i class="fa-solid fa-magnifying-glass-chart text-blue-600 group-hover:text-blue-700"></i>
+              <span>Analyze</span>
+            </a>
+            <a href="#curate" class="nav-link group">
+              <i class="fa-solid fa-layer-group text-purple-600 group-hover:text-purple-700"></i>
+              <span>Curate</span>
+            </a>
+            <a href="/compare" class="nav-link group">
+              <i class="fa-solid fa-code-compare text-green-600 group-hover:text-green-700"></i>
+              <span>Compare</span>
+            </a>
           </div>
+          <!-- Mobile menu button -->
+          <div class="md:hidden">
+            <button type="button" class="mobile-menu-btn p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- Mobile menu -->
+      <div class="mobile-menu hidden md:hidden bg-white border-t border-gray-200">
+        <div class="px-4 py-3 space-y-2">
+          <a href="#analyze" class="mobile-nav-link">
+            <i class="fa-solid fa-magnifying-glass-chart text-blue-600"></i>
+            <span>Analyze</span>
+          </a>
+          <a href="#curate" class="mobile-nav-link">
+            <i class="fa-solid fa-layer-group text-purple-600"></i>
+            <span>Curate</span>
+          </a>
+          <a href="/compare" class="mobile-nav-link">
+            <i class="fa-solid fa-code-compare text-green-600"></i>
+            <span>Compare</span>
+          </a>
         </div>
       </div>
     </nav>
 
-    <main class="w-full px-4 sm:px-6 lg:px-8 py-4">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {% block content %}{% endblock %}
     </main>
 
-    <footer class="mt-10 py-6 text-center text-sm text-slate-500">
-      <div class="w-full px-4">
-        <p class="text-slate-500">Powered by Flask • spaCy • VADER • scikit‑learn • NewsAPI</p>
+    <footer class="mt-16 border-t border-gray-200 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="text-center">
+          <p class="text-sm text-gray-500">
+            Powered by <span class="font-medium">Flask</span> • <span class="font-medium">spaCy</span> • <span class="font-medium">VADER</span> • <span class="font-medium">scikit‑learn</span> • <span class="font-medium">NewsAPI</span>
+          </p>
+          <p class="text-xs text-gray-400 mt-2">© 2025 AI Content Curator. Built for intelligent content analysis.</p>
+        </div>
       </div>
     </footer>
   </div>
@@ -52,7 +94,18 @@
   {% block scripts %}
   <script src="/static/js/app.js"></script>
   <script>
-    (function(){
+    // Mobile menu toggle
+    document.addEventListener('DOMContentLoaded', function() {
+      const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+      const mobileMenu = document.querySelector('.mobile-menu');
+      
+      if (mobileMenuBtn && mobileMenu) {
+        mobileMenuBtn.addEventListener('click', function() {
+          mobileMenu.classList.toggle('hidden');
+        });
+      }
+
+      // Navigation link handlers
       var links = document.querySelectorAll('nav a[href="#analyze"], nav a[href="#curate"]');
       links.forEach(function(a){
         a.addEventListener('click', function(e){
@@ -65,9 +118,13 @@
             btn.click();
             window.scrollTo({top: 0, behavior: 'smooth'});
           }
+          // Close mobile menu
+          if (mobileMenu) {
+            mobileMenu.classList.add('hidden');
+          }
         });
       });
-    })();
+    });
   </script>
   {% endblock %}
 </body>
