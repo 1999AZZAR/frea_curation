@@ -12,6 +12,37 @@ An AI-powered content curation web application built with Flask. It fetches arti
 ## Project Structure
 
 ```
+frea_curation/
+  app.py                     # Flask app entry
+  curator/                   # Application package
+    core/                    # Core domain modules
+      models.py              # Article, Entity, ScoreCard, ScoringConfig
+      config.py              # Configuration loader (env-based)
+      validation.py          # Validation utilities
+      nlp.py                 # NLP helpers (spaCy/VADER)
+      utils.py               # Shared utilities
+    services/                # Service layer
+      _analyzer.py           # Scoring engine implementation
+      analyzer.py            # Thin API over _analyzer
+      _parser.py             # Parser implementation
+      parser.py              # Thin API
+      _news_source.py        # News source implementation
+      news_source.py         # Thin API
+    web/                     # Web-specific utilities (reserved)
+  templates/                 # Jinja templates
+  static/                    # Static assets
+  assets/                    # Precompiled sources (e.g., Tailwind)
+  tests/                     # Test suite
+  config.py                  # Back-compat loader (delegates to curator.core)
+  models.py                  # Back-compat re-exports
+  validation.py              # Legacy location (kept for BC; move usage to curator.core.validation)
+```
+
+Notes:
+- Prefer importing from `curator.core.*` and `curator.services.*`.
+- Root-level `models.py`, `config.py`, and `validation.py` exist for backward compatibility in tests and legacy scripts.
+
+```
 ai-content-curator/
 ├── app.py                 # Flask app+routes (JSON or server-rendered views)
 ├── config.py              # Scoring configuration loading

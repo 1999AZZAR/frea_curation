@@ -76,6 +76,11 @@ class ScoringConfig:
     recency_weight: float = 0.2
     min_word_count: int = 300
     max_articles_per_topic: int = 20
+    # Topic-aware recency calibration
+    # Default half-life in days for recency decay when topic-specific override is not found
+    default_recency_half_life_days: float = 7.0
+    # Mapping of topic keyword -> half-life days (e.g., {"finance": 1.0, "tech": 3.0})
+    topic_half_life_days: dict = field(default_factory=dict)
 
     def __post_init__(self):
         total_weight = (
@@ -106,5 +111,16 @@ class ScoringConfig:
 
         if not isinstance(self.max_articles_per_topic, int) or self.max_articles_per_topic < 1:
             raise ValueError("max_articles_per_topic must be a positive integer")
+
+        # Basic validation for recency half-life configuration
+        if not isinstance(self.default_recency_half_life_days, (int, float)) or self.default_recency_half_life_days <= 0:
+            raise ValueError("default_recency_half_life_days must be a positive number")
+        if not isinstance(self.topic_half_life_days, dict):
+            raise ValueError("topic_half_life_days must be a dict of topic->days mappings")
+        for key, value in self.topic_half_life_days.items():
+            if not isinstance(key, str) or not key.strip():
+                raise ValueError("topic_half_life_days keys must be non-empty strings")
+            if not isinstance(value, (int, float)) or value <= 0:
+                raise ValueError("topic_half_life_days values must be positive numbers")
 
 

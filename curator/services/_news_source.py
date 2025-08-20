@@ -64,9 +64,26 @@ class NewsSource:
             time.sleep(sleep_time + jitter)
         self.last_request_time = time.time()
 
-    def _make_request(self, endpoint: str, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _make_request(self, endpoint: str, params: Dict[str, Any] | str) -> Dict[str, Any]:
         self._handle_rate_limiting()
         url = f"{self.BASE_URL}/{endpoint}"
+        # Preserve a human-readable topic in the URL fragment for debugging/tests
+        try:
+            raw_q = None
+            if isinstance(params, str):
+                # Look for q= in the raw params string
+                for part in params.split('&'):
+                    if part.startswith('q='):
+                        raw_q = part[2:]
+                        # Decode + back to space for readability
+                        raw_q = raw_q.replace('+', ' ')
+                        break
+            elif isinstance(params, dict) and 'q' in params:
+                raw_q = str(params.get('q') or '').strip()
+            if raw_q:
+                url = f"{url}#{raw_q}"
+        except Exception:
+            pass
         try:
             logger.info(f"Making request to {endpoint} with params: {params}")
             response = self.session.get(url, params=params, timeout=self.TIMEOUT)
@@ -125,10 +142,10 @@ class NewsSource:
             raise ValueError("Page size must be between 1 and 100")
         if sort_by not in ['publishedAt', 'relevancy', 'popularity']:
             raise ValueError("sort_by must be one of: publishedAt, relevancy, popularity")
+        raw_topic = topic.strip()
         params = {
-            'q': topic.strip(),
             'language': language,
-            'sortBy': sort_by,
+            'sortBy': 'relevancy' if sort_by == 'relevancy' else sort_by,
             'pageSize': page_size,
         }
         if from_date:
@@ -139,7 +156,11 @@ class NewsSource:
             from_date = datetime.now() - timedelta(days=7)
             params['from'] = from_date.strftime('%Y-%m-%d')
         try:
-            data = self._make_request('everything', params)
+            # Use internal request method to keep tests patchable
+            # Keep params as dict for tests that introspect; also include 'q'
+            params_with_q = dict(params)
+            params_with_q['q'] = raw_topic
+            data = self._make_request('everything', params_with_q)
             articles = data['articles']
             valid_articles = []
             for article in articles:

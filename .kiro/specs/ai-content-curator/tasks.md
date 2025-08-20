@@ -200,7 +200,7 @@
   - Domain diversity cap in final ranking (e.g., max 2 per domain)
   - _Requirements: 2.3, 7.1_
 
-- [ ] 19. Topic‑aware recency calibration
+- [x] 19. Topic‑aware recency calibration
   - Add per‑topic half‑life config (e.g., finance=1d, tech=3d, research=14d)
   - Pass calibrated half‑life into `compute_recency_score`
   - _Requirements: 3.5, 5.2_

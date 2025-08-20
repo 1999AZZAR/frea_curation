@@ -3,7 +3,7 @@ from unittest.mock import patch, Mock
 import os
 
 from app import app as flask_app
-from models import ScoringConfig
+from curator.core.models import ScoringConfig
 
 
 class TestAppRoutes(unittest.TestCase):
@@ -14,7 +14,7 @@ class TestAppRoutes(unittest.TestCase):
         resp = self.app.post('/analyze', json={'url': ''})
         self.assertEqual(resp.status_code, 400)
 
-    @patch('config.load_scoring_config')
+    @patch('curator.core.config.load_scoring_config')
     @patch('curator.core.validation.validate_url')
     @patch('curator.services._analyzer.analyze_article')
     def test_analyze_success_mock(self, mock_analyze, mock_validate, mock_load):

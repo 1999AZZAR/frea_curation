@@ -369,7 +369,8 @@ class TestExternalServiceIntegration(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             # Verify NewsAPI was called
             self.assertEqual(len(responses.calls), 1)
-            self.assertIn('artificial intelligence', responses.calls[0].request.url)
+            from urllib.parse import unquote_plus
+            self.assertIn('artificial intelligence', unquote_plus(responses.calls[0].request.url))
 
     @responses.activate
     def test_newsapi_integration_rate_limit(self):

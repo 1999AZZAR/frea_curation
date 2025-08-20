@@ -33,7 +33,7 @@
         <p class="prose-content">{{ card.article.summary }}</p>
         {% endif %}
       </div>
-      <div class="score-badge-large">{{ '%.0f' % card.overall_score }}</div>
+      <div class="score-badge-large">{{ '%.1f' % card.overall_score }}</div>
     </div>
 
     <!-- Metrics Grid -->
@@ -92,7 +92,7 @@
         <div class="stats-grid">
           <div class="stat-item">
             <span class="stat-label">Word Count:</span>
-            <span class="stat-value">{{ card.article.text.split()|length if card.article.text else 'N/A' }}</span>
+            <span class="stat-value">{{ (card.article.content.split()|length) if card.article.content else 'N/A' }}</span>
           </div>
           <div class="stat-item">
             <span class="stat-label">Entities Found:</span>

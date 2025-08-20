@@ -6,7 +6,7 @@ validation utilities.
 """
 
 import unittest
-from validation import (
+from curator.core.validation import (
     validate_url, 
     validate_topic_keywords, 
     validate_url_list, 

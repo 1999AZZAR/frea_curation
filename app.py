@@ -93,7 +93,11 @@ def create_app():
             compute_embeddings_relevance_score,
             compute_tfidf_relevance_score,
         )
-        from config import load_scoring_config
+        # Prefer package config to keep modules under curator/
+        try:
+            from curator.core.config import load_scoring_config
+        except Exception:
+            from config import load_scoring_config
         from curator.core.validation import validate_url
         from urllib.parse import urlparse
         from curator.services.parser import get_article_word_count
@@ -138,9 +142,15 @@ def create_app():
             else:
                 os.environ['USE_EMBEDDINGS_RELEVANCE'] = original_env
 
-            # Derived stats
-            wc = get_article_word_count(scorecard.article)
-            ent_count = len(scorecard.article.entities or [])
+            # Derived stats (robust to partial objects)
+            try:
+                wc = get_article_word_count(scorecard.article)
+            except Exception:
+                wc = None
+            try:
+                ent_count = len(getattr(scorecard.article, 'entities', []) or [])
+            except Exception:
+                ent_count = 0
             try:
                 netloc = urlparse(scorecard.article.url).netloc.lower()
                 domain = netloc[4:] if netloc.startswith('www.') else netloc
@@ -168,12 +178,12 @@ def create_app():
                 'tfidf_relevance_score': scorecard.tfidf_relevance_score,
                 'recency_score': scorecard.recency_score,
                 'article': {
-                    'url': scorecard.article.url,
-                    'title': scorecard.article.title,
-                    'author': scorecard.article.author,
-                    'summary': scorecard.article.summary,
-                    'publish_date': scorecard.article.publish_date.isoformat() if scorecard.article.publish_date else None,
-                    'entities': [{'text': e.text, 'label': e.label} for e in (scorecard.article.entities or [])],
+                    'url': getattr(scorecard.article, 'url', ''),
+                    'title': getattr(scorecard.article, 'title', ''),
+                    'author': getattr(scorecard.article, 'author', ''),
+                    'summary': getattr(scorecard.article, 'summary', ''),
+                    'publish_date': scorecard.article.publish_date.isoformat() if getattr(scorecard.article, 'publish_date', None) else None,
+                    'entities': [{'text': e.text, 'label': e.label} for e in (getattr(scorecard.article, 'entities', []) or [])],
                 }
             }
             result['stats'] = {
@@ -195,7 +205,10 @@ def create_app():
     def curate_topic():
         """Topic-based curation endpoint"""
         from curator.services.analyzer import batch_analyze
-        from config import load_scoring_config
+        try:
+            from curator.core.config import load_scoring_config
+        except Exception:
+            from config import load_scoring_config
         from curator.core.validation import validate_topic_keywords
         from curator.services.news_source import NewsSource
         from urllib.parse import urlparse
@@ -243,26 +256,29 @@ def create_app():
                 payload = []
                 for r in results:
                     try:
-                        netloc = urlparse(r.article.url).netloc.lower()
+                        netloc = urlparse(getattr(r.article, 'url', '')).netloc.lower()
                         domain = netloc[4:] if netloc.startswith('www.') else netloc
                     except Exception:
                         domain = ''
-                    wc = get_article_word_count(r.article)
+                    try:
+                        wc = get_article_word_count(r.article)
+                    except Exception:
+                        wc = None
                     payload.append({
-                        'overall_score': r.overall_score,
-                        'readability_score': r.readability_score,
-                        'ner_density_score': r.ner_density_score,
-                        'sentiment_score': r.sentiment_score,
-                        'tfidf_relevance_score': r.tfidf_relevance_score,
-                        'recency_score': r.recency_score,
+                        'overall_score': getattr(r, 'overall_score', 0),
+                        'readability_score': getattr(r, 'readability_score', 0),
+                        'ner_density_score': getattr(r, 'ner_density_score', 0),
+                        'sentiment_score': getattr(r, 'sentiment_score', 0),
+                        'tfidf_relevance_score': getattr(r, 'tfidf_relevance_score', 0),
+                        'recency_score': getattr(r, 'recency_score', 0),
                         'domain': domain,
                         'word_count': wc,
                         'article': {
-                            'url': r.article.url,
-                            'title': r.article.title,
-                            'author': r.article.author,
-                            'summary': r.article.summary,
-                            'publish_date': r.article.publish_date.isoformat() if r.article.publish_date else None,
+                            'url': getattr(r.article, 'url', ''),
+                            'title': getattr(r.article, 'title', ''),
+                            'author': getattr(r.article, 'author', ''),
+                            'summary': getattr(r.article, 'summary', ''),
+                            'publish_date': (getattr(r.article, 'publish_date', None).isoformat() if getattr(r.article, 'publish_date', None) else None),
                         }
                     })
                 return jsonify({'count': len(payload), 'results': payload})

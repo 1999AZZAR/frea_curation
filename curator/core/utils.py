@@ -15,7 +15,16 @@ def canonicalize_url(url: str) -> str:
     - Handle mobile/AMP variants
     """
     try:
-        parsed = urlparse(url.strip())
+        raw = (url or "").strip()
+        # If no scheme and it looks like a bare domain, prepend https://
+        if raw and '://' not in raw:
+            host_like = raw.split('/')[0]
+            if '.' in host_like and not host_like.startswith('javascript:'):
+                raw = 'https://' + raw
+            else:
+                # Not a valid URL host, return original unchanged
+                return url
+        parsed = urlparse(raw)
         
         # Normalize scheme
         scheme = (parsed.scheme or 'https').lower()
