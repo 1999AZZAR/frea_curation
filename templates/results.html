@@ -83,6 +83,16 @@
           <div class="progress-fill bg-pink-500" style="width: {{ card.recency_score }}%"></div>
         </div>
       </div>
+      
+      <div class="metric-card">
+        <div class="flex justify-between items-center mb-3">
+          <span class="metric-label">Reputation</span>
+          <span class="metric-value">{{ '%.1f' % card.reputation_score }}</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill bg-teal-500" style="width: {{ card.reputation_score }}%"></div>
+        </div>
+      </div>
     </div>
 
     <!-- Additional Information -->

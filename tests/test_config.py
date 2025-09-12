@@ -83,6 +83,7 @@ class TestFixtures:
             sentiment_score=70.0,
             tfidf_relevance_score=90.0,
             recency_score=95.0,
+            reputation_score=75.0,
             article=article
         )
     
@@ -90,11 +91,12 @@ class TestFixtures:
     def create_test_config():
         """Create a test scoring configuration."""
         return ScoringConfig(
-            readability_weight=0.2,
-            ner_density_weight=0.2,
+            readability_weight=0.15,
+            ner_density_weight=0.15,
             sentiment_weight=0.15,
             tfidf_relevance_weight=0.25,
-            recency_weight=0.2,
+            recency_weight=0.15,
+            reputation_weight=0.15,
             min_word_count=TestConfig.MIN_WORD_COUNT,
             max_articles_per_topic=TestConfig.MAX_ARTICLES_PER_TOPIC
         )
@@ -175,6 +177,8 @@ class TestHelpers:
         test_case.assertLessEqual(scorecard.tfidf_relevance_score, 100)
         test_case.assertGreaterEqual(scorecard.recency_score, 0)
         test_case.assertLessEqual(scorecard.recency_score, 100)
+        test_case.assertGreaterEqual(scorecard.reputation_score, 0)
+        test_case.assertLessEqual(scorecard.reputation_score, 100)
         
         # Check article structure
         test_case.assertIsInstance(scorecard.article, Article)

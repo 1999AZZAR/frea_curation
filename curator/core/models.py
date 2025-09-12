@@ -49,6 +49,7 @@ class ScoreCard:
     sentiment_score: float
     tfidf_relevance_score: float
     recency_score: float
+    reputation_score: float
     article: Article
 
     def __post_init__(self):
@@ -59,6 +60,7 @@ class ScoreCard:
             self.sentiment_score,
             self.tfidf_relevance_score,
             self.recency_score,
+            self.reputation_score,
         ]
         for score in scores:
             if not isinstance(score, (int, float)):
@@ -69,11 +71,12 @@ class ScoreCard:
 
 @dataclass
 class ScoringConfig:
-    readability_weight: float = 0.2
-    ner_density_weight: float = 0.2
+    readability_weight: float = 0.15
+    ner_density_weight: float = 0.15
     sentiment_weight: float = 0.15
     tfidf_relevance_weight: float = 0.25
-    recency_weight: float = 0.2
+    recency_weight: float = 0.15
+    reputation_weight: float = 0.15
     min_word_count: int = 300
     max_articles_per_topic: int = 20
     # Topic-aware recency calibration
@@ -89,6 +92,7 @@ class ScoringConfig:
             + self.sentiment_weight
             + self.tfidf_relevance_weight
             + self.recency_weight
+            + self.reputation_weight
         )
         if not 0.99 <= total_weight <= 1.01:
             raise ValueError(f"Scoring weights must sum to 1.0, got {total_weight}")
@@ -99,6 +103,7 @@ class ScoringConfig:
             self.sentiment_weight,
             self.tfidf_relevance_weight,
             self.recency_weight,
+            self.reputation_weight,
         ]
         for weight in weights:
             if not isinstance(weight, (int, float)):

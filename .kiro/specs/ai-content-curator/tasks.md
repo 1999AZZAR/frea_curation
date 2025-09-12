@@ -205,13 +205,13 @@
   - Pass calibrated half‑life into `compute_recency_score`
   - _Requirements: 3.5, 5.2_
 
-- [ ] 20. Parser resilience improvements
+- [x] 20. Parser resilience improvements
   - Add `readability-lxml` fallback when newspaper3k fails
   - Harden retry/backoff and user‑agent rotation
   - Expand error messages for better UX and logs
   - _Requirements: 1.1, 6.2, 6.4_
 
-- [ ] 21. Source reputation and credibility signals
+- [x] 21. Source reputation and credibility signals
   - Maintain domain reputation table and optional author reputation
   - Add reputation weight into composite score via `ScoringConfig`
   - _Requirements: 3.6_

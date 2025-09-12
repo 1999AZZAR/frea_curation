@@ -199,6 +199,7 @@ class TestDiversityAndDeduplication(unittest.TestCase):
                 sentiment_score=60.0,
                 tfidf_relevance_score=85.0 - i * 5,
                 recency_score=95.0,
+                reputation_score=75.0,
                 article=article
             )
             self.scorecards.append(scorecard)
@@ -221,6 +222,7 @@ class TestDiversityAndDeduplication(unittest.TestCase):
                 sentiment_score=60.0,
                 tfidf_relevance_score=85.0,
                 recency_score=95.0,
+                reputation_score=75.0,
                 article=article
             )
             same_domain_articles.append(scorecard)
@@ -281,6 +283,7 @@ class TestDiversityAndDeduplication(unittest.TestCase):
                 sentiment_score=60.0,
                 tfidf_relevance_score=85.0,
                 recency_score=95.0,
+                reputation_score=75.0,
                 article=Article(
                     url="https://example.com/article1",
                     title="Same Title",
@@ -294,6 +297,7 @@ class TestDiversityAndDeduplication(unittest.TestCase):
                 sentiment_score=60.0,
                 tfidf_relevance_score=85.0,
                 recency_score=95.0,
+                reputation_score=75.0,
                 article=Article(
                     url="https://different.com/article2",
                     title="Same Title",
@@ -338,6 +342,7 @@ class TestDiversityAndDeduplication(unittest.TestCase):
                 sentiment_score=60.0,
                 tfidf_relevance_score=85.0,
                 recency_score=95.0,
+                reputation_score=75.0,
                 article=article
             )
             many_articles.append(scorecard)
@@ -387,6 +392,7 @@ class TestDiversityAndDeduplication(unittest.TestCase):
                 sentiment_score=60.0,
                 tfidf_relevance_score=85.0,
                 recency_score=95.0,
+                reputation_score=75.0,
                 article=Article(
                     url="https://example.com/article1",
                     title="AI Technology Advances",
@@ -400,6 +406,7 @@ class TestDiversityAndDeduplication(unittest.TestCase):
                 sentiment_score=60.0,
                 tfidf_relevance_score=85.0,
                 recency_score=95.0,
+                reputation_score=75.0,
                 article=Article(
                     url="https://different.com/article2",
                     title="AI Tech Progress",
@@ -441,6 +448,7 @@ class TestDiversityAndDeduplication(unittest.TestCase):
                 sentiment_score=60.0,
                 tfidf_relevance_score=85.0,
                 recency_score=95.0,
+                reputation_score=75.0,
                 article=Article(
                     url="https://example.com/article1",
                     title="Exact Same Title",
@@ -454,6 +462,7 @@ class TestDiversityAndDeduplication(unittest.TestCase):
                 sentiment_score=60.0,
                 tfidf_relevance_score=85.0,
                 recency_score=95.0,
+                reputation_score=75.0,
                 article=Article(
                     url="https://different.com/article2",
                     title="Exact Same Title",

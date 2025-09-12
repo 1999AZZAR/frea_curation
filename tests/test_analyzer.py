@@ -219,6 +219,7 @@ class TestScoringFunctions(unittest.TestCase):
             "sentiment": 60,
             "tfidf_relevance": 75,
             "recency": 90,
+            "reputation": 85,
         }
         s = calculate_composite_score(metrics, config)
         self.assertGreaterEqual(s, 0)

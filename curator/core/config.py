@@ -22,11 +22,12 @@ def load_scoring_config() -> ScoringConfig:
     """
     try:
         # Read raw values (with defaults)
-        readability_weight = float(os.environ.get('READABILITY_WEIGHT', 0.2))
-        ner_density_weight = float(os.environ.get('NER_DENSITY_WEIGHT', 0.2))
+        readability_weight = float(os.environ.get('READABILITY_WEIGHT', 0.15))
+        ner_density_weight = float(os.environ.get('NER_DENSITY_WEIGHT', 0.15))
         sentiment_weight = float(os.environ.get('SENTIMENT_WEIGHT', 0.15))
         tfidf_relevance_weight = float(os.environ.get('TFIDF_RELEVANCE_WEIGHT', 0.25))
-        recency_weight = float(os.environ.get('RECENCY_WEIGHT', 0.2))
+        recency_weight = float(os.environ.get('RECENCY_WEIGHT', 0.15))
+        reputation_weight = float(os.environ.get('REPUTATION_WEIGHT', 0.15))
 
         # Detect which weights were overridden by env
         overridden = {
@@ -35,6 +36,7 @@ def load_scoring_config() -> ScoringConfig:
             'sentiment_weight': os.environ.get('SENTIMENT_WEIGHT') is not None,
             'tfidf_relevance_weight': os.environ.get('TFIDF_RELEVANCE_WEIGHT') is not None,
             'recency_weight': os.environ.get('RECENCY_WEIGHT') is not None,
+            'reputation_weight': os.environ.get('REPUTATION_WEIGHT') is not None,
         }
 
         # Compute total and adjust if necessary only when not all weights are overridden
@@ -43,7 +45,8 @@ def load_scoring_config() -> ScoringConfig:
             ner_density_weight +
             sentiment_weight +
             tfidf_relevance_weight +
-            recency_weight
+            recency_weight +
+            reputation_weight
         )
 
         # If sum deviates from 1.0 and at least one weight is not overridden,
@@ -53,6 +56,7 @@ def load_scoring_config() -> ScoringConfig:
             # Preference order for adjustment
             candidates = [
                 ('recency_weight', recency_weight),
+                ('reputation_weight', reputation_weight),
                 ('tfidf_relevance_weight', tfidf_relevance_weight),
                 ('ner_density_weight', ner_density_weight),
                 ('sentiment_weight', sentiment_weight),
@@ -65,6 +69,8 @@ def load_scoring_config() -> ScoringConfig:
                     # Apply the adjustment
                     if name == 'recency_weight':
                         recency_weight = new_value
+                    elif name == 'reputation_weight':
+                        reputation_weight = new_value
                     elif name == 'tfidf_relevance_weight':
                         tfidf_relevance_weight = new_value
                     elif name == 'ner_density_weight':
@@ -107,6 +113,7 @@ def load_scoring_config() -> ScoringConfig:
             sentiment_weight=sentiment_weight,
             tfidf_relevance_weight=tfidf_relevance_weight,
             recency_weight=recency_weight,
+            reputation_weight=reputation_weight,
             min_word_count=int(os.environ.get('MIN_WORD_COUNT', 300)),
             max_articles_per_topic=int(os.environ.get('MAX_ARTICLES_PER_TOPIC', 20)),
             default_recency_half_life_days=default_half_life,

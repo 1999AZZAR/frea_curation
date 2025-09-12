@@ -49,6 +49,7 @@ function createCurationCard(r){
           <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full">Sent: ${Math.round(r.sentiment_score)}</span>
           <span class="bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full">Rel: ${Math.round(r.tfidf_relevance_score)}</span>
           <span class="bg-pink-100 text-pink-800 px-2 py-1 rounded-full">Rec: ${Math.round(r.recency_score)}</span>
+          <span class="bg-teal-100 text-teal-800 px-2 py-1 rounded-full">Rep: ${Math.round(r.reputation_score)}</span>
         </div>
       </div>
       <div class="score-badge">${Math.round(r.overall_score)}</div>
@@ -97,6 +98,8 @@ window.addEventListener('DOMContentLoaded', () => {
         setBar('an-tfidf', data.tfidf_relevance_score);
         setText('an-recency-v', `${data.recency_score}`);
         setBar('an-recency', data.recency_score);
+        setText('an-reputation-v', `${data.reputation_score}`);
+        setBar('an-reputation', data.reputation_score);
 
         setText('an-summary', data.article.summary || '');
         // Entities list
@@ -298,7 +301,7 @@ window.addEventListener('DOMContentLoaded', () => {
       download('curation.json', JSON.stringify(payload, null, 2));
     });
     exportCurateCsv?.addEventListener('click', () => {
-      const header = 'title,url,domain,overall,readability,ner,sentiment,relevance,recency,words,date';
+      const header = 'title,url,domain,overall,readability,ner,sentiment,relevance,recency,reputation,words,date';
       const rows = curateData.map(r => [
         JSON.stringify(r.article.title || ''),
         JSON.stringify(r.article.url || ''),
@@ -309,6 +312,7 @@ window.addEventListener('DOMContentLoaded', () => {
         Math.round(r.sentiment_score),
         Math.round(r.tfidf_relevance_score),
         Math.round(r.recency_score),
+        Math.round(r.reputation_score),
         r.word_count || 0,
         JSON.stringify(r.article.publish_date || ''),
       ].join(','));

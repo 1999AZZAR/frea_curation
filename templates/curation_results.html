@@ -67,6 +67,7 @@
             <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full">Sentiment: {{ '%.0f' % r.sentiment_score }}</span>
             <span class="bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full">Relevance: {{ '%.0f' % r.tfidf_relevance_score }}</span>
             <span class="bg-pink-100 text-pink-800 px-2 py-1 rounded-full">Recency: {{ '%.0f' % r.recency_score }}</span>
+            <span class="bg-teal-100 text-teal-800 px-2 py-1 rounded-full">Reputation: {{ '%.0f' % r.reputation_score }}</span>
           </div>
         </div>
         <div class="score-badge">{{ '%.0f' % r.overall_score }}</div>

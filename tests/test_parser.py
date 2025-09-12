@@ -73,13 +73,14 @@ class TestArticleParser(unittest.TestCase):
         
         self.assertIn("URL cannot be empty", str(context.exception))
 
-    @patch('curator.services._parser.NewspaperArticle')
-    def test_parse_article_download_failure(self, mock_newspaper_class):
+    @patch('curator.services._parser.parse_with_fallback')
+    def test_parse_article_download_failure(self, mock_parse_fallback):
         """Test handling of download failures."""
         # Setup mock to simulate download failure
-        mock_article = Mock(spec=NewspaperArticle)
-        mock_article.html = None  # Simulate failed download
-        mock_newspaper_class.return_value = mock_article
+        mock_parse_fallback.side_effect = ArticleParsingError(
+            "Failed to download article HTML - empty response", 
+            url=self.test_url, method="newspaper3k"
+        )
         
         # Should raise error after all retries
         with self.assertRaises(ArticleParsingError) as context:
@@ -87,13 +88,14 @@ class TestArticleParser(unittest.TestCase):
         
         self.assertIn("Failed to parse article after 2 attempts", str(context.exception))
 
-    @patch('curator.services._parser.NewspaperArticle')
-    def test_parse_article_network_timeout(self, mock_newspaper_class):
+    @patch('curator.services._parser.parse_with_fallback')
+    def test_parse_article_network_timeout(self, mock_parse_fallback):
         """Test handling of network timeouts."""
         # Setup mock to raise timeout
-        mock_article = Mock(spec=NewspaperArticle)
-        mock_article.download.side_effect = requests.exceptions.Timeout("Timeout")
-        mock_newspaper_class.return_value = mock_article
+        mock_parse_fallback.side_effect = ArticleParsingError(
+            "Request timeout after 30 seconds", 
+            url=self.test_url, method="newspaper3k"
+        )
         
         # Should retry and eventually fail
         with self.assertRaises(ArticleParsingError) as context:
@@ -101,23 +103,20 @@ class TestArticleParser(unittest.TestCase):
         
         self.assertIn("Failed to parse article after 2 attempts", str(context.exception))
 
-    @patch('curator.services._parser.NewspaperArticle')
-    def test_parse_article_retry_success(self, mock_newspaper_class):
+    @patch('curator.services._parser.parse_with_fallback')
+    def test_parse_article_retry_success(self, mock_parse_fallback):
         """Test successful parsing after initial failure."""
         # Setup mock to fail first, succeed second
-        mock_article = Mock(spec=NewspaperArticle)
-        mock_article.download.side_effect = [
-            requests.exceptions.ConnectionError("Connection failed"),
-            None  # Success on second attempt
+        mock_parse_fallback.side_effect = [
+            ArticleParsingError("Connection failed", url=self.test_url, method="newspaper3k"),
+            {  # Success on second attempt
+                'title': self.test_title,
+                'content': self.test_content,
+                'summary': "Test summary",
+                'authors': [self.test_author],
+                'publish_date': self.test_date
+            }
         ]
-        mock_article.html = "<html>content</html>"
-        mock_article.text = self.test_content
-        mock_article.title = self.test_title
-        mock_article.authors = [self.test_author]
-        mock_article.publish_date = self.test_date
-        mock_article.summary = "Test summary"
-        
-        mock_newspaper_class.return_value = mock_article
         
         # Should succeed on retry
         result = parse_article(self.test_url, max_retries=3)
@@ -126,7 +125,7 @@ class TestArticleParser(unittest.TestCase):
         self.assertEqual(result.title, self.test_title)
         
         # Verify multiple attempts were made
-        self.assertEqual(mock_article.download.call_count, 2)
+        self.assertEqual(mock_parse_fallback.call_count, 2)
 
     def test_validate_content_success(self):
         """Test successful content validation."""
@@ -281,34 +280,30 @@ class TestArticleParser(unittest.TestCase):
         self.assertIn("Network connection error", str(context.exception))
 
     @patch('curator.services._parser.time.sleep')
-    @patch('curator.services._parser.NewspaperArticle')
-    def test_parse_article_retry_delay(self, mock_newspaper_class, mock_sleep):
+    @patch('curator.services._parser.parse_with_fallback')
+    def test_parse_article_retry_delay(self, mock_parse_fallback, mock_sleep):
         """Test that retry delay is applied between attempts."""
         # Setup mock to fail twice, succeed third time
-        mock_article = Mock(spec=NewspaperArticle)
-        mock_article.download.side_effect = [
-            requests.exceptions.ConnectionError("Connection failed"),
-            requests.exceptions.ConnectionError("Connection failed"),
-            None  # Success on third attempt
+        mock_parse_fallback.side_effect = [
+            ArticleParsingError("Connection failed", url=self.test_url, method="newspaper3k"),
+            ArticleParsingError("Connection failed", url=self.test_url, method="newspaper3k"),
+            {  # Success on third attempt
+                'title': self.test_title,
+                'content': self.test_content,
+                'summary': "Test summary",
+                'authors': [self.test_author],
+                'publish_date': self.test_date
+            }
         ]
-        mock_article.html = "<html>content</html>"
-        mock_article.text = self.test_content
-        mock_article.title = self.test_title
-        mock_article.authors = [self.test_author]
-        mock_article.publish_date = self.test_date
-        mock_article.summary = "Test summary"
-        
-        mock_newspaper_class.return_value = mock_article
         
         # Parse with retry
-        result = parse_article(self.test_url, max_retries=3, retry_delay=1.0)
+        result = parse_article(self.test_url, max_retries=3, base_retry_delay=1.0)
         
         # Verify sleep was called between retries
         self.assertEqual(mock_sleep.call_count, 2)  # Two delays for three attempts
         
-        # Verify exponential backoff
-        mock_sleep.assert_any_call(1.0)  # First delay
-        mock_sleep.assert_any_call(1.5)  # Second delay (1.0 * 1.5)
+        # Verify that sleep was called (exact values may vary due to jitter)
+        self.assertTrue(mock_sleep.called)
 
 
 class TestArticleParserIntegration(unittest.TestCase):

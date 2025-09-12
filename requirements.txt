@@ -11,3 +11,5 @@ sentence-transformers
 simhash
 responses
 psutil
+readability-lxml
+beautifulsoup4

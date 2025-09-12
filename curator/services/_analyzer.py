@@ -22,6 +22,7 @@ from curator.core.models import Article, ScoreCard, ScoringConfig, Entity
 from curator.services.parser import parse_article, batch_parse_articles, get_article_word_count
 from curator.services._parser import ArticleParsingError
 from curator.core.nlp import get_sentence_transformer
+from curator.core.reputation import compute_reputation_score
 
 
 def compute_readability_score(article: Article, min_word_count: int = 300) -> float:
@@ -270,7 +271,8 @@ def calculate_composite_score(metrics: Dict[str, float], config: ScoringConfig) 
         metrics.get("ner_density", 0.0) * config.ner_density_weight +
         metrics.get("sentiment", 0.0) * config.sentiment_weight +
         metrics.get("tfidf_relevance", 0.0) * config.tfidf_relevance_weight +
-        metrics.get("recency", 0.0) * config.recency_weight
+        metrics.get("recency", 0.0) * config.recency_weight +
+        metrics.get("reputation", 0.0) * config.reputation_weight
     )
     return round(max(0.0, min(100.0, weighted_sum)), 2)
 
@@ -352,6 +354,12 @@ def analyze_article(
     except Exception:
         metrics["recency"] = 100.0  # Assume recent if date parsing fails
     
+    # Reputation score (graceful degradation)
+    try:
+        metrics["reputation"] = compute_reputation_score(parsed.url, parsed.author)
+    except Exception:
+        metrics["reputation"] = 50.0  # Neutral fallback
+    
     # Ensure all scores are valid
     for key, value in metrics.items():
         if not isinstance(value, (int, float)) or not (0.0 <= value <= 100.0):
@@ -365,6 +373,7 @@ def analyze_article(
         sentiment_score=metrics["sentiment"],
         tfidf_relevance_score=metrics["tfidf_relevance"],
         recency_score=metrics["recency"],
+        reputation_score=metrics["reputation"],
         article=parsed,
     )
 
@@ -458,6 +467,13 @@ def batch_analyze(
                 logger.warning(f"Recency scoring failed for article {i+1}: {e}")
                 metrics["recency"] = 100.0  # Assume recent if date parsing fails
             
+            # Reputation score (graceful degradation)
+            try:
+                metrics["reputation"] = compute_reputation_score(article.url, article.author)
+            except Exception as e:
+                logger.warning(f"Reputation scoring failed for article {i+1}: {e}")
+                metrics["reputation"] = 50.0  # Neutral fallback
+            
             # Ensure all scores are valid
             for key, value in metrics.items():
                 if not isinstance(value, (int, float)) or not (0.0 <= value <= 100.0):
@@ -473,6 +489,7 @@ def batch_analyze(
                     sentiment_score=metrics["sentiment"],
                     tfidf_relevance_score=metrics["tfidf_relevance"],
                     recency_score=metrics["recency"],
+                    reputation_score=metrics["reputation"],
                     article=article,
                 )
             )
