@@ -259,7 +259,7 @@ class DatabaseManager:
         db_type = os.environ.get('DB_TYPE', 'sqlite')
         
         if db_type.lower() == 'sqlite':
-            db_path = os.environ.get('DB_PATH', 'curator.db')
+            db_path = os.environ.get('DB_PATH', 'data/curator.db')
             return f'sqlite:///{db_path}'
         
         elif db_type.lower() == 'postgresql':

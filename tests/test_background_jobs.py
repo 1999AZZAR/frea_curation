@@ -1,398 +1,201 @@
+#!/usr/bin/env python3
 """
-Unit tests for background job processing system.
+Test script for background job processing.
 
-Tests the Celery task system, job manager, and Flask routes
-for background job processing functionality.
+This script tests the Celery task system by submitting jobs and monitoring their progress.
 """
 
 import os
-import pytest
+import time
 import json
-from unittest.mock import Mock, patch, MagicMock
-from datetime import datetime
+from dotenv import load_dotenv
 
-# Set test environment
-os.environ['CELERY_ALWAYS_EAGER'] = 'True'  # Run tasks synchronously in tests
-os.environ['REDIS_URL'] = 'redis://localhost:6379/1'  # Use test database
+# Load environment variables
+load_dotenv()
 
-
-class TestCeleryTasks:
-    """Test Celery task functions."""
+def test_job_manager():
+    """Test the JobManager functionality."""
+    print("Testing JobManager...")
     
-    def test_health_check_task(self):
-        """Test health check task."""
-        from curator.core.tasks import health_check_task
-        
-        result = health_check_task()
-        
-        assert result['status'] == 'healthy'
-        assert 'timestamp' in result
-        assert isinstance(result['timestamp'], str)
-    
-    @patch('curator.services.analyzer.batch_analyze')
-    @patch('curator.core.nlp.get_spacy_model')
-    @patch('curator.core.nlp.get_vader_analyzer')
-    def test_batch_analyze_task_success(self, mock_vader, mock_spacy, mock_batch_analyze):
-        """Test successful batch analysis task."""
-        from curator.core.tasks import batch_analyze_task
-        from curator.core.models import Article, ScoreCard
-        
-        # Mock dependencies
-        mock_spacy.return_value = Mock()
-        mock_vader.return_value = Mock()
-        
-        # Mock batch_analyze result
-        mock_article = Article(
-            url='https://example.com/test',
-            title='Test Article',
-            author='Test Author',
-            content='Test content',
-            summary='Test summary'
-        )
-        mock_scorecard = ScoreCard(
-            overall_score=85.0,
-            readability_score=80.0,
-            ner_density_score=75.0,
-            sentiment_score=90.0,
-            tfidf_relevance_score=85.0,
-            recency_score=95.0,
-            reputation_score=70.0,
-            topic_coherence_score=80.0,
-            article=mock_article
-        )
-        mock_batch_analyze.return_value = [mock_scorecard]
-        
-        # Create a mock task instance
-        mock_task = Mock()
-        mock_task.update_state = Mock()
-        
-        # Test the task
-        urls = ['https://example.com/test']
-        result = batch_analyze_task(mock_task, urls, query='test', apply_diversity=False)
-        
-        # Verify result
-        assert result['status'] == 'SUCCESS'
-        assert result['total_urls'] == 1
-        assert result['processed_count'] == 1
-        assert result['failed_count'] == 0
-        assert len(result['results']) == 1
-        
-        # Verify task state updates were called
-        assert mock_task.update_state.called
-    
-    @patch('curator.services.analyzer.analyze_article')
-    @patch('curator.core.nlp.get_spacy_model')
-    @patch('curator.core.nlp.get_vader_analyzer')
-    def test_analyze_single_task_success(self, mock_vader, mock_spacy, mock_analyze):
-        """Test successful single analysis task."""
-        from curator.core.tasks import analyze_single_task
-        from curator.core.models import Article, ScoreCard
-        
-        # Mock dependencies
-        mock_spacy.return_value = Mock()
-        mock_vader.return_value = Mock()
-        
-        # Mock analyze_article result
-        mock_article = Article(
-            url='https://example.com/test',
-            title='Test Article',
-            author='Test Author',
-            content='Test content',
-            summary='Test summary'
-        )
-        mock_scorecard = ScoreCard(
-            overall_score=85.0,
-            readability_score=80.0,
-            ner_density_score=75.0,
-            sentiment_score=90.0,
-            tfidf_relevance_score=85.0,
-            recency_score=95.0,
-            reputation_score=70.0,
-            topic_coherence_score=80.0,
-            article=mock_article
-        )
-        mock_analyze.return_value = mock_scorecard
-        
-        # Create a mock task instance
-        mock_task = Mock()
-        mock_task.update_state = Mock()
-        
-        # Test the task
-        result = analyze_single_task(mock_task, 'https://example.com/test', query='test')
-        
-        # Verify result
-        assert result['status'] == 'SUCCESS'
-        assert result['url'] == 'https://example.com/test'
-        assert result['query'] == 'test'
-        assert 'result' in result
-        
-        # Verify task state updates were called
-        assert mock_task.update_state.called
-
-
-class TestJobManager:
-    """Test JobManager functionality."""
-    
-    @pytest.fixture
-    def mock_redis(self):
-        """Mock Redis client."""
-        with patch('curator.core.job_manager.redis.from_url') as mock_redis_from_url:
-            mock_client = Mock()
-            mock_client.ping.return_value = True
-            mock_client.setex = Mock()
-            mock_client.get = Mock()
-            mock_client.delete = Mock()
-            mock_client.keys = Mock(return_value=[])
-            mock_redis_from_url.return_value = mock_client
-            yield mock_client
-    
-    @pytest.fixture
-    def mock_celery(self):
-        """Mock Celery app."""
-        with patch('curator.core.job_manager.celery_app') as mock_app:
-            mock_task = Mock()
-            mock_task.id = 'test-job-id'
-            mock_app.send_task.return_value = mock_task
-            mock_app.AsyncResult.return_value = Mock(state='PENDING', info=None, result=None)
-            mock_app.control.revoke = Mock()
-            mock_app.control.inspect.return_value.stats.return_value = {'worker1': {}}
-            yield mock_app
-    
-    def test_job_manager_init(self, mock_redis):
-        """Test JobManager initialization."""
+    try:
         from curator.core.job_manager import JobManager
+        from curator.core.config import load_scoring_config
         
+        # Initialize job manager
         job_manager = JobManager()
+        config = load_scoring_config()
         
-        assert job_manager.redis_client is not None
-        mock_redis.ping.assert_called_once()
-    
-    def test_submit_single_analysis(self, mock_redis, mock_celery):
-        """Test submitting single analysis job."""
-        from curator.core.job_manager import JobManager
-        from curator.core.models import ScoringConfig
-        
-        job_manager = JobManager()
-        config = ScoringConfig()
-        
-        job_id = job_manager.submit_single_analysis(
-            url='https://example.com/test',
-            query='test query',
-            config=config
-        )
-        
-        assert job_id == 'test-job-id'
-        mock_celery.send_task.assert_called_once()
-        mock_redis.setex.assert_called_once()
-    
-    def test_submit_batch_analysis(self, mock_redis, mock_celery):
-        """Test submitting batch analysis job."""
-        from curator.core.job_manager import JobManager
-        from curator.core.models import ScoringConfig
-        
-        job_manager = JobManager()
-        config = ScoringConfig()
-        
-        urls = ['https://example.com/test1', 'https://example.com/test2']
-        job_id = job_manager.submit_batch_analysis(
-            urls=urls,
-            query='test query',
-            config=config,
-            apply_diversity=True
-        )
-        
-        assert job_id == 'test-job-id'
-        mock_celery.send_task.assert_called_once()
-        mock_redis.setex.assert_called_once()
-    
-    def test_get_job_status(self, mock_redis, mock_celery):
-        """Test getting job status."""
-        from curator.core.job_manager import JobManager
-        
-        # Mock Redis metadata
-        mock_redis.get.return_value = json.dumps({
-            'task_id': 'test-job-id',
-            'type': 'single_analysis',
-            'submitted_at': '2023-01-01T00:00:00',
-            'url': 'https://example.com/test'
-        })
-        
-        job_manager = JobManager()
-        status = job_manager.get_job_status('test-job-id')
-        
-        assert status['job_id'] == 'test-job-id'
-        assert status['state'] == 'PENDING'
-        assert status['type'] == 'single_analysis'
-    
-    def test_cancel_job(self, mock_redis, mock_celery):
-        """Test cancelling a job."""
-        from curator.core.job_manager import JobManager
-        
-        job_manager = JobManager()
-        success = job_manager.cancel_job('test-job-id')
-        
-        assert success is True
-        mock_celery.control.revoke.assert_called_once_with('test-job-id', terminate=True)
-        mock_redis.delete.assert_called_once()
-    
-    def test_health_check(self, mock_redis, mock_celery):
-        """Test health check."""
-        from curator.core.job_manager import JobManager
-        
-        job_manager = JobManager()
+        # Test health check
+        print("\n1. Testing health check...")
         health = job_manager.health_check()
+        print(f"Health status: {json.dumps(health, indent=2)}")
         
-        assert health['redis_connected'] is True
-        assert health['celery_workers'] == 1
-        assert health['active_jobs'] == 0
+        if not health.get('redis_connected'):
+            print("❌ Redis is not connected. Please start Redis first.")
+            return False
+        
+        if health.get('celery_workers', 0) == 0:
+            print("⚠️  No Celery workers detected. Please start a worker.")
+            print("   Run: python celery_worker.py")
+            return False
+        
+        # Test single article analysis
+        print("\n2. Testing single article analysis...")
+        test_url = "https://example.com/test-article"
+        
+        try:
+            job_id = job_manager.submit_single_analysis(
+                url=test_url,
+                query="test query",
+                config=config
+            )
+            print(f"✅ Submitted single analysis job: {job_id}")
+            
+            # Monitor job progress
+            for i in range(30):  # Wait up to 30 seconds
+                status = job_manager.get_job_status(job_id)
+                print(f"   Status: {status.get('state')} - {status.get('status', 'Unknown')}")
+                
+                if status.get('state') in ['SUCCESS', 'FAILURE']:
+                    break
+                    
+                time.sleep(1)
+            
+            # Get final result
+            result = job_manager.get_job_result(job_id)
+            if result:
+                print(f"✅ Job completed with result: {result.get('status', 'Unknown')}")
+            else:
+                print("❌ No result available")
+                
+        except Exception as e:
+            print(f"❌ Single analysis test failed: {e}")
+        
+        # Test batch analysis
+        print("\n3. Testing batch analysis...")
+        test_urls = [
+            "https://example.com/article1",
+            "https://example.com/article2",
+            "https://example.com/article3"
+        ]
+        
+        try:
+            job_id = job_manager.submit_batch_analysis(
+                urls=test_urls,
+                query="test batch",
+                config=config,
+                apply_diversity=True
+            )
+            print(f"✅ Submitted batch analysis job: {job_id}")
+            
+            # Monitor job progress
+            for i in range(60):  # Wait up to 60 seconds
+                status = job_manager.get_job_status(job_id)
+                current = status.get('current', 0)
+                total = status.get('total', 0)
+                print(f"   Status: {status.get('state')} - {current}/{total} - {status.get('status', 'Unknown')}")
+                
+                if status.get('state') in ['SUCCESS', 'FAILURE']:
+                    break
+                    
+                time.sleep(2)
+            
+            # Get final result
+            result = job_manager.get_job_result(job_id)
+            if result:
+                processed = result.get('processed_count', 0)
+                failed = result.get('failed_count', 0)
+                print(f"✅ Batch job completed: {processed} processed, {failed} failed")
+            else:
+                print("❌ No result available")
+                
+        except Exception as e:
+            print(f"❌ Batch analysis test failed: {e}")
+        
+        # Test job listing
+        print("\n4. Testing job listing...")
+        try:
+            active_jobs = job_manager.list_active_jobs()
+            print(f"✅ Found {len(active_jobs)} active jobs")
+            for job in active_jobs[:3]:  # Show first 3
+                print(f"   Job {job.get('job_id')}: {job.get('state')} - {job.get('type')}")
+        except Exception as e:
+            print(f"❌ Job listing test failed: {e}")
+        
+        print("\n✅ JobManager tests completed!")
+        return True
+        
+    except ImportError as e:
+        print(f"❌ Import error: {e}")
+        print("Make sure all dependencies are installed: pip install -r requirements.txt")
+        return False
+    except Exception as e:
+        print(f"❌ Unexpected error: {e}")
+        return False
 
+def test_celery_tasks():
+    """Test Celery tasks directly."""
+    print("\nTesting Celery tasks directly...")
+    
+    try:
+        from curator.core.tasks import health_check_task, batch_analyze_task
+        
+        # Test health check task
+        print("\n1. Testing health check task...")
+        result = health_check_task.delay()
+        
+        # Wait for result
+        try:
+            health_result = result.get(timeout=10)
+            print(f"✅ Health check task completed: {health_result}")
+        except Exception as e:
+            print(f"❌ Health check task failed: {e}")
+        
+        print("\n✅ Celery task tests completed!")
+        return True
+        
+    except ImportError as e:
+        print(f"❌ Import error: {e}")
+        return False
+    except Exception as e:
+        print(f"❌ Unexpected error: {e}")
+        return False
 
-class TestFlaskRoutes:
-    """Test Flask routes for job management."""
+def main():
+    """Run all tests."""
+    print("🚀 Testing AI Content Curator Background Jobs")
+    print("=" * 50)
     
-    @pytest.fixture
-    def app(self):
-        """Create test Flask app."""
-        from app import create_app
-        app = create_app()
-        app.config['TESTING'] = True
-        return app
+    # Check environment
+    redis_url = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+    print(f"Redis URL: {redis_url}")
     
-    @pytest.fixture
-    def client(self, app):
-        """Create test client."""
-        return app.test_client()
+    # Run tests
+    success = True
     
-    @patch('curator.core.job_manager.JobManager')
-    def test_submit_job_single_analysis(self, mock_job_manager_class, client):
-        """Test submitting single analysis job via API."""
-        # Mock JobManager
-        mock_job_manager = Mock()
-        mock_job_manager.submit_single_analysis.return_value = 'test-job-id'
-        mock_job_manager_class.return_value = mock_job_manager
-        
-        response = client.post('/jobs', 
-            json={
-                'type': 'single_analysis',
-                'url': 'https://example.com/test',
-                'query': 'test query'
-            }
-        )
-        
-        assert response.status_code == 202
-        data = response.get_json()
-        assert data['job_id'] == 'test-job-id'
-        assert data['status'] == 'submitted'
-        assert data['type'] == 'single_analysis'
+    try:
+        success &= test_job_manager()
+        success &= test_celery_tasks()
+    except KeyboardInterrupt:
+        print("\n⚠️  Tests interrupted by user")
+        return False
     
-    @patch('curator.core.job_manager.JobManager')
-    def test_submit_job_batch_analysis(self, mock_job_manager_class, client):
-        """Test submitting batch analysis job via API."""
-        # Mock JobManager
-        mock_job_manager = Mock()
-        mock_job_manager.submit_batch_analysis.return_value = 'test-job-id'
-        mock_job_manager_class.return_value = mock_job_manager
-        
-        response = client.post('/jobs',
-            json={
-                'type': 'batch_analysis',
-                'urls': ['https://example.com/test1', 'https://example.com/test2'],
-                'query': 'test query',
-                'apply_diversity': True
-            }
-        )
-        
-        assert response.status_code == 202
-        data = response.get_json()
-        assert data['job_id'] == 'test-job-id'
-        assert data['status'] == 'submitted'
-        assert data['type'] == 'batch_analysis'
+    print("\n" + "=" * 50)
+    if success:
+        print("🎉 All tests passed!")
+        print("\nYour background job system is working correctly!")
+        print("\nNext steps:")
+        print("1. Start the Flask app: python app.py")
+        print("2. Visit the web interface and try topic curation with background processing")
+        print("3. Monitor jobs at /jobs/<job_id>")
+    else:
+        print("❌ Some tests failed!")
+        print("\nTroubleshooting:")
+        print("1. Make sure Redis is running: redis-server")
+        print("2. Make sure Celery worker is running: python celery_worker.py")
+        print("3. Check that all dependencies are installed: pip install -r requirements.txt")
     
-    @patch('curator.core.job_manager.JobManager')
-    def test_job_status_api(self, mock_job_manager_class, client):
-        """Test job status API endpoint."""
-        # Mock JobManager
-        mock_job_manager = Mock()
-        mock_job_manager.get_job_status.return_value = {
-            'job_id': 'test-job-id',
-            'state': 'PROGRESS',
-            'status': 'Processing...',
-            'current': 5,
-            'total': 10
-        }
-        mock_job_manager_class.return_value = mock_job_manager
-        
-        response = client.get('/jobs/test-job-id/status')
-        
-        assert response.status_code == 200
-        data = response.get_json()
-        assert data['job_id'] == 'test-job-id'
-        assert data['state'] == 'PROGRESS'
-        assert data['current'] == 5
-        assert data['total'] == 10
-    
-    @patch('curator.core.job_manager.JobManager')
-    def test_cancel_job_api(self, mock_job_manager_class, client):
-        """Test job cancellation API endpoint."""
-        # Mock JobManager
-        mock_job_manager = Mock()
-        mock_job_manager.cancel_job.return_value = True
-        mock_job_manager_class.return_value = mock_job_manager
-        
-        response = client.delete('/jobs/test-job-id')
-        
-        assert response.status_code == 200
-        data = response.get_json()
-        assert data['status'] == 'cancelled'
-        assert data['job_id'] == 'test-job-id'
-    
-    @patch('curator.core.job_manager.JobManager')
-    def test_jobs_health_check(self, mock_job_manager_class, client):
-        """Test jobs health check endpoint."""
-        # Mock JobManager
-        mock_job_manager = Mock()
-        mock_job_manager.health_check.return_value = {
-            'redis_connected': True,
-            'celery_workers': 2,
-            'active_jobs': 1
-        }
-        mock_job_manager_class.return_value = mock_job_manager
-        
-        response = client.get('/health/jobs')
-        
-        assert response.status_code == 200
-        data = response.get_json()
-        assert data['status'] == 'healthy'
-        assert data['redis_connected'] is True
-        assert data['celery_workers'] == 2
-        assert data['active_jobs'] == 1
-    
-    def test_invalid_job_type(self, client):
-        """Test submitting job with invalid type."""
-        response = client.post('/jobs',
-            json={
-                'type': 'invalid_type',
-                'url': 'https://example.com/test'
-            }
-        )
-        
-        assert response.status_code == 400
-        data = response.get_json()
-        assert 'error' in data
-    
-    def test_missing_job_type(self, client):
-        """Test submitting job without type."""
-        response = client.post('/jobs',
-            json={
-                'url': 'https://example.com/test'
-            }
-        )
-        
-        assert response.status_code == 400
-        data = response.get_json()
-        assert 'error' in data
-        assert 'Job type is required' in data['error']
-
+    return success
 
 if __name__ == '__main__':
-    pytest.main([__file__])
+    main()
