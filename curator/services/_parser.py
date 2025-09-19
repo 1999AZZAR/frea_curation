@@ -10,6 +10,7 @@ from datetime import datetime
 import requests
 from newspaper import Article as NewspaperArticle, Config
 from curator.core.models import Article
+from curator.core.summarization import enhance_article_summary
 
 # Import readability-lxml for fallback parsing
 try:
@@ -362,6 +363,13 @@ def parse_article(url: str, min_word_count: int = 300, max_retries: int = 3,
                 summary=article_data['summary'],
                 entities=[]
             )
+            
+            # Enhance summary if needed using summarization utility
+            try:
+                enhance_article_summary(article, method="extractive", target_length=200)
+                logger.debug(f"Enhanced summary for article: {len(article.summary)} chars")
+            except Exception as e:
+                logger.warning(f"Failed to enhance summary for {url}: {e}")
             
             logger.info(f"Successfully parsed article on attempt {attempt + 1}: "
                        f"{article.title[:50]}... ({len(article.content.split())} words)")

@@ -38,11 +38,13 @@ class TestAnalysisIntegration(unittest.TestCase):
         )
         
         self.config = ScoringConfig(
-            readability_weight=0.2,
-            ner_density_weight=0.2,
+            readability_weight=0.15,
+            ner_density_weight=0.15,
             sentiment_weight=0.15,
             tfidf_relevance_weight=0.25,
-            recency_weight=0.2,
+            recency_weight=0.15,
+            reputation_weight=0.10,
+            topic_coherence_weight=0.05,
             min_word_count=50  # Lower for testing
         )
 
@@ -88,6 +90,8 @@ class TestAnalysisIntegration(unittest.TestCase):
         self.assertLessEqual(result.tfidf_relevance_score, 100)
         self.assertGreaterEqual(result.recency_score, 0)
         self.assertLessEqual(result.recency_score, 100)
+        self.assertGreaterEqual(result.topic_coherence_score, 0)
+        self.assertLessEqual(result.topic_coherence_score, 100)
         
         # Verify entities were extracted
         self.assertEqual(len(result.article.entities), 1)

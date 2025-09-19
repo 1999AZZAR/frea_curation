@@ -9,6 +9,7 @@ The system implements comprehensive duplicate detection and diversity controls t
 1. **URL Canonicalization** - Normalizes URLs to reduce false duplicates
 2. **Near-Duplicate Detection** - Uses embeddings, simhash, or basic text comparison
 3. **Domain Diversity Controls** - Limits articles from the same domain
+4. **Embedding-Based Clustering** - Groups articles by semantic similarity and caps results per cluster
 
 ## URL Canonicalization
 
@@ -101,6 +102,37 @@ os.environ['DOMAIN_CAP'] = '3'  # Max 3 articles per domain
 results = batch_analyze(urls, apply_diversity=True)
 ```
 
+## Embedding-Based Clustering
+
+### Semantic Clustering
+
+The system can group articles by semantic similarity using embeddings and cap results per cluster to ensure varied perspectives:
+
+```python
+import os
+
+# Enable embedding-based clustering
+os.environ['USE_EMBEDDING_CLUSTERING'] = '1'
+os.environ['CLUSTER_CAP'] = '2'  # Max 2 articles per semantic cluster
+os.environ['CLUSTERING_THRESHOLD'] = '0.75'  # Similarity threshold for clustering
+
+# Analyze with clustering diversity
+results = batch_analyze(urls, apply_diversity=True)
+```
+
+### How It Works
+
+1. **Embedding Generation**: Creates semantic embeddings for each article using title + content
+2. **Clustering**: Groups articles with similarity above the threshold into clusters
+3. **Diverse Selection**: Selects up to `CLUSTER_CAP` articles from each cluster
+4. **Score Preservation**: Maintains highest-scoring articles within each cluster
+
+### Benefits
+
+- **Varied Perspectives**: Ensures diverse viewpoints by limiting similar articles
+- **Semantic Understanding**: Groups articles by meaning, not just keywords
+- **Quality Preservation**: Keeps the best articles from each semantic cluster
+
 ## Configuration
 
 ### Environment Variables
@@ -110,6 +142,9 @@ results = batch_analyze(urls, apply_diversity=True)
 - `DUP_SIM_THRESHOLD`: Similarity threshold for duplicates (default: 0.97)
 - `EMBEDDINGS_MODEL_NAME`: Sentence transformer model (default: "all-MiniLM-L6-v2")
 - `USE_EMBEDDINGS_RELEVANCE`: Enable embeddings for relevance scoring
+- `USE_EMBEDDING_CLUSTERING`: Enable embedding-based clustering (default: "1")
+- `CLUSTER_CAP`: Maximum articles per semantic cluster (default: 3)
+- `CLUSTERING_THRESHOLD`: Similarity threshold for clustering (default: 0.75)
 
 ### Example Configuration
 

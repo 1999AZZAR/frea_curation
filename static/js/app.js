@@ -280,8 +280,19 @@ window.addEventListener('DOMContentLoaded', () => {
       const maxStr = document.getElementById('curate-max').value;
       const max_articles = maxStr ? parseInt(maxStr, 10) : undefined;
       const apply_diversity = curateDiversify ? !!curateDiversify.checked : true;
+      const background = document.getElementById('curate-background')?.checked || false;
+      
       try{
-        const data = await postJson('/curate-topic', { topic, max_articles, apply_diversity });
+        const data = await postJson('/curate-topic', { topic, max_articles, apply_diversity, background });
+        
+        // Check if this is a background job response
+        if(data.job_id && data.status === 'submitted'){
+          // Redirect to job status page
+          window.location.href = `/jobs/${data.job_id}`;
+          return;
+        }
+        
+        // Handle synchronous response
         curateData = data.results || [];
         currentPage = 1;
         renderCuration();

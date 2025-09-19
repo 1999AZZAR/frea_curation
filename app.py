@@ -203,7 +203,7 @@ def create_app():
     
     @app.route('/curate-topic', methods=['POST'])
     def curate_topic():
-        """Topic-based curation endpoint"""
+        """Topic-based curation endpoint with optional background processing"""
         from curator.services.analyzer import batch_analyze
         try:
             from curator.core.config import load_scoring_config
@@ -218,6 +218,8 @@ def create_app():
         topic = (data.get('topic') if data else None) or ''
         max_articles = data.get('max_articles')
         apply_diversity = data.get('apply_diversity')
+        background = str(data.get('background', '')).strip().lower() in {'1', 'true', 'yes', 'on'}
+        
         try:
             max_articles = int(max_articles) if max_articles is not None else None
         except Exception:
@@ -244,7 +246,35 @@ def create_app():
             source = NewsSource(api_key=api_key)
             urls = source.get_article_urls(topic, max_articles=max_articles or config.max_articles_per_topic)
 
-            # Analyze
+            # Check if background processing is requested and available
+            if background and len(urls) > 5:  # Use background for larger batches
+                try:
+                    from curator.core.job_manager import JobManager
+                    job_manager = JobManager()
+                    
+                    job_id = job_manager.submit_batch_analysis(
+                        urls=urls,
+                        query=topic,
+                        config=config,
+                        apply_diversity=(str(apply_diversity).lower() in {'1','true','yes','on'} if apply_diversity is not None else None)
+                    )
+                    
+                    if request.is_json:
+                        return jsonify({
+                            'job_id': job_id,
+                            'status': 'submitted',
+                            'message': f'Background job submitted for {len(urls)} articles',
+                            'urls_count': len(urls),
+                        }), 202
+                    else:
+                        # Redirect to job status page for web interface
+                        return redirect(url_for('job_status', job_id=job_id))
+                        
+                except Exception as e:
+                    # Fall back to synchronous processing if background fails
+                    pass
+
+            # Synchronous processing (original behavior)
             from curator.core.nlp import get_spacy_model, get_vader_analyzer
             nlp_model = get_spacy_model()
             vader = get_vader_analyzer()
@@ -289,6 +319,207 @@ def create_app():
                 return jsonify({'error': f'Curation failed: {str(e)}'}), 500
             return render_template('errors/500.html', message=f'Curation failed: {str(e)}'), 500
     
+    # Job management routes
+    @app.route('/jobs', methods=['POST'])
+    def submit_job():
+        """Submit a background analysis job"""
+        from curator.core.job_manager import JobManager
+        try:
+            from curator.core.config import load_scoring_config
+        except Exception:
+            from config import load_scoring_config
+        from curator.core.validation import validate_url, validate_topic_keywords
+        from curator.services.news_source import NewsSource
+
+        data = request.get_json() or {}
+        job_type = data.get('type')
+        
+        if not job_type:
+            return jsonify({'error': 'Job type is required'}), 400
+        
+        try:
+            job_manager = JobManager()
+            config = load_scoring_config()
+            
+            if job_type == 'single_analysis':
+                url = data.get('url', '').strip()
+                query = data.get('query', '').strip() or None
+                
+                is_valid, error = validate_url(url)
+                if not is_valid:
+                    return jsonify({'error': error or 'Invalid URL'}), 400
+                
+                job_id = job_manager.submit_single_analysis(
+                    url=url,
+                    query=query,
+                    config=config
+                )
+                
+                return jsonify({
+                    'job_id': job_id,
+                    'status': 'submitted',
+                    'type': 'single_analysis',
+                    'url': url,
+                }), 202
+                
+            elif job_type == 'batch_analysis':
+                urls = data.get('urls', [])
+                query = data.get('query', '').strip() or None
+                apply_diversity = data.get('apply_diversity', True)
+                
+                if not urls or not isinstance(urls, list):
+                    return jsonify({'error': 'URLs list is required'}), 400
+                
+                # Validate URLs
+                for url in urls:
+                    is_valid, error = validate_url(url)
+                    if not is_valid:
+                        return jsonify({'error': f'Invalid URL {url}: {error}'}), 400
+                
+                job_id = job_manager.submit_batch_analysis(
+                    urls=urls,
+                    query=query,
+                    config=config,
+                    apply_diversity=apply_diversity
+                )
+                
+                return jsonify({
+                    'job_id': job_id,
+                    'status': 'submitted',
+                    'type': 'batch_analysis',
+                    'urls_count': len(urls),
+                }), 202
+                
+            elif job_type == 'topic_curation':
+                topic = data.get('topic', '').strip()
+                max_articles = data.get('max_articles')
+                apply_diversity = data.get('apply_diversity', True)
+                
+                is_valid, error = validate_topic_keywords(topic)
+                if not is_valid:
+                    return jsonify({'error': error or 'Invalid topic'}), 400
+                
+                try:
+                    max_articles = int(max_articles) if max_articles is not None else None
+                except Exception:
+                    return jsonify({'error': 'max_articles must be an integer'}), 400
+                
+                # Fetch URLs first
+                api_key = os.environ.get('NEWS_API_KEY', 'test-api-key')
+                source = NewsSource(api_key=api_key)
+                urls = source.get_article_urls(topic, max_articles=max_articles or config.max_articles_per_topic)
+                
+                job_id = job_manager.submit_batch_analysis(
+                    urls=urls,
+                    query=topic,
+                    config=config,
+                    apply_diversity=apply_diversity
+                )
+                
+                return jsonify({
+                    'job_id': job_id,
+                    'status': 'submitted',
+                    'type': 'topic_curation',
+                    'topic': topic,
+                    'urls_count': len(urls),
+                }), 202
+                
+            else:
+                return jsonify({'error': f'Unknown job type: {job_type}'}), 400
+                
+        except Exception as e:
+            return jsonify({'error': f'Failed to submit job: {str(e)}'}), 500
+
+    @app.route('/jobs/<job_id>/status', methods=['GET'])
+    def job_status_api(job_id):
+        """Get job status via API"""
+        try:
+            from curator.core.job_manager import JobManager
+            job_manager = JobManager()
+            status = job_manager.get_job_status(job_id)
+            return jsonify(status)
+        except Exception as e:
+            return jsonify({'error': f'Failed to get job status: {str(e)}'}), 500
+
+    @app.route('/jobs/<job_id>', methods=['GET'])
+    def job_status(job_id):
+        """Job status page for web interface"""
+        try:
+            from curator.core.job_manager import JobManager
+            job_manager = JobManager()
+            status = job_manager.get_job_status(job_id)
+            return render_template('job_status.html', job_id=job_id, status=status)
+        except Exception as e:
+            return render_template('errors/500.html', message=f'Failed to get job status: {str(e)}'), 500
+
+    @app.route('/jobs/<job_id>/result', methods=['GET'])
+    def job_result(job_id):
+        """Get job result"""
+        try:
+            from curator.core.job_manager import JobManager
+            job_manager = JobManager()
+            result = job_manager.get_job_result(job_id)
+            
+            if result is None:
+                return jsonify({'error': 'Job not completed or result not available'}), 404
+            
+            return jsonify(result)
+        except Exception as e:
+            return jsonify({'error': f'Failed to get job result: {str(e)}'}), 500
+
+    @app.route('/jobs/<job_id>', methods=['DELETE'])
+    def cancel_job(job_id):
+        """Cancel a job"""
+        try:
+            from curator.core.job_manager import JobManager
+            job_manager = JobManager()
+            success = job_manager.cancel_job(job_id)
+            
+            if success:
+                return jsonify({'status': 'cancelled', 'job_id': job_id})
+            else:
+                return jsonify({'error': 'Failed to cancel job'}), 500
+        except Exception as e:
+            return jsonify({'error': f'Failed to cancel job: {str(e)}'}), 500
+
+    @app.route('/jobs', methods=['GET'])
+    def list_jobs():
+        """List active jobs"""
+        try:
+            from curator.core.job_manager import JobManager
+            job_manager = JobManager()
+            jobs = job_manager.list_active_jobs()
+            return jsonify({'jobs': jobs})
+        except Exception as e:
+            return jsonify({'error': f'Failed to list jobs: {str(e)}'}), 500
+
+    @app.route('/health/jobs', methods=['GET'])
+    def jobs_health():
+        """Health check for job processing system"""
+        try:
+            from curator.core.job_manager import JobManager
+            job_manager = JobManager()
+            health = job_manager.health_check()
+            
+            # Determine overall health status
+            is_healthy = (
+                health.get('redis_connected', False) and
+                health.get('celery_workers', 0) > 0
+            )
+            
+            status_code = 200 if is_healthy else 503
+            health['status'] = 'healthy' if is_healthy else 'unhealthy'
+            
+            return jsonify(health), status_code
+        except Exception as e:
+            return jsonify({
+                'status': 'unhealthy',
+                'error': str(e),
+                'redis_connected': False,
+                'celery_workers': 0,
+                'active_jobs': 0,
+            }), 503
+
     # Error handlers
     @app.errorhandler(400)
     def bad_request(error):

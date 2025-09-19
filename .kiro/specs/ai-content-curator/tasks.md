@@ -216,37 +216,37 @@
   - Add reputation weight into composite score via `ScoringConfig`
   - _Requirements: 3.6_
 
-- [ ] 22. Topic coherence and coverage
+- [x] 22. Topic coherence and coverage
   - Keyword coverage ratio and keyphrase extraction (e.g., YAKE)
   - Blend as an additional metric in composite score
   - _Requirements: 3.4, 3.6_
 
-- [ ] 23. Summarization for display
+- [x] 23. Summarization for display
   - Add summarization utility (extractive or lightweight abstractive)
   - Use when newspaper3k summary is missing/low quality
   - _Requirements: 1.3, 4.2_
 
-- [ ] 24. Diversity‑constrained ranking
+- [x] 24. Diversity‑constrained ranking
   - Cluster by embeddings and cap results per cluster/domain
   - Ensure varied perspectives in top‑N
   - _Requirements: 2.3, 7.1_
 
-- [ ] 25. Caching layer
+- [x] 25. Caching layer
   - Redis cache for parsed articles and scorecards with TTLs
   - Wrapper utilities and cache keys by URL/hash
   - _Requirements: 7.1, 7.2_
 
-- [ ] 26. Background jobs for batch processing
+- [x] 26. Background jobs for batch processing
   - Celery + Redis worker for `batch_analyze`
   - Add status endpoints and progress polling in UI
   - _Requirements: 7.1, 7.2_
 
-- [ ] 27. Persistence layer
-  - Store `Article`, `ScoreCard`, `Entity` in Postgres via SQLAlchemy
+- [x] 27. Persistence layer
+  - Store `Article`, `ScoreCard`, `Entity` in Postgres via SQLAlchemy or SQLite
   - Simple migrations and retention policy
   - _Requirements: 5.1, 5.2_
 
-- [ ] 28. Feedback loop and learning‑to‑rank
+- [x] 28. Feedback loop and learning‑to‑rank
   - Endpoints to capture clicks/saves/likes
   - Periodic job to tune `ScoringConfig` weights from feedback
   - _Requirements: 5.4, 7.3_

@@ -29,6 +29,8 @@ class TestAppRoutes(unittest.TestCase):
             sentiment_score=60
             tfidf_relevance_score=50
             recency_score=40
+            reputation_score=75
+            topic_coherence_score=85
             article=type('A', (), {'url':'https://example.com','title':'t','author':'a','summary':'s'})()
         mock_analyze.return_value = Dummy()
 
@@ -47,8 +49,8 @@ class TestAppRoutes(unittest.TestCase):
         mock_source.return_value = mock_instance
         # Mock analyzed results with scores to verify sorting
         A = lambda u,t: type('A', (), {'url':u,'title':t,'author':'','summary':''})()
-        r1 = type('R', (), {'overall_score':90,'readability_score':80,'ner_density_score':70,'sentiment_score':60,'tfidf_relevance_score':50,'recency_score':40,'article':A('https://example.com/1','a1')})()
-        r2 = type('R', (), {'overall_score':95,'readability_score':80,'ner_density_score':70,'sentiment_score':60,'tfidf_relevance_score':50,'recency_score':40,'article':A('https://example.com/2','a2')})()
+        r1 = type('R', (), {'overall_score':90,'readability_score':80,'ner_density_score':70,'sentiment_score':60,'tfidf_relevance_score':50,'recency_score':40,'reputation_score':75,'topic_coherence_score':85,'article':A('https://example.com/1','a1')})()
+        r2 = type('R', (), {'overall_score':95,'readability_score':80,'ner_density_score':70,'sentiment_score':60,'tfidf_relevance_score':50,'recency_score':40,'reputation_score':75,'topic_coherence_score':85,'article':A('https://example.com/2','a2')})()
         mock_batch.return_value = [r1, r2]
 
         resp = self.app.post('/curate-topic', json={'topic': 'ai', 'max_articles': 2})

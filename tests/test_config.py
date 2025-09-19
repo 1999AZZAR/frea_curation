@@ -84,6 +84,7 @@ class TestFixtures:
             tfidf_relevance_score=90.0,
             recency_score=95.0,
             reputation_score=75.0,
+            topic_coherence_score=85.0,
             article=article
         )
     
@@ -179,6 +180,8 @@ class TestHelpers:
         test_case.assertLessEqual(scorecard.recency_score, 100)
         test_case.assertGreaterEqual(scorecard.reputation_score, 0)
         test_case.assertLessEqual(scorecard.reputation_score, 100)
+        test_case.assertGreaterEqual(scorecard.topic_coherence_score, 0)
+        test_case.assertLessEqual(scorecard.topic_coherence_score, 100)
         
         # Check article structure
         test_case.assertIsInstance(scorecard.article, Article)
