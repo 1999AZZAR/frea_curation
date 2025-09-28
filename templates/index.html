@@ -1,362 +1,221 @@
 {% extends 'base.html' %}
 
-{% block title %}AI Content Curator - Intelligent Content Analysis{% endblock %}
+{% block title %}AI Content Curator - Dashboard{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<div class="text-center mb-12">
-  <div class="max-w-4xl mx-auto">
-    <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-      Intelligent Content <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Analysis</span>
-    </h1>
-    <p class="text-xl text-gray-600 mb-8 leading-relaxed">
-      Analyze individual articles or curate entire topics with AI-powered insights. 
-      Get comprehensive quality scores, sentiment analysis, and relevance metrics.
-    </p>
-    <div class="flex flex-wrap justify-center gap-6 text-sm text-gray-500">
-      <div class="flex items-center gap-2">
-        <i class="fa-solid fa-bolt text-yellow-500"></i>
-        <span>Lightning Fast</span>
+<!-- Main Dashboard with Hero Section -->
+<div class="relative min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-12">
+  <div class="max-w-7xl mx-auto px-6">
+    
+    <!-- Hero Header -->
+    <div class="text-center mb-16">
+      <!-- Status Badge -->
+      <div class="inline-flex items-center gap-4 px-8 py-4 bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 backdrop-blur-xl rounded-full border border-emerald-400/30 shadow-2xl mb-12 animate-fade-in-up">
+        <div class="flex items-center gap-3">
+          <div class="h-4 w-4 bg-emerald-400 rounded-full animate-pulse shadow-lg shadow-emerald-400/70"></div>
+          <div class="h-4 w-4 bg-cyan-400 rounded-full animate-pulse shadow-lg shadow-cyan-400/70 animation-delay-200"></div>
+          <div class="h-4 w-4 bg-blue-400 rounded-full animate-pulse shadow-lg shadow-blue-400/70 animation-delay-400"></div>
+        </div>
+        <span class="text-lg font-bold text-white tracking-wider uppercase">AI-POWERED CONTENT ANALYSIS</span>
+        <i class="fa-solid fa-sparkles text-yellow-400 text-xl animate-spin animation-delay-1000"></i>
       </div>
-      <div class="flex items-center gap-2">
-        <i class="fa-solid fa-shield-check text-green-500"></i>
-        <span>Reliable Analysis</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <i class="fa-solid fa-chart-line text-blue-500"></i>
-        <span>Professional Results</span>
-      </div>
+      
+      <!-- Main Heading -->
+      <h1 class="text-6xl md:text-8xl font-black text-white mb-8 leading-none tracking-tighter animate-fade-in-up animation-delay-200">
+        <span class="block drop-shadow-2xl">CONTENT</span>
+        <span class="block bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-gradient-x drop-shadow-2xl">
+          CURATOR
+        </span>
+      </h1>
+      
+      <!-- Subtitle -->
+      <p class="text-xl md:text-2xl text-white/80 mb-12 max-w-4xl mx-auto leading-relaxed font-medium animate-fade-in-up animation-delay-400 drop-shadow-lg">
+        Transform how you discover and analyze content with 
+        <span class="text-transparent bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text font-bold">AI-powered insights</span>, 
+        quality scoring, and intelligent curation.
+      </p>
     </div>
-  </div>
-</div>
-
-<!-- Main Interface -->
-<div class="max-w-6xl mx-auto">
-  <div class="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-    <!-- Tab Navigation -->
-    <div class="border-b border-gray-200 bg-gray-50">
-      <nav class="flex">
-        <button class="tab-btn active flex-1 px-6 py-4 text-center font-medium transition-all duration-200" data-tab="analyze">
-          <div class="flex items-center justify-center gap-3">
-            <i class="fa-solid fa-magnifying-glass-chart text-lg"></i>
-            <span>Analyze Article</span>
-          </div>
-        </button>
-        <button class="tab-btn flex-1 px-6 py-4 text-center font-medium transition-all duration-200" data-tab="curate">
-          <div class="flex items-center justify-center gap-3">
-            <i class="fa-solid fa-layer-group text-lg"></i>
-            <span>Curate Topic</span>
-          </div>
-        </button>
-      </nav>
-    </div>
-
-    <!-- Analyze Panel -->
-    <div class="tab-panel p-8" id="panel-analyze">
-      <div class="mb-6">
-        <h2 class="text-2xl font-bold text-gray-900 mb-2">Article Analysis</h2>
-        <p class="text-gray-600">Extract comprehensive insights and compute quality scores for any article.</p>
-      </div>
-
-      <form id="analyze-form" class="space-y-6">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div class="space-y-2">
-            <label for="analyze-url" class="block text-sm font-medium text-gray-700">Article URL</label>
-            <input type="url" id="analyze-url" class="form-input" placeholder="https://example.com/article" required>
-          </div>
-          <div class="space-y-2">
-            <label for="analyze-query" class="block text-sm font-medium text-gray-700">Query (optional)</label>
-            <input type="text" id="analyze-query" class="form-input" placeholder="e.g., artificial intelligence">
-          </div>
-        </div>
-
-        <div class="flex items-center space-x-3">
-          <input type="checkbox" id="use-embeddings" class="form-checkbox">
-          <label for="use-embeddings" class="text-sm text-gray-700">Use semantic relevance (embeddings)</label>
-        </div>
-
-        <div class="flex items-center space-x-4">
-          <button type="submit" class="btn-primary">
-            <i class="fa-solid fa-chart-line"></i>
-            <span>Analyze Article</span>
-          </button>
-          <div id="analyze-loading" class="hidden flex items-center space-x-2 text-blue-600">
-            <div class="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
-            <span class="text-sm">Analyzing...</span>
-          </div>
-        </div>
-
-        <div id="analyze-error" class="hidden alert-error"></div>
-      </form>
-
-      <!-- Results Card -->
-      <div id="analyze-result-card" class="hidden mt-8">
-        <div class="result-card">
-          <div class="flex items-start justify-between mb-6">
-            <div class="flex-1">
-              <h3 id="an-title" class="text-xl font-bold text-gray-900 mb-2"></h3>
-              <p id="an-meta" class="text-sm text-gray-600"></p>
-            </div>
-            <div class="score-badge-large" id="an-overall"></div>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-            <div class="metric-card">
-              <div class="flex justify-between items-center mb-2">
-                <span class="metric-label">Readability</span>
-                <span id="an-readability-v" class="metric-value"></span>
+    
+    <!-- Main Feature Navigation Cards -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto mb-16">
+      <!-- Analyze Article Card -->
+      <a href="/analyze" class="group relative block">
+        <div class="absolute -inset-2 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 rounded-3xl blur-2xl opacity-50 group-hover:opacity-80 transition duration-1000 animate-pulse"></div>
+        <div class="relative bg-white rounded-3xl shadow-2xl border-4 border-blue-200 overflow-hidden hover:shadow-3xl transition-all duration-700 hover:-translate-y-2">
+          <!-- Header -->
+          <div class="bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 p-10 text-white relative overflow-hidden">
+            <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.15"%3E%3Ccircle cx="30" cy="30" r="3"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-30"></div>
+            
+            <div class="relative flex items-center gap-8">
+              <div class="h-20 w-20 bg-white/25 backdrop-blur-sm rounded-3xl flex items-center justify-center shadow-2xl border-2 border-white/40 group-hover:scale-110 transition-transform duration-300">
+                <i class="fa-solid fa-magnifying-glass-chart text-white text-3xl"></i>
               </div>
-              <div class="progress-bar">
-                <div id="an-readability" class="progress-fill bg-blue-500"></div>
+              <div>
+                <h3 class="text-3xl font-black mb-3 tracking-tight">ANALYZE ARTICLE</h3>
+                <p class="text-white/90 font-semibold text-lg">Deep content analysis</p>
               </div>
             </div>
-            <div class="metric-card">
-              <div class="flex justify-between items-center mb-2">
-                <span class="metric-label">NER Density</span>
-                <span id="an-ner-v" class="metric-value"></span>
+          </div>
+          
+          <!-- Content -->
+          <div class="p-10 bg-gray-50">
+            <div class="space-y-6">
+              <div class="flex items-center gap-4">
+                <div class="h-12 w-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg">
+                  <i class="fa-solid fa-chart-line text-white text-xl"></i>
+                </div>
+                <div>
+                  <h4 class="text-xl font-bold text-gray-900">Quality Metrics</h4>
+                  <p class="text-gray-600 font-medium">Comprehensive scoring and insights</p>
+                </div>
               </div>
-              <div class="progress-bar">
-                <div id="an-ner" class="progress-fill bg-green-500"></div>
+              
+              <div class="flex items-center gap-4">
+                <div class="h-12 w-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
+                  <i class="fa-solid fa-brain text-white text-xl"></i>
+                </div>
+                <div>
+                  <h4 class="text-xl font-bold text-gray-900">AI Analysis</h4>
+                  <p class="text-gray-600 font-medium">Sentiment and entity extraction</p>
+                </div>
               </div>
-            </div>
-            <div class="metric-card">
-              <div class="flex justify-between items-center mb-2">
-                <span class="metric-label">Sentiment</span>
-                <span id="an-sentiment-v" class="metric-value"></span>
-              </div>
-              <div class="progress-bar">
-                <div id="an-sentiment" class="progress-fill bg-orange-500"></div>
-              </div>
-            </div>
-            <div class="metric-card">
-              <div class="flex justify-between items-center mb-2">
-                <span class="metric-label">Relevance</span>
-                <span id="an-tfidf-v" class="metric-value"></span>
-              </div>
-              <div class="progress-bar">
-                <div id="an-tfidf" class="progress-fill bg-purple-500"></div>
-              </div>
-            </div>
-            <div class="metric-card">
-              <div class="flex justify-between items-center mb-2">
-                <span class="metric-label">Recency</span>
-                <span id="an-recency-v" class="metric-value"></span>
-              </div>
-              <div class="progress-bar">
-                <div id="an-recency" class="progress-fill bg-pink-500"></div>
+              
+              <div class="flex items-center gap-4">
+                <div class="h-12 w-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg">
+                  <i class="fa-solid fa-file-text text-white text-xl"></i>
+                </div>
+                <div>
+                  <h4 class="text-xl font-bold text-gray-900">Detailed Reports</h4>
+                  <p class="text-gray-600 font-medium">Export results in multiple formats</p>
+                </div>
               </div>
             </div>
             
-            <div class="metric-card">
-              <div class="flex justify-between items-center mb-2">
-                <span class="metric-label">Reputation</span>
-                <span id="an-reputation-v" class="metric-value"></span>
-              </div>
-              <div class="progress-bar">
-                <div id="an-reputation" class="progress-fill bg-teal-500"></div>
-              </div>
+            <div class="mt-8 flex items-center justify-center gap-3 text-blue-600 font-bold text-lg group-hover:gap-6 transition-all duration-300">
+              <span>Start Analysis</span>
+              <i class="fa-solid fa-arrow-right group-hover:translate-x-2 transition-transform duration-300"></i>
             </div>
-          </div>
-
-          <div id="an-summary" class="prose-content mb-6"></div>
-
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <div class="stats-section">
-              <h4 class="section-title">Statistics</h4>
-              <div class="stats-grid">
-                <div class="stat-item">
-                  <span class="stat-label">Words:</span>
-                  <span id="an-word-count" class="stat-value"></span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-label">Entities:</span>
-                  <span id="an-entity-count" class="stat-value"></span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-label">Method:</span>
-                  <span id="an-rel-method" class="stat-value">tfidf</span>
-                </div>
-              </div>
-            </div>
-            <div id="an-entities" class="hidden entities-section">
-              <h4 class="section-title">Entities</h4>
-              <div id="an-entities-list" class="entities-list"></div>
-            </div>
-          </div>
-
-          <div class="flex flex-wrap gap-3">
-            <button id="analyze-export-json" type="button" class="btn-secondary">
-              <i class="fa-solid fa-file-arrow-down"></i>
-              <span>Export JSON</span>
-            </button>
-            <button id="analyze-export-csv" type="button" class="btn-secondary">
-              <i class="fa-solid fa-table"></i>
-              <span>Export CSV</span>
-            </button>
           </div>
         </div>
-      </div>
+      </a>
+
+      <!-- Curate Topic Card -->
+      <a href="/curate" class="group relative block">
+        <div class="absolute -inset-2 bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 rounded-3xl blur-2xl opacity-50 group-hover:opacity-80 transition duration-1000 animate-pulse"></div>
+        <div class="relative bg-white rounded-3xl shadow-2xl border-4 border-purple-200 overflow-hidden hover:shadow-3xl transition-all duration-700 hover:-translate-y-2">
+          <!-- Header -->
+          <div class="bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 p-10 text-white relative overflow-hidden">
+            <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.15"%3E%3Ccircle cx="30" cy="30" r="3"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-30"></div>
+            
+            <div class="relative flex items-center gap-8">
+              <div class="h-20 w-20 bg-white/25 backdrop-blur-sm rounded-3xl flex items-center justify-center shadow-2xl border-2 border-white/40 group-hover:scale-110 transition-transform duration-300">
+                <i class="fa-solid fa-layer-group text-white text-3xl"></i>
+              </div>
+              <div>
+                <h3 class="text-3xl font-black mb-3 tracking-tight">CURATE TOPIC</h3>
+                <p class="text-white/90 font-semibold text-lg">Smart content discovery</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Content -->
+          <div class="p-10 bg-gray-50">
+            <div class="space-y-6">
+              <div class="flex items-center gap-4">
+                <div class="h-12 w-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
+                  <i class="fa-solid fa-search text-white text-xl"></i>
+                </div>
+                <div>
+                  <h4 class="text-xl font-bold text-gray-900">Topic Discovery</h4>
+                  <p class="text-gray-600 font-medium">Find relevant articles by topic</p>
+                </div>
+              </div>
+              
+              <div class="flex items-center gap-4">
+                <div class="h-12 w-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg">
+                  <i class="fa-solid fa-sort text-white text-xl"></i>
+                </div>
+                <div>
+                  <h4 class="text-xl font-bold text-gray-900">Smart Ranking</h4>
+                  <p class="text-gray-600 font-medium">AI-powered quality scoring</p>
+                </div>
+              </div>
+              
+              <div class="flex items-center gap-4">
+                <div class="h-12 w-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg">
+                  <i class="fa-solid fa-shuffle text-white text-xl"></i>
+                </div>
+                <div>
+                  <h4 class="text-xl font-bold text-gray-900">Diversification</h4>
+                  <p class="text-gray-600 font-medium">Remove duplicates automatically</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mt-8 flex items-center justify-center gap-3 text-purple-600 font-bold text-lg group-hover:gap-6 transition-all duration-300">
+              <span>Start Curation</span>
+              <i class="fa-solid fa-arrow-right group-hover:translate-x-2 transition-transform duration-300"></i>
+            </div>
+          </div>
+        </div>
+      </a>
     </div>
 
-    <!-- Curate Panel -->
-    <div class="tab-panel hidden p-8" id="panel-curate">
-      <div class="mb-6">
-        <h2 class="text-2xl font-bold text-gray-900 mb-2">Topic Curation</h2>
-        <p class="text-gray-600">Fetch, analyze, and rank multiple articles for comprehensive topic coverage.</p>
-      </div>
-
-      <form id="curate-form" class="space-y-6">
-        <div class="space-y-2">
-          <label for="curate-topic" class="block text-sm font-medium text-gray-700">Topic Keywords</label>
-          <input type="text" id="curate-topic" class="form-input" placeholder="e.g., climate change, artificial intelligence" required>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="space-y-2">
-            <label for="curate-max" class="block text-sm font-medium text-gray-700">Max Articles</label>
-            <input type="number" id="curate-max" min="1" max="100" class="form-input" placeholder="20">
-          </div>
-          <div class="space-y-2">
-            <label for="curate-sort" class="block text-sm font-medium text-gray-700">Sort By</label>
-            <select id="curate-sort" class="form-select">
-              <option value="score_desc">Score: High → Low</option>
-              <option value="score_asc">Score: Low → High</option>
-            </select>
-          </div>
-          <div class="space-y-2">
-            <label for="curate-min-score" class="block text-sm font-medium text-gray-700">Min Score</label>
-            <input type="number" id="curate-min-score" min="0" max="100" value="0" class="form-input">
+    <!-- Secondary Feature Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+      <!-- Plagiarism Detection Card -->
+      <a href="/plagiarism" class="group relative block">
+        <div class="absolute -inset-1 bg-gradient-to-r from-red-500 to-orange-500 rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-1000"></div>
+        <div class="relative bg-white rounded-2xl p-8 border-4 border-red-200 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
+          <div class="flex items-center gap-6">
+            <div class="h-16 w-16 bg-gradient-to-br from-red-500 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <i class="fa-solid fa-shield-halved text-white text-2xl"></i>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-2xl font-black text-gray-900 mb-2">Plagiarism Detection</h3>
+              <p class="text-gray-600 font-medium">Check content originality</p>
+            </div>
+            <i class="fa-solid fa-arrow-right text-red-600 text-xl group-hover:translate-x-2 transition-transform duration-300"></i>
           </div>
         </div>
+      </a>
 
-        <div class="space-y-3">
-          <div class="flex items-center space-x-3">
-            <input id="curate-diversify" type="checkbox" checked class="form-checkbox">
-            <label for="curate-diversify" class="text-sm text-gray-700">Diversify results (deduplicate and limit per domain)</label>
-          </div>
-          <div class="flex items-center space-x-3">
-            <input id="curate-background" type="checkbox" class="form-checkbox">
-            <label for="curate-background" class="text-sm text-gray-700">
-              Use background processing for large batches (>5 articles)
-              <span class="text-xs text-gray-500 block">Recommended for better performance with many articles</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Advanced Filters -->
-        <div class="border-t border-gray-200 pt-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Advanced Filters</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div class="space-y-2">
-              <label for="curate-domain" class="block text-sm font-medium text-gray-700">Domain</label>
-              <input id="curate-domain" type="text" class="form-input" placeholder="e.g., bbc.com">
+      <!-- Compare Content Card -->
+      <a href="/compare" class="group relative block">
+        <div class="absolute -inset-1 bg-gradient-to-r from-green-500 to-teal-500 rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-1000"></div>
+        <div class="relative bg-white rounded-2xl p-8 border-4 border-green-200 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
+          <div class="flex items-center gap-6">
+            <div class="h-16 w-16 bg-gradient-to-br from-green-500 to-teal-500 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <i class="fa-solid fa-code-compare text-white text-2xl"></i>
             </div>
-            <div class="space-y-2">
-              <label for="curate-date-from" class="block text-sm font-medium text-gray-700">From Date</label>
-              <input id="curate-date-from" type="date" class="form-input">
+            <div class="flex-1">
+              <h3 class="text-2xl font-black text-gray-900 mb-2">Compare Content</h3>
+              <p class="text-gray-600 font-medium">Analyze similarity between articles</p>
             </div>
-            <div class="space-y-2">
-              <label for="curate-date-to" class="block text-sm font-medium text-gray-700">To Date</label>
-              <input id="curate-date-to" type="date" class="form-input">
-            </div>
-            <div class="space-y-2">
-              <label for="curate-word-min" class="block text-sm font-medium text-gray-700">Min Words</label>
-              <input id="curate-word-min" type="number" min="0" class="form-input" placeholder="0">
-            </div>
-            <div class="space-y-2">
-              <label for="curate-word-max" class="block text-sm font-medium text-gray-700">Max Words</label>
-              <input id="curate-word-max" type="number" min="0" class="form-input" placeholder="0">
-            </div>
+            <i class="fa-solid fa-arrow-right text-green-600 text-xl group-hover:translate-x-2 transition-transform duration-300"></i>
           </div>
         </div>
+      </a>
 
-        <div class="flex items-center space-x-4">
-          <button type="submit" class="btn-primary">
-            <i class="fa-regular fa-newspaper"></i>
-            <span>Curate Topic</span>
-          </button>
-          <div id="curate-loading" class="hidden flex items-center space-x-2 text-purple-600">
-            <div class="animate-spin rounded-full h-4 w-4 border-2 border-purple-600 border-t-transparent"></div>
-            <span class="text-sm">Curating...</span>
-          </div>
-        </div>
-
-        <div id="curate-error" class="hidden alert-error"></div>
-      </form>
-
-      <!-- Results Section -->
-      <div class="mt-8">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <div class="flex items-center space-x-4">
-            <div class="text-sm text-gray-600">
-              <span id="curate-count">0</span> results
+      <!-- View Results Card -->
+      <a href="/results" class="group relative block">
+        <div class="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-green-500 rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-1000"></div>
+        <div class="relative bg-white rounded-2xl p-8 border-4 border-emerald-200 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
+          <div class="flex items-center gap-6">
+            <div class="h-16 w-16 bg-gradient-to-br from-emerald-500 to-green-500 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <i class="fa-solid fa-chart-bar text-white text-2xl"></i>
             </div>
-            <div class="flex items-center space-x-2">
-              <label for="curate-page-size" class="text-sm text-gray-700">Per page:</label>
-              <select id="curate-page-size" class="form-select-sm">
-                <option value="5">5</option>
-                <option value="10" selected>10</option>
-                <option value="20">20</option>
-              </select>
+            <div class="flex-1">
+              <h3 class="text-2xl font-black text-gray-900 mb-2">View Results</h3>
+              <p class="text-gray-600 font-medium">Browse analysis history</p>
             </div>
-          </div>
-          <div class="flex items-center space-x-3">
-            <input id="curate-search" type="text" placeholder="Search articles..." class="form-input-sm">
-            <button id="curate-export-json" type="button" class="btn-secondary-sm">
-              <i class="fa-solid fa-file-arrow-down"></i>
-              <span class="hidden sm:inline">JSON</span>
-            </button>
-            <button id="curate-export-csv" type="button" class="btn-secondary-sm">
-              <i class="fa-solid fa-table"></i>
-              <span class="hidden sm:inline">CSV</span>
-            </button>
+            <i class="fa-solid fa-arrow-right text-emerald-600 text-xl group-hover:translate-x-2 transition-transform duration-300"></i>
           </div>
         </div>
-
-        <div class="flex items-center justify-center space-x-3 mb-6">
-          <button id="curate-prev" class="btn-pagination" type="button">
-            <i class="fa-solid fa-chevron-left"></i>
-          </button>
-          <span id="curate-page-info" class="text-sm text-gray-600">Page 1 / 1</span>
-          <button id="curate-next" class="btn-pagination" type="button">
-            <i class="fa-solid fa-chevron-right"></i>
-          </button>
-        </div>
-
-        <div id="curate-result" class="space-y-4"></div>
-      </div>
+      </a>
     </div>
   </div>
 </div>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const tabs = document.querySelectorAll('.tab-btn');
-    const panels = {
-      analyze: document.getElementById('panel-analyze'),
-      curate: document.getElementById('panel-curate')
-    };
-    
-    function activate(name) {
-      tabs.forEach(t => {
-        if (t.dataset.tab === name) {
-          t.classList.add('active', 'bg-white', 'text-blue-600', 'border-b-2', 'border-blue-600');
-          t.classList.remove('text-gray-600', 'hover:text-gray-900');
-        } else {
-          t.classList.remove('active', 'bg-white', 'text-blue-600', 'border-b-2', 'border-blue-600');
-          t.classList.add('text-gray-600', 'hover:text-gray-900');
-        }
-      });
-      
-      panels.analyze.classList.toggle('hidden', name !== 'analyze');
-      panels.curate.classList.toggle('hidden', name !== 'curate');
-    }
-    
-    tabs.forEach(t => t.addEventListener('click', () => activate(t.dataset.tab)));
-    
-    // Initialize first tab
-    activate('analyze');
-  });
-</script>
 {% endblock %}
 

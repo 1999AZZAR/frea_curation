@@ -3,197 +3,251 @@
 {% block title %}Compare • AI Content Curator{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto">
-  <!-- Header -->
-  <div class="text-center mb-12">
-    <div class="flex items-center justify-center gap-3 mb-4">
-      <div class="h-12 w-12 rounded-xl bg-gradient-to-br from-green-600 to-teal-600 flex items-center justify-center">
-        <i class="fa-solid fa-code-compare text-white text-lg"></i>
-      </div>
-      <div>
-        <h1 class="text-3xl font-bold text-gray-900">Content Comparison</h1>
-        <p class="text-gray-600">Compare articles or text for similarity analysis</p>
+<!-- Compare Page with High Contrast Design -->
+<div class="relative min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-12">
+  <div class="max-w-7xl mx-auto px-6">
+    
+    <!-- Header Card -->
+    <div class="group relative mb-12">
+      <!-- Glow Effect -->
+      <div class="absolute -inset-2 bg-gradient-to-r from-green-600 via-teal-500 to-green-600 rounded-3xl blur-2xl opacity-50 group-hover:opacity-80 transition duration-1000 animate-pulse"></div>
+      
+      <!-- Card Content -->
+      <div class="relative bg-white rounded-3xl shadow-2xl border-4 border-green-200 overflow-hidden">
+        <!-- Header with Gradient -->
+        <div class="bg-gradient-to-r from-green-600 via-teal-500 to-green-600 p-10 text-white relative overflow-hidden">
+          <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.15"%3E%3Ccircle cx="30" cy="30" r="3"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-30"></div>
+          
+          <div class="relative text-center">
+            <div class="flex items-center justify-center gap-8 mb-6">
+              <div class="h-20 w-20 bg-white/25 backdrop-blur-sm rounded-3xl flex items-center justify-center shadow-2xl border-2 border-white/40">
+                <i class="fa-solid fa-code-compare text-white text-3xl"></i>
+              </div>
+              <div>
+                <h1 class="text-4xl font-black mb-3 tracking-tight">CONTENT COMPARISON</h1>
+                <p class="text-white/90 font-semibold text-lg">Compare articles or text for similarity analysis</p>
+              </div>
+            </div>
+            
+            <div class="flex flex-wrap justify-center gap-8 text-lg font-bold">
+              <div class="flex items-center gap-3">
+                <i class="fa-solid fa-chart-bar text-2xl"></i>
+                <span>TF-IDF Analysis</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <i class="fa-solid fa-brain text-2xl"></i>
+                <span>Semantic Embeddings</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <i class="fa-solid fa-balance-scale text-2xl"></i>
+                <span>Bidirectional Comparison</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="flex flex-wrap justify-center gap-6 text-sm text-gray-500">
-      <div class="flex items-center gap-2">
-        <i class="fa-solid fa-chart-bar text-blue-500"></i>
-        <span>TF-IDF Analysis</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <i class="fa-solid fa-brain text-purple-500"></i>
-        <span>Semantic Embeddings</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <i class="fa-solid fa-balance-scale text-green-500"></i>
-        <span>Bidirectional Comparison</span>
+
+    <!-- Main Interface -->
+    <div class="group relative mb-12">
+      <!-- Glow Effect -->
+      <div class="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-3xl blur opacity-30 group-hover:opacity-60 transition duration-1000"></div>
+      
+      <!-- Form Card -->
+      <div class="relative bg-white rounded-3xl shadow-2xl border-4 border-blue-200 overflow-hidden hover:shadow-3xl transition-all duration-700 hover:-translate-y-1">
+        <div class="p-10">
+          <form id="compare-form" class="space-y-10">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+              <!-- Content A -->
+              <div class="space-y-6">
+                <div class="flex items-center gap-4 mb-6">
+                  <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 text-white flex items-center justify-center font-black text-xl shadow-lg border-4 border-blue-300">A</div>
+                  <h3 class="text-2xl font-black text-gray-900">First Content</h3>
+                </div>
+                
+                <div class="space-y-4">
+                  <label for="cmp-a-url" class="block text-lg font-bold text-gray-700">URL</label>
+                  <input id="cmp-a-url" type="url" class="w-full px-6 py-4 bg-white border-4 border-gray-300 rounded-2xl text-lg font-semibold text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-200 transition-all duration-300 shadow-lg" placeholder="https://example.com/article-a">
+                </div>
+                
+                <div class="space-y-4">
+                  <label for="cmp-a-text" class="block text-lg font-bold text-gray-700">Raw Text (optional)</label>
+                  <textarea id="cmp-a-text" class="w-full px-6 py-4 bg-white border-4 border-gray-300 rounded-2xl text-lg font-semibold text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-200 transition-all duration-300 shadow-lg resize-none" rows="6" placeholder="Paste text content for comparison..."></textarea>
+                </div>
+              </div>
+
+              <!-- Content B -->
+              <div class="space-y-6">
+                <div class="flex items-center gap-4 mb-6">
+                  <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 text-white flex items-center justify-center font-black text-xl shadow-lg border-4 border-purple-300">B</div>
+                  <h3 class="text-2xl font-black text-gray-900">Second Content</h3>
+                </div>
+                
+                <div class="space-y-4">
+                  <label for="cmp-b-url" class="block text-lg font-bold text-gray-700">URL</label>
+                  <input id="cmp-b-url" type="url" class="w-full px-6 py-4 bg-white border-4 border-gray-300 rounded-2xl text-lg font-semibold text-gray-900 focus:border-purple-500 focus:ring-4 focus:ring-purple-200 transition-all duration-300 shadow-lg" placeholder="https://example.com/article-b">
+                </div>
+                
+                <div class="space-y-4">
+                  <label for="cmp-b-text" class="block text-lg font-bold text-gray-700">Raw Text (optional)</label>
+                  <textarea id="cmp-b-text" class="w-full px-6 py-4 bg-white border-4 border-gray-300 rounded-2xl text-lg font-semibold text-gray-900 focus:border-purple-500 focus:ring-4 focus:ring-purple-200 transition-all duration-300 shadow-lg resize-none" rows="6" placeholder="Paste text content for comparison..."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="border-t-4 border-gray-200 pt-8">
+              <div class="flex items-center gap-4 mb-8">
+                <input type="checkbox" id="cmp-use-embeddings" class="h-6 w-6 text-green-600 bg-white border-4 border-gray-300 rounded-lg focus:ring-green-500 focus:ring-4">
+                <label for="cmp-use-embeddings" class="text-lg font-bold text-gray-700">Use semantic embeddings for deeper similarity analysis</label>
+              </div>
+
+              <div class="flex items-center gap-6">
+                <button type="submit" class="group/btn bg-gradient-to-r from-green-600 via-teal-500 to-green-600 text-white font-black py-6 px-12 rounded-2xl hover:from-green-700 hover:via-teal-600 hover:to-green-700 focus:outline-none focus:ring-4 focus:ring-green-500 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1 uppercase tracking-wider text-xl">
+                  <div class="flex items-center gap-4">
+                    <i class="fa-solid fa-code-compare text-2xl"></i>
+                    <span>Compare Content</span>
+                    <i class="fa-solid fa-arrow-right group-hover/btn:translate-x-2 transition-transform duration-300"></i>
+                  </div>
+                </button>
+                <div id="cmp-loading" class="hidden flex items-center gap-4 text-green-600">
+                  <div class="animate-spin rounded-full h-8 w-8 border-4 border-green-600 border-t-transparent"></div>
+                  <span class="text-xl font-bold">Comparing...</span>
+                </div>
+              </div>
+
+              <div id="cmp-error" class="hidden bg-gradient-to-r from-red-50 to-pink-50 border-4 border-red-300 rounded-2xl p-6 mt-6">
+                <div class="flex items-center gap-4">
+                  <i class="fa-solid fa-exclamation-triangle text-red-600 text-2xl"></i>
+                  <span class="text-lg font-bold text-red-800"></span>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Main Interface -->
-  <div class="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden mb-8">
-    <div class="p-8">
-      <form id="compare-form" class="space-y-8">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <!-- Content A -->
-          <div class="space-y-4">
-            <div class="flex items-center gap-2 mb-4">
-              <div class="h-8 w-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold">A</div>
-              <h3 class="text-lg font-semibold text-gray-900">First Content</h3>
-            </div>
-            
-            <div class="space-y-2">
-              <label for="cmp-a-url" class="block text-sm font-medium text-gray-700">URL</label>
-              <input id="cmp-a-url" type="url" class="form-input" placeholder="https://example.com/article-a">
-            </div>
-            
-            <div class="space-y-2">
-              <label for="cmp-a-text" class="block text-sm font-medium text-gray-700">Raw Text (optional)</label>
-              <textarea id="cmp-a-text" class="form-input" rows="6" placeholder="Paste text content for comparison..."></textarea>
-            </div>
-          </div>
-
-          <!-- Content B -->
-          <div class="space-y-4">
-            <div class="flex items-center gap-2 mb-4">
-              <div class="h-8 w-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center font-bold">B</div>
-              <h3 class="text-lg font-semibold text-gray-900">Second Content</h3>
-            </div>
-            
-            <div class="space-y-2">
-              <label for="cmp-b-url" class="block text-sm font-medium text-gray-700">URL</label>
-              <input id="cmp-b-url" type="url" class="form-input" placeholder="https://example.com/article-b">
-            </div>
-            
-            <div class="space-y-2">
-              <label for="cmp-b-text" class="block text-sm font-medium text-gray-700">Raw Text (optional)</label>
-              <textarea id="cmp-b-text" class="form-input" rows="6" placeholder="Paste text content for comparison..."></textarea>
-            </div>
-          </div>
-        </div>
-
-        <div class="border-t border-gray-200 pt-6">
-          <div class="flex items-center space-x-3 mb-6">
-            <input type="checkbox" id="cmp-use-embeddings" class="form-checkbox">
-            <label for="cmp-use-embeddings" class="text-sm text-gray-700">Use semantic embeddings for deeper similarity analysis</label>
-          </div>
-
-          <div class="flex items-center space-x-4">
-            <button type="submit" class="btn-primary">
-              <i class="fa-solid fa-code-compare"></i>
-              <span>Compare Content</span>
-            </button>
-            <div id="cmp-loading" class="hidden flex items-center space-x-2 text-green-600">
-              <div class="animate-spin rounded-full h-4 w-4 border-2 border-green-600 border-t-transparent"></div>
-              <span class="text-sm">Comparing...</span>
-            </div>
-          </div>
-
-          <div id="cmp-error" class="hidden alert-error mt-4"></div>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Results Section -->
-  <div id="cmp-result" class="hidden">
-    <div class="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-      <div class="p-8">
-        <div class="flex items-center gap-3 mb-8">
-          <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-green-600 to-teal-600 flex items-center justify-center">
-            <i class="fa-solid fa-chart-line text-white"></i>
-          </div>
-          <div>
-            <h2 class="text-2xl font-bold text-gray-900">Similarity Analysis</h2>
-            <p class="text-gray-600">Bidirectional content comparison results</p>
-          </div>
-        </div>
-
-        <!-- TF-IDF Results -->
-        <div class="mb-8">
-          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
-            <i class="fa-solid fa-chart-bar text-blue-600"></i>
-            TF-IDF Similarity
-          </h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div class="metric-card">
-              <div class="flex justify-between items-center mb-3">
-                <span class="metric-label">A → B Similarity</span>
-                <span id="cmp-tfidf-ab-val" class="metric-value">0%</span>
+    <!-- Results Section -->
+    <div id="cmp-result" class="hidden">
+      <div class="group relative">
+        <!-- Glow Effect -->
+        <div class="absolute -inset-2 bg-gradient-to-r from-emerald-600 via-green-500 to-emerald-600 rounded-3xl blur-2xl opacity-50 group-hover:opacity-80 transition duration-1000 animate-pulse"></div>
+        
+        <!-- Results Card -->
+        <div class="relative bg-white rounded-3xl shadow-2xl border-4 border-emerald-200 overflow-hidden hover:shadow-3xl transition-all duration-700 hover:-translate-y-1">
+          <div class="p-10">
+            <div class="flex items-center gap-6 mb-10">
+              <div class="h-16 w-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center shadow-2xl border-4 border-emerald-300">
+                <i class="fa-solid fa-chart-line text-white text-2xl"></i>
               </div>
-              <div class="progress-bar">
-                <div id="cmp-tfidf-ab" class="progress-fill bg-blue-500"></div>
+              <div>
+                <h2 class="text-3xl font-black text-gray-900">Similarity Analysis</h2>
+                <p class="text-lg font-bold text-gray-600">Bidirectional content comparison results</p>
               </div>
             </div>
-            <div class="metric-card">
-              <div class="flex justify-between items-center mb-3">
-                <span class="metric-label">B → A Similarity</span>
-                <span id="cmp-tfidf-ba-val" class="metric-value">0%</span>
-              </div>
-              <div class="progress-bar">
-                <div id="cmp-tfidf-ba" class="progress-fill bg-blue-500"></div>
-              </div>
-            </div>
-          </div>
-          <div class="metric-card bg-blue-50 border-blue-200">
-            <div class="flex justify-between items-center mb-3">
-              <span class="metric-label text-blue-800">Average TF-IDF Similarity</span>
-              <span id="cmp-tfidf-avg-val" class="metric-value text-blue-900">0%</span>
-            </div>
-            <div class="progress-bar">
-              <div id="cmp-tfidf-avg" class="progress-fill bg-blue-600"></div>
-            </div>
-          </div>
-        </div>
 
-        <!-- Embeddings Results -->
-        <div id="cmp-embeds" class="hidden">
-          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
-            <i class="fa-solid fa-brain text-purple-600"></i>
-            Semantic Similarity (Embeddings)
-          </h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div class="metric-card">
-              <div class="flex justify-between items-center mb-3">
-                <span class="metric-label">A → B Semantic</span>
-                <span id="cmp-emb-ab-val" class="metric-value">0%</span>
+            <!-- TF-IDF Results -->
+            <div class="mb-10">
+              <div class="flex items-center gap-4 mb-8">
+                <div class="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg">
+                  <i class="fa-solid fa-chart-bar text-white text-xl"></i>
+                </div>
+                <h3 class="text-2xl font-black text-gray-900">TF-IDF Similarity</h3>
               </div>
-              <div class="progress-bar">
-                <div id="cmp-emb-ab" class="progress-fill bg-purple-500"></div>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border-4 border-blue-300 shadow-xl">
+                  <div class="flex justify-between items-center mb-4">
+                    <span class="text-lg font-bold text-gray-800">A → B Similarity</span>
+                    <span id="cmp-tfidf-ab-val" class="text-2xl font-black text-blue-600">0%</span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-4 border-2 border-gray-300">
+                    <div id="cmp-tfidf-ab" class="bg-gradient-to-r from-blue-500 to-cyan-500 h-4 rounded-full transition-all duration-500 shadow-lg" style="width: 0%"></div>
+                  </div>
+                </div>
+                
+                <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border-4 border-blue-300 shadow-xl">
+                  <div class="flex justify-between items-center mb-4">
+                    <span class="text-lg font-bold text-gray-800">B → A Similarity</span>
+                    <span id="cmp-tfidf-ba-val" class="text-2xl font-black text-blue-600">0%</span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-4 border-2 border-gray-300">
+                    <div id="cmp-tfidf-ba" class="bg-gradient-to-r from-blue-500 to-cyan-500 h-4 rounded-full transition-all duration-500 shadow-lg" style="width: 0%"></div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="bg-gradient-to-r from-blue-100 to-cyan-100 rounded-2xl p-6 border-4 border-blue-400 shadow-xl">
+                <div class="flex justify-between items-center mb-4">
+                  <span class="text-xl font-bold text-blue-900">Average TF-IDF Similarity</span>
+                  <span id="cmp-tfidf-avg-val" class="text-3xl font-black text-blue-900">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-6 border-2 border-gray-300">
+                  <div id="cmp-tfidf-avg" class="bg-gradient-to-r from-blue-600 to-cyan-600 h-6 rounded-full transition-all duration-500 shadow-lg" style="width: 0%"></div>
+                </div>
               </div>
             </div>
-            <div class="metric-card">
-              <div class="flex justify-between items-center mb-3">
-                <span class="metric-label">B → A Semantic</span>
-                <span id="cmp-emb-ba-val" class="metric-value">0%</span>
-              </div>
-              <div class="progress-bar">
-                <div id="cmp-emb-ba" class="progress-fill bg-purple-500"></div>
-              </div>
-            </div>
-          </div>
-          <div class="metric-card bg-purple-50 border-purple-200">
-            <div class="flex justify-between items-center mb-3">
-              <span class="metric-label text-purple-800">Average Semantic Similarity</span>
-              <span id="cmp-emb-avg-val" class="metric-value text-purple-900">0%</span>
-            </div>
-            <div class="progress-bar">
-              <div id="cmp-emb-avg" class="progress-fill bg-purple-600"></div>
-            </div>
-          </div>
-        </div>
 
-        <!-- Action Buttons -->
-        <div class="flex flex-wrap gap-3 pt-6 border-t border-gray-200">
-          <button onclick="window.location.reload()" class="btn-secondary">
-            <i class="fa-solid fa-arrow-rotate-right"></i>
-            <span>New Comparison</span>
-          </button>
-          <a href="/" class="btn-secondary">
-            <i class="fa-solid fa-house"></i>
-            <span>Back to Home</span>
-          </a>
+            <!-- Embeddings Results -->
+            <div id="cmp-embeds" class="hidden mb-10">
+              <div class="flex items-center gap-4 mb-8">
+                <div class="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+                  <i class="fa-solid fa-brain text-white text-xl"></i>
+                </div>
+                <h3 class="text-2xl font-black text-gray-900">Semantic Similarity (Embeddings)</h3>
+              </div>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border-4 border-purple-300 shadow-xl">
+                  <div class="flex justify-between items-center mb-4">
+                    <span class="text-lg font-bold text-gray-800">A → B Semantic</span>
+                    <span id="cmp-emb-ab-val" class="text-2xl font-black text-purple-600">0%</span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-4 border-2 border-gray-300">
+                    <div id="cmp-emb-ab" class="bg-gradient-to-r from-purple-500 to-pink-500 h-4 rounded-full transition-all duration-500 shadow-lg" style="width: 0%"></div>
+                  </div>
+                </div>
+                
+                <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border-4 border-purple-300 shadow-xl">
+                  <div class="flex justify-between items-center mb-4">
+                    <span class="text-lg font-bold text-gray-800">B → A Semantic</span>
+                    <span id="cmp-emb-ba-val" class="text-2xl font-black text-purple-600">0%</span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-4 border-2 border-gray-300">
+                    <div id="cmp-emb-ba" class="bg-gradient-to-r from-purple-500 to-pink-500 h-4 rounded-full transition-all duration-500 shadow-lg" style="width: 0%"></div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-6 border-4 border-purple-400 shadow-xl">
+                <div class="flex justify-between items-center mb-4">
+                  <span class="text-xl font-bold text-purple-900">Average Semantic Similarity</span>
+                  <span id="cmp-emb-avg-val" class="text-3xl font-black text-purple-900">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-6 border-2 border-gray-300">
+                  <div id="cmp-emb-avg" class="bg-gradient-to-r from-purple-600 to-pink-600 h-6 rounded-full transition-all duration-500 shadow-lg" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap gap-6 pt-8 border-t-4 border-gray-200">
+              <button onclick="window.location.reload()" class="group/btn bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 text-white font-black py-4 px-8 rounded-2xl hover:from-blue-700 hover:via-cyan-600 hover:to-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1 uppercase tracking-wider text-lg">
+                <div class="flex items-center gap-3">
+                  <i class="fa-solid fa-arrow-rotate-right text-xl"></i>
+                  <span>New Comparison</span>
+                  <i class="fa-solid fa-arrow-right group-hover/btn:translate-x-2 transition-transform duration-300"></i>
+                </div>
+              </button>
+              <a href="/" class="group/btn bg-gradient-to-r from-green-600 via-teal-500 to-green-600 text-white font-black py-4 px-8 rounded-2xl hover:from-green-700 hover:via-teal-600 hover:to-green-700 focus:outline-none focus:ring-4 focus:ring-green-500 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1 uppercase tracking-wider text-lg">
+                <div class="flex items-center gap-3">
+                  <i class="fa-solid fa-house text-xl"></i>
+                  <span>Back to Home</span>
+                  <i class="fa-solid fa-arrow-right group-hover/btn:translate-x-2 transition-transform duration-300"></i>
+                </div>
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </div>

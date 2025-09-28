@@ -1,145 +1,121 @@
 {% extends 'base.html' %}
 
-{% block title %}Analysis Result • AI Content Curator{% endblock %}
+{% block title %}Analysis Results • AI Content Curator{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto">
-  <!-- Header -->
-  <div class="mb-8">
-    <div class="flex items-center gap-3 mb-4">
-      <div class="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
-        <i class="fa-solid fa-magnifying-glass-chart text-white text-lg"></i>
-      </div>
-      <div>
-        <h1 class="text-3xl font-bold text-gray-900">Analysis Result</h1>
-        <p class="text-gray-600">Comprehensive content analysis and quality assessment</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Main Result Card -->
-  <div class="result-card mb-8">
-    <div class="flex items-start justify-between gap-6 mb-6">
-      <div class="flex-1">
-        <h2 class="text-2xl font-bold text-gray-900 mb-3">{{ card.article.title or card.article.url }}</h2>
-        {% if card.article.author or card.article.publish_date %}
-        <div class="text-sm text-gray-600 mb-4">
-          {% if card.article.author %}By {{ card.article.author }}{% endif %}
-          {% if card.article.author and card.article.publish_date %} • {% endif %}
-          {% if card.article.publish_date %}{{ card.article.publish_date }}{% endif %}
-        </div>
-        {% endif %}
-        {% if card.article.summary %}
-        <p class="prose-content">{{ card.article.summary }}</p>
-        {% endif %}
-      </div>
-      <div class="score-badge-large">{{ '%.1f' % card.overall_score }}</div>
-    </div>
-
-    <!-- Metrics Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-      <div class="metric-card">
-        <div class="flex justify-between items-center mb-3">
-          <span class="metric-label">Readability</span>
-          <span class="metric-value">{{ '%.1f' % card.readability_score }}</span>
-        </div>
-        <div class="progress-bar">
-          <div class="progress-fill bg-blue-500" style="width: {{ card.readability_score }}%"></div>
-        </div>
-      </div>
-      <div class="metric-card">
-        <div class="flex justify-between items-center mb-3">
-          <span class="metric-label">NER Density</span>
-          <span class="metric-value">{{ '%.1f' % card.ner_density_score }}</span>
-        </div>
-        <div class="progress-bar">
-          <div class="progress-fill bg-green-500" style="width: {{ card.ner_density_score }}%"></div>
-        </div>
-      </div>
-      <div class="metric-card">
-        <div class="flex justify-between items-center mb-3">
-          <span class="metric-label">Sentiment</span>
-          <span class="metric-value">{{ '%.1f' % card.sentiment_score }}</span>
-        </div>
-        <div class="progress-bar">
-          <div class="progress-fill bg-orange-500" style="width: {{ card.sentiment_score }}%"></div>
-        </div>
-      </div>
-      <div class="metric-card">
-        <div class="flex justify-between items-center mb-3">
-          <span class="metric-label">Relevance</span>
-          <span class="metric-value">{{ '%.1f' % card.tfidf_relevance_score }}</span>
-        </div>
-        <div class="progress-bar">
-          <div class="progress-fill bg-purple-500" style="width: {{ card.tfidf_relevance_score }}%"></div>
-        </div>
-      </div>
-      <div class="metric-card">
-        <div class="flex justify-between items-center mb-3">
-          <span class="metric-label">Recency</span>
-          <span class="metric-value">{{ '%.1f' % card.recency_score }}</span>
-        </div>
-        <div class="progress-bar">
-          <div class="progress-fill bg-pink-500" style="width: {{ card.recency_score }}%"></div>
-        </div>
-      </div>
+<!-- Results Page with High Contrast Design -->
+<div class="relative min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-12">
+  <div class="max-w-7xl mx-auto px-6">
+    
+    <!-- Header Card -->
+    <div class="group relative mb-12">
+      <!-- Glow Effect -->
+      <div class="absolute -inset-2 bg-gradient-to-r from-emerald-600 via-green-500 to-emerald-600 rounded-3xl blur-2xl opacity-50 group-hover:opacity-80 transition duration-1000 animate-pulse"></div>
       
-      <div class="metric-card">
-        <div class="flex justify-between items-center mb-3">
-          <span class="metric-label">Reputation</span>
-          <span class="metric-value">{{ '%.1f' % card.reputation_score }}</span>
-        </div>
-        <div class="progress-bar">
-          <div class="progress-fill bg-teal-500" style="width: {{ card.reputation_score }}%"></div>
+      <!-- Card Content -->
+      <div class="relative bg-white rounded-3xl shadow-2xl border-4 border-emerald-200 overflow-hidden">
+        <!-- Header with Gradient -->
+        <div class="bg-gradient-to-r from-emerald-600 via-green-500 to-emerald-600 p-10 text-white relative overflow-hidden">
+          <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.15"%3E%3Ccircle cx="30" cy="30" r="3"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-30"></div>
+          
+          <div class="relative flex items-center gap-8">
+            <div class="h-20 w-20 bg-white/25 backdrop-blur-sm rounded-3xl flex items-center justify-center shadow-2xl border-2 border-white/40">
+              <i class="fa-solid fa-chart-bar text-white text-3xl"></i>
+            </div>
+            <div>
+              <h1 class="text-4xl font-black mb-3 tracking-tight">ANALYSIS RESULTS</h1>
+              <p class="text-white/90 font-semibold text-lg">View and manage your content analysis history</p>
+              <div class="flex items-center gap-3 mt-4">
+                <i class="fa-solid fa-history text-green-300 text-xl"></i>
+                <span class="text-base text-white/80 font-medium">Analysis History</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Additional Information -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-      <div class="stats-section">
-        <h3 class="section-title">Article Statistics</h3>
-        <div class="stats-grid">
-          <div class="stat-item">
-            <span class="stat-label">Word Count:</span>
-            <span class="stat-value">{{ (card.article.content.split()|length) if card.article.content else 'N/A' }}</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">Entities Found:</span>
-            <span class="stat-value">{{ card.article.entities|length if card.article.entities else 0 }}</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">Source Domain:</span>
-            <span class="stat-value">{{ card.article.url.split('/')[2] if card.article.url else 'N/A' }}</span>
-          </div>
-        </div>
-      </div>
+    <!-- Results Content -->
+    <div class="group relative mb-12">
+      <!-- Glow Effect -->
+      <div class="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-green-500 rounded-3xl blur opacity-30 group-hover:opacity-60 transition duration-1000"></div>
       
-      {% if card.article.entities %}
-      <div class="entities-section">
-        <h3 class="section-title">Named Entities</h3>
-        <div class="entities-list">
-          {% for e in card.article.entities[:12] %}
-            <span class="entity-chip">{{ e.label }}: {{ e.text }}</span>
-          {% endfor %}
+      <!-- Content Card -->
+      <div class="relative bg-white rounded-3xl shadow-2xl border-4 border-emerald-200 overflow-hidden hover:shadow-3xl transition-all duration-700 hover:-translate-y-1">
+        <div class="p-10">
+          <!-- Coming Soon Message -->
+          <div class="text-center py-16">
+            <div class="h-32 w-32 bg-gradient-to-br from-emerald-500 to-green-500 rounded-full flex items-center justify-center mx-auto mb-8 shadow-2xl border-4 border-emerald-300">
+              <i class="fa-solid fa-clock text-white text-5xl"></i>
+            </div>
+            
+            <h2 class="text-4xl font-black text-gray-900 mb-6">Results Dashboard Coming Soon</h2>
+            <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed font-medium">
+              We're working on a comprehensive results dashboard that will allow you to view, manage, and export your content analysis history.
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto mb-12">
+              <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border-4 border-blue-300 shadow-xl">
+                <div class="h-16 w-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                  <i class="fa-solid fa-history text-white text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Analysis History</h3>
+                <p class="text-gray-600 font-medium">View all your previous content analyses with detailed metrics and insights</p>
+              </div>
+              
+              <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border-4 border-purple-300 shadow-xl">
+                <div class="h-16 w-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                  <i class="fa-solid fa-download text-white text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Export & Share</h3>
+                <p class="text-gray-600 font-medium">Export your results in multiple formats and share insights with your team</p>
+              </div>
+              
+              <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border-4 border-green-300 shadow-xl">
+                <div class="h-16 w-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                  <i class="fa-solid fa-chart-line text-white text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Trends & Analytics</h3>
+                <p class="text-gray-600 font-medium">Track content quality trends and analyze patterns over time</p>
+              </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap gap-6 justify-center">
+              <a href="/analyze" class="group/btn bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 text-white font-black py-4 px-8 rounded-2xl hover:from-blue-700 hover:via-cyan-600 hover:to-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1 uppercase tracking-wider text-lg">
+                <div class="flex items-center gap-3">
+                  <i class="fa-solid fa-magnifying-glass-chart text-xl"></i>
+                  <span>Analyze Article</span>
+                  <i class="fa-solid fa-arrow-right group-hover/btn:translate-x-2 transition-transform duration-300"></i>
+                </div>
+              </a>
+              
+              <a href="/curate" class="group/btn bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 text-white font-black py-4 px-8 rounded-2xl hover:from-purple-700 hover:via-pink-600 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-purple-500 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1 uppercase tracking-wider text-lg">
+                <div class="flex items-center gap-3">
+                  <i class="fa-solid fa-layer-group text-xl"></i>
+                  <span>Curate Topic</span>
+                  <i class="fa-solid fa-arrow-right group-hover/btn:translate-x-2 transition-transform duration-300"></i>
+                </div>
+              </a>
+            </div>
+          </div>
         </div>
       </div>
-      {% endif %}
     </div>
 
-    <!-- Action Buttons -->
-    <div class="flex flex-wrap gap-3 pt-6 border-t border-gray-200">
-      <a href="{{ card.article.url }}" target="_blank" rel="noopener" class="btn-primary">
-        <i class="fa-solid fa-arrow-up-right-from-square"></i>
-        <span>View Original Article</span>
-      </a>
-      <a href="/" class="btn-secondary">
-        <i class="fa-solid fa-house"></i>
-        <span>Back to Home</span>
+    <!-- Navigation -->
+    <div class="mt-16 text-center">
+      <a href="/" class="group relative inline-block">
+        <div class="absolute -inset-2 bg-gradient-to-r from-emerald-600 via-green-500 to-emerald-600 rounded-2xl blur opacity-50 group-hover:opacity-80 transition duration-1000"></div>
+        <div class="relative bg-gradient-to-r from-emerald-600 via-green-500 to-emerald-600 text-white font-black py-6 px-12 rounded-2xl hover:from-emerald-700 hover:via-green-600 hover:to-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-500 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1 uppercase tracking-wider text-xl">
+          <div class="flex items-center gap-4">
+            <i class="fa-solid fa-house text-2xl"></i>
+            <span>Back to Dashboard</span>
+            <i class="fa-solid fa-arrow-right group-hover:translate-x-2 transition-transform duration-300"></i>
+          </div>
+        </div>
       </a>
     </div>
   </div>
 </div>
 {% endblock %}
-
-

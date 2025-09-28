@@ -25,6 +25,96 @@ def create_app():
         """Homepage with input forms for manual analysis and topic curation"""
         return render_template('index.html')
 
+    @app.route('/analyze', methods=['GET'])
+    def analyze_page():
+        """Article analysis page."""
+        return render_template('analyze.html')
+
+    @app.route('/curate', methods=['GET'])
+    def curate_page():
+        """Topic curation page."""
+        return render_template('curate.html')
+
+    @app.route('/results', methods=['GET'])
+    def results_page():
+        """Results page for viewing analysis history."""
+        return render_template('results.html')
+
+    @app.route('/plagiarism', methods=['GET'])
+    def plagiarism_page():
+        """Plagiarism detection page."""
+        return render_template('plagiarism.html')
+
+    @app.route('/plagiarism', methods=['POST'])
+    def plagiarism_detect():
+        """Plagiarism detection API endpoint."""
+        try:
+            data = request.get_json(silent=True) or request.form
+            
+            # Get content to check
+            content = (data.get('content') or '').strip()
+            url = (data.get('url') or '').strip()
+            
+            # Get detection options
+            deep_search = str(data.get('deep_search', 'false')).lower() in {'true', '1', 'yes', 'on'}
+            citation_check = str(data.get('citation_check', 'false')).lower() in {'true', '1', 'yes', 'on'}
+            paraphrase_check = str(data.get('paraphrase_check', 'true')).lower() in {'true', '1', 'yes', 'on'}
+            
+            # If URL provided, parse content from it
+            if url and not content:
+                from curator.services.parser import parse_article
+                article = parse_article(url)
+                content = article.content if article else ''
+            
+            if not content or len(content.split()) < 10:
+                if request.is_json:
+                    return jsonify({'error': 'Content must be at least 10 words long'}), 400
+                return render_template('errors/400.html', message='Content must be at least 10 words long'), 400
+            
+            # Mock plagiarism detection results (replace with actual implementation)
+            import random
+            
+            # Simulate plagiarism detection
+            originality_score = random.randint(75, 95)  # Mock score
+            similarity_sources = []
+            
+            if originality_score < 85:
+                # Add some mock similarity sources
+                sources = [
+                    {'url': 'https://example.com/article1', 'title': 'Similar Article 1', 'similarity': random.randint(15, 45)},
+                    {'url': 'https://example.com/article2', 'title': 'Similar Article 2', 'similarity': random.randint(10, 30)}
+                ]
+                similarity_sources = sources
+            
+            # Generate mock analysis
+            analysis = {
+                'originality_score': originality_score,
+                'similarity_sources': similarity_sources,
+                'total_words': len(content.split()),
+                'analyzed_sources': random.randint(1000, 5000) if deep_search else random.randint(100, 500),
+                'recommendations': []
+            }
+            
+            # Add recommendations based on score
+            if originality_score < 80:
+                analysis['recommendations'].append('Consider rewriting sections with high similarity')
+                analysis['recommendations'].append('Add proper citations where applicable')
+            elif originality_score < 90:
+                analysis['recommendations'].append('Content is mostly original with minor similarities')
+            else:
+                analysis['recommendations'].append('Excellent! Content appears to be highly original')
+            
+            if request.is_json:
+                return jsonify(analysis)
+            
+            # For form submissions, redirect back to page with results
+            return render_template('plagiarism.html', results=analysis)
+            
+        except Exception as e:
+            if request.is_json:
+                return jsonify({'error': f'Plagiarism detection failed: {str(e)}'}), 500
+            return render_template('errors/500.html', message=f'Plagiarism detection failed: {str(e)}'), 500
+
     @app.route('/compare', methods=['GET'])
     def compare_page():
         """Similarity comparison page."""
@@ -201,7 +291,7 @@ def create_app():
                 return jsonify({'error': f'Analysis failed: {str(e)}'}), 500
             return render_template('errors/500.html', message=f'Analysis failed: {str(e)}'), 500
     
-    @app.route('/curate-topic', methods=['POST'])
+    @app.route('/curate', methods=['POST'])
     def curate_topic():
         """Topic-based curation endpoint with optional background processing"""
         from curator.services.analyzer import batch_analyze
@@ -549,6 +639,6 @@ if __name__ == '__main__':
     debug_mode = os.environ.get('FLASK_ENV') == 'development'
     app.run(
         host='0.0.0.0',
-        port=int(os.environ.get('PORT', 5000)),
+        port=int(os.environ.get('PORT', 7000)),
         debug=debug_mode
     )

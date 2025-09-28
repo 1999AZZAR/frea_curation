@@ -5,53 +5,120 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}AI Content Curator{% endblock %}</title>
   <meta name="color-scheme" content="light">
-  <!-- Compiled Tailwind CSS -->
-  <link rel="stylesheet" href="/static/css/tailwind.css" />
-  <!-- App UI overrides -->
-  <link rel="stylesheet" href="/static/css/ui.css" />
-  <!-- Font Awesome -->
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-5o4kFfN2+6V2hK0m0m9mH7jJc4Q0D3ZP1T0p7l+zjz0xZPjZcQx2C3q2C2x0iXlJ0h3m8b3zJv9s8c6yEo6bWg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <!-- Inter font for professional typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..900;1,14..32,300..900&display=swap" rel="stylesheet">
+  <!-- Custom Tailwind Configuration -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            'inter': ['Inter', 'system-ui', 'sans-serif'],
+          },
+          animation: {
+            'blob': 'blob 7s infinite',
+            'gradient-x': 'gradient-x 3s ease infinite',
+            'fade-in-up': 'fade-in-up 0.8s ease-out forwards',
+            'tilt': 'tilt 10s infinite',
+            'float': 'float 3s ease-in-out infinite',
+          },
+          keyframes: {
+            blob: {
+              '0%': { transform: 'translate(0px, 0px) scale(1)' },
+              '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+              '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+              '100%': { transform: 'translate(0px, 0px) scale(1)' },
+            },
+            'gradient-x': {
+              '0%, 100%': { 'background-size': '200% 200%', 'background-position': 'left center' },
+              '50%': { 'background-size': '200% 200%', 'background-position': 'right center' },
+            },
+            'fade-in-up': {
+              '0%': { opacity: '0', transform: 'translateY(30px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            tilt: {
+              '0%, 50%, 100%': { transform: 'rotate(0deg)' },
+              '25%': { transform: 'rotate(1deg)' },
+              '75%': { transform: 'rotate(-1deg)' },
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-20px)' },
+            },
+          },
+          boxShadow: {
+            '3xl': '0 35px 60px -12px rgba(0, 0, 0, 0.25)',
+          },
+          backdropBlur: {
+            '2xl': '40px',
+          },
+          borderRadius: {
+            '3xl': '2rem',
+          },
+          animationDelay: {
+            '200': '0.2s',
+            '400': '0.4s',
+            '600': '0.6s',
+            '1000': '1s',
+            '2000': '2s',
+            '4000': '4s',
+          },
+        }
+      }
+    }
+  </script>
   {% block head %}{% endblock %}
 </head>
 <body class="h-full bg-gray-50 text-gray-900 font-inter">
   <div class="min-h-full">
     <!-- Navigation -->
-    <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex h-16 items-center justify-between">
+    <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-white/20 shadow-lg">
+      <div class="max-w-8xl mx-auto px-6 sm:px-8 lg:px-12">
+        <div class="flex h-20 items-center justify-between">
           <div class="flex items-center space-x-4">
             <div class="flex items-center space-x-3">
-              <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-lg">
-                <i class="fa-solid fa-brain text-white text-lg"></i>
+              <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 flex items-center justify-center shadow-xl">
+                <i class="fa-solid fa-brain text-white text-xl"></i>
               </div>
               <div>
-                <a href="/" class="text-xl font-bold text-gray-900 tracking-tight">AI Content Curator</a>
-                <p class="text-xs text-gray-500 font-medium">Intelligent Content Analysis</p>
+                <a href="/" class="text-2xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent tracking-tight">AI Content Curator</a>
+                <p class="text-xs text-gray-600 font-medium">Intelligent Content Analysis</p>
               </div>
             </div>
           </div>
           <div class="hidden md:flex items-center space-x-8">
-            <a href="#analyze" class="nav-link group">
+            <a href="/analyze" class="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 group">
               <i class="fa-solid fa-magnifying-glass-chart text-blue-600 group-hover:text-blue-700"></i>
-              <span>Analyze</span>
+              <span class="font-medium">Analyze</span>
             </a>
-            <a href="#curate" class="nav-link group">
+            <a href="/curate" class="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-700 hover:text-purple-600 hover:bg-purple-50 transition-all duration-200 group">
               <i class="fa-solid fa-layer-group text-purple-600 group-hover:text-purple-700"></i>
-              <span>Curate</span>
+              <span class="font-medium">Curate</span>
             </a>
-            <a href="/compare" class="nav-link group">
+            <a href="/plagiarism" class="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-200 group">
+              <i class="fa-solid fa-shield-halved text-red-600 group-hover:text-red-700"></i>
+              <span class="font-medium">Plagiarism</span>
+            </a>
+            <a href="/results" class="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-700 hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-200 group">
+              <i class="fa-solid fa-chart-bar text-emerald-600 group-hover:text-emerald-700"></i>
+              <span class="font-medium">Results</span>
+            </a>
+            <a href="/compare" class="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-700 hover:text-green-600 hover:bg-green-50 transition-all duration-200 group">
               <i class="fa-solid fa-code-compare text-green-600 group-hover:text-green-700"></i>
-              <span>Compare</span>
+              <span class="font-medium">Compare</span>
             </a>
           </div>
           <!-- Mobile menu button -->
           <div class="md:hidden">
-            <button type="button" class="mobile-menu-btn p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100">
-              <i class="fa-solid fa-bars"></i>
+            <button type="button" class="mobile-menu-btn p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200">
+              <i class="fa-solid fa-bars text-lg"></i>
             </button>
           </div>
         </div>
@@ -59,33 +126,41 @@
       <!-- Mobile menu -->
       <div class="mobile-menu hidden md:hidden bg-white border-t border-gray-200">
         <div class="px-4 py-3 space-y-2">
-          <a href="#analyze" class="mobile-nav-link">
-            <i class="fa-solid fa-magnifying-glass-chart text-blue-600"></i>
-            <span>Analyze</span>
+          <a href="/analyze" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+            <i class="fa-solid fa-magnifying-glass-chart text-blue-600 text-lg"></i>
+            <span class="font-medium">Analyze</span>
           </a>
-          <a href="#curate" class="mobile-nav-link">
-            <i class="fa-solid fa-layer-group text-purple-600"></i>
-            <span>Curate</span>
+          <a href="/curate" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:text-purple-600 hover:bg-purple-50 transition-all duration-200">
+            <i class="fa-solid fa-layer-group text-purple-600 text-lg"></i>
+            <span class="font-medium">Curate</span>
           </a>
-          <a href="/compare" class="mobile-nav-link">
-            <i class="fa-solid fa-code-compare text-green-600"></i>
-            <span>Compare</span>
+          <a href="/plagiarism" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-200">
+            <i class="fa-solid fa-shield-halved text-red-600 text-lg"></i>
+            <span class="font-medium">Plagiarism</span>
+          </a>
+          <a href="/results" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-200">
+            <i class="fa-solid fa-chart-bar text-emerald-600 text-lg"></i>
+            <span class="font-medium">Results</span>
+          </a>
+          <a href="/compare" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:text-green-600 hover:bg-green-50 transition-all duration-200">
+            <i class="fa-solid fa-code-compare text-green-600 text-lg"></i>
+            <span class="font-medium">Compare</span>
           </a>
         </div>
       </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="max-w-8xl mx-auto px-6 sm:px-8 lg:px-12 py-12">
       {% block content %}{% endblock %}
     </main>
 
-    <footer class="mt-16 border-t border-gray-200 bg-white">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <footer class="mt-20 border-t border-white/20 bg-white/60 backdrop-blur-md">
+      <div class="max-w-8xl mx-auto px-6 sm:px-8 lg:px-12 py-12">
         <div class="text-center">
-          <p class="text-sm text-gray-500">
-            Powered by <span class="font-medium">Flask</span> • <span class="font-medium">spaCy</span> • <span class="font-medium">VADER</span> • <span class="font-medium">scikit‑learn</span> • <span class="font-medium">NewsAPI</span>
+          <p class="text-sm text-gray-600">
+            Powered by <span class="font-semibold text-indigo-600">Flask</span> • <span class="font-semibold text-purple-600">spaCy</span> • <span class="font-semibold text-pink-600">VADER</span> • <span class="font-semibold text-blue-600">scikit‑learn</span> • <span class="font-semibold text-green-600">NewsAPI</span>
           </p>
-          <p class="text-xs text-gray-400 mt-2">© 2025 AI Content Curator. Built for intelligent content analysis.</p>
+          <p class="text-xs text-gray-500 mt-2">© 2025 AI Content Curator. Built for intelligent content analysis.</p>
         </div>
       </div>
     </footer>
@@ -105,20 +180,10 @@
         });
       }
 
-      // Navigation link handlers
-      var links = document.querySelectorAll('nav a[href="#analyze"], nav a[href="#curate"]');
-      links.forEach(function(a){
-        a.addEventListener('click', function(e){
-          var hash = a.getAttribute('href');
-          var tab = hash && hash.replace('#','');
-          var btn = document.querySelector('.tab-btn[data-tab="'+tab+'"]');
-          var panel = document.getElementById('panel-' + tab);
-          if(btn && panel){
-            e.preventDefault();
-            btn.click();
-            window.scrollTo({top: 0, behavior: 'smooth'});
-          }
-          // Close mobile menu
+      // Close mobile menu when clicking on navigation links
+      var navLinks = document.querySelectorAll('.mobile-menu a');
+      navLinks.forEach(function(link){
+        link.addEventListener('click', function(){
           if (mobileMenu) {
             mobileMenu.classList.add('hidden');
           }

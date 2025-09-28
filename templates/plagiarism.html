@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+
+{% block title %}Plagiarism Detection • AI Content Curator{% endblock %}
+
+{% block content %}
+<!-- Plagiarism Detection Page with High Contrast Design -->
+<div class="relative min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-12">
+  <div class="max-w-6xl mx-auto px-6">
+    
+    <!-- Header Card -->
+    <div class="group relative mb-12">
+      <!-- Glow Effect -->
+      <div class="absolute -inset-2 bg-gradient-to-r from-red-600 via-orange-500 to-red-600 rounded-3xl blur-2xl opacity-50 group-hover:opacity-80 transition duration-1000 animate-pulse"></div>
+      
+      <!-- Card Content -->
+      <div class="relative bg-white rounded-3xl shadow-2xl border-4 border-red-200 overflow-hidden">
+        <!-- Header with Gradient -->
+        <div class="bg-gradient-to-r from-red-600 via-orange-500 to-red-600 p-10 text-white relative overflow-hidden">
+          <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.15"%3E%3Ccircle cx="30" cy="30" r="3"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-30"></div>
+          
+          <div class="relative flex items-center gap-8">
+            <div class="h-20 w-20 bg-white/25 backdrop-blur-sm rounded-3xl flex items-center justify-center shadow-2xl border-2 border-white/40">
+              <i class="fa-solid fa-shield-halved text-white text-3xl"></i>
+            </div>
+            <div>
+              <h1 class="text-4xl font-black mb-3 tracking-tight">PLAGIARISM DETECTION</h1>
+              <p class="text-white/90 font-semibold text-lg">Advanced content originality verification</p>
+              <div class="flex items-center gap-3 mt-4">
+                <i class="fa-solid fa-search-plus text-orange-300 text-xl"></i>
+                <span class="text-base text-white/80 font-medium">Deep Content Analysis</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Plagiarism Detection Form Card -->
+    <div class="group relative mb-12">
+      <!-- Glow Effect -->
+      <div class="absolute -inset-1 bg-gradient-to-r from-red-500 to-orange-500 rounded-3xl blur opacity-30 group-hover:opacity-60 transition duration-1000"></div>
+      
+      <!-- Form Card -->
+      <div class="relative bg-white rounded-3xl shadow-2xl border-4 border-red-200 overflow-hidden hover:shadow-3xl transition-all duration-700 hover:-translate-y-1">
+        <div class="p-10">
+          <form id="plagiarism-form" class="space-y-10">
+            <!-- Content Input -->
+            <div class="space-y-4">
+              <label for="plagiarism-content" class="flex items-center gap-3 text-lg font-black text-gray-900 uppercase tracking-wider">
+                <i class="fa-solid fa-file-text text-red-600 text-xl"></i>
+                Content to Check
+              </label>
+              <div class="relative group">
+                <textarea id="plagiarism-content" class="w-full px-8 py-6 bg-white border-4 border-red-200 rounded-2xl focus:ring-4 focus:ring-red-500 focus:border-red-500 transition-all duration-300 placeholder-gray-500 font-semibold text-lg shadow-lg hover:shadow-xl resize-none" rows="8" placeholder="Paste your content here to check for plagiarism..." required></textarea>
+              </div>
+              <p class="text-base text-gray-600 flex items-center gap-3 font-medium">
+                <i class="fa-solid fa-info-circle text-blue-600 text-lg"></i>
+                Minimum 50 words required for accurate plagiarism detection
+              </p>
+            </div>
+
+            <!-- URL Input (Alternative) -->
+            <div class="space-y-4">
+              <label for="plagiarism-url" class="flex items-center gap-3 text-lg font-black text-gray-900 uppercase tracking-wider">
+                <i class="fa-solid fa-link text-orange-600 text-xl"></i>
+                Or Check by URL (Alternative)
+              </label>
+              <div class="relative group">
+                <input type="url" id="plagiarism-url" class="w-full px-8 py-6 pl-16 bg-white border-4 border-orange-200 rounded-2xl focus:ring-4 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300 placeholder-gray-500 font-semibold text-lg shadow-lg hover:shadow-xl" placeholder="https://example.com/article">
+                <i class="fa-solid fa-link absolute left-6 top-1/2 transform -translate-y-1/2 text-orange-600 text-xl"></i>
+              </div>
+            </div>
+
+            <!-- Detection Options -->
+            <div class="space-y-6">
+              <!-- Search Depth Option -->
+              <div class="bg-gradient-to-r from-red-100 to-orange-100 rounded-2xl p-8 border-4 border-red-300">
+                <div class="flex items-start gap-6">
+                  <input id="deep-search" type="checkbox" checked class="mt-2 h-6 w-6 text-red-600 border-4 border-red-400 rounded focus:ring-red-500 focus:ring-offset-2 transition-all duration-200">
+                  <div>
+                    <label for="deep-search" class="flex items-center gap-3 text-xl font-black text-gray-900 cursor-pointer">
+                      <i class="fa-solid fa-search-plus text-red-600 text-2xl"></i>
+                      Deep Search Mode
+                    </label>
+                    <p class="text-base text-gray-700 mt-3 leading-relaxed font-medium">Enable comprehensive search across academic databases, news sources, and web content for maximum accuracy</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Citation Detection Option -->
+              <div class="bg-gradient-to-r from-orange-100 to-yellow-100 rounded-2xl p-8 border-4 border-orange-300">
+                <div class="flex items-start gap-6">
+                  <input id="citation-check" type="checkbox" class="mt-2 h-6 w-6 text-orange-600 border-4 border-orange-400 rounded focus:ring-orange-500 focus:ring-offset-2 transition-all duration-200">
+                  <div>
+                    <label for="citation-check" class="flex items-center gap-3 text-xl font-black text-gray-900 cursor-pointer">
+                      <i class="fa-solid fa-quote-left text-orange-600 text-2xl"></i>
+                      Citation Detection
+                    </label>
+                    <p class="text-base text-gray-700 mt-3 leading-relaxed font-medium">Identify properly cited content and distinguish between original and referenced material</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Paraphrasing Detection Option -->
+              <div class="bg-gradient-to-r from-yellow-100 to-red-100 rounded-2xl p-8 border-4 border-yellow-300">
+                <div class="flex items-start gap-6">
+                  <input id="paraphrase-check" type="checkbox" checked class="mt-2 h-6 w-6 text-yellow-600 border-4 border-yellow-400 rounded focus:ring-yellow-500 focus:ring-offset-2 transition-all duration-200">
+                  <div>
+                    <label for="paraphrase-check" class="flex items-center gap-3 text-xl font-black text-gray-900 cursor-pointer">
+                      <i class="fa-solid fa-language text-yellow-600 text-2xl"></i>
+                      Paraphrasing Detection
+                    </label>
+                    <p class="text-base text-gray-700 mt-3 leading-relaxed font-medium">Detect sophisticated paraphrasing and rewording attempts using advanced AI algorithms</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="group relative w-full bg-gradient-to-r from-red-600 via-orange-500 to-red-600 text-white font-black py-6 px-10 rounded-2xl hover:from-red-700 hover:via-orange-600 hover:to-red-700 focus:outline-none focus:ring-4 focus:ring-red-500 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1 uppercase tracking-wider text-xl">
+              <div class="relative flex items-center justify-center gap-4">
+                <i class="fa-solid fa-shield-halved text-2xl"></i>
+                <span>Check for Plagiarism</span>
+                <i class="fa-solid fa-arrow-right group-hover:translate-x-3 transition-transform duration-300"></i>
+              </div>
+            </button>
+
+            <!-- Loading State -->
+            <div id="plagiarism-loading" class="hidden flex items-center justify-center gap-4 text-red-600 py-8">
+              <div class="animate-spin rounded-full h-8 w-8 border-4 border-red-600 border-t-transparent"></div>
+              <span class="font-bold text-xl">Analyzing content for plagiarism...</span>
+            </div>
+
+            <!-- Error State -->
+            <div id="plagiarism-error" class="hidden bg-gradient-to-r from-red-50 to-pink-50 border-4 border-red-300 rounded-2xl p-6 mt-6">
+              <div class="flex items-center gap-4">
+                <i class="fa-solid fa-exclamation-triangle text-red-600 text-2xl"></i>
+                <span class="text-lg font-bold text-red-800"></span>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Section -->
+    <div id="plagiarism-results" class="hidden">
+      <div class="group relative">
+        <!-- Glow Effect -->
+        <div class="absolute -inset-2 bg-gradient-to-r from-green-600 via-emerald-500 to-green-600 rounded-3xl blur-2xl opacity-50 group-hover:opacity-80 transition duration-1000 animate-pulse"></div>
+        
+        <!-- Results Card -->
+        <div class="relative bg-white rounded-3xl shadow-2xl border-4 border-green-200 overflow-hidden hover:shadow-3xl transition-all duration-700">
+          <!-- Header with Strong Gradient -->
+          <div class="bg-gradient-to-r from-green-600 via-emerald-500 to-green-600 p-10 text-white relative overflow-hidden">
+            <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.15"%3E%3Ccircle cx="30" cy="30" r="3"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-30"></div>
+            
+            <div class="relative flex items-center gap-8">
+              <div class="h-20 w-20 bg-white/25 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-2xl border-2 border-white/40">
+                <i class="fa-solid fa-check-circle text-white text-3xl"></i>
+              </div>
+              <div>
+                <h3 class="text-3xl font-black mb-3 tracking-tight">PLAGIARISM REPORT</h3>
+                <p class="text-white/90 font-semibold text-lg">Content originality analysis complete</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Results Content -->
+          <div class="p-10 bg-gray-50">
+            <!-- Overall Score -->
+            <div class="text-center mb-10">
+              <div class="inline-flex items-center justify-center">
+                <div class="h-32 w-32 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center shadow-2xl border-4 border-green-300">
+                  <div class="text-center">
+                    <div class="text-4xl font-black text-white" id="originality-score">0%</div>
+                    <div class="text-sm font-bold text-white/90">ORIGINAL</div>
+                  </div>
+                </div>
+              </div>
+              <h4 class="text-2xl font-black text-gray-900 mt-6" id="originality-status">Content Analysis</h4>
+            </div>
+
+            <!-- Detailed Results -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+              <!-- Similarity Sources -->
+              <div class="bg-gradient-to-r from-red-50 to-pink-50 rounded-2xl p-8 border-4 border-red-300 shadow-xl">
+                <div class="flex items-center gap-4 mb-6">
+                  <div class="h-12 w-12 bg-gradient-to-br from-red-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
+                    <i class="fa-solid fa-exclamation-triangle text-white text-xl"></i>
+                  </div>
+                  <h4 class="text-2xl font-black text-gray-900">Similar Content Found</h4>
+                </div>
+                <div id="similarity-sources" class="space-y-4">
+                  <!-- Similarity sources will be populated here -->
+                </div>
+              </div>
+
+              <!-- Analysis Summary -->
+              <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-8 border-4 border-blue-300 shadow-xl">
+                <div class="flex items-center gap-4 mb-6">
+                  <div class="h-12 w-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg">
+                    <i class="fa-solid fa-chart-pie text-white text-xl"></i>
+                  </div>
+                  <h4 class="text-2xl font-black text-gray-900">Analysis Summary</h4>
+                </div>
+                <div id="analysis-summary" class="space-y-4">
+                  <!-- Analysis summary will be populated here -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-8 border-4 border-yellow-300 shadow-xl mb-10">
+              <div class="flex items-center gap-4 mb-6">
+                <div class="h-12 w-12 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center shadow-lg">
+                  <i class="fa-solid fa-lightbulb text-white text-xl"></i>
+                </div>
+                <h4 class="text-2xl font-black text-gray-900">Recommendations</h4>
+              </div>
+              <div id="recommendations" class="space-y-4">
+                <!-- Recommendations will be populated here -->
+              </div>
+            </div>
+
+            <!-- Export Options -->
+            <div class="flex flex-wrap gap-6 pt-8 border-t-4 border-gray-200">
+              <button id="plagiarism-export-pdf" type="button" class="group/btn bg-gradient-to-r from-red-600 via-orange-500 to-red-600 text-white font-black py-4 px-8 rounded-2xl hover:from-red-700 hover:via-orange-600 hover:to-red-700 focus:outline-none focus:ring-4 focus:ring-red-500 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1 uppercase tracking-wider text-lg">
+                <div class="flex items-center gap-3">
+                  <i class="fa-solid fa-file-pdf text-xl"></i>
+                  <span>Export PDF Report</span>
+                  <i class="fa-solid fa-arrow-right group-hover/btn:translate-x-2 transition-transform duration-300"></i>
+                </div>
+              </button>
+              <button id="plagiarism-export-docx" type="button" class="group/btn bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 text-white font-black py-4 px-8 rounded-2xl hover:from-blue-700 hover:via-cyan-600 hover:to-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1 uppercase tracking-wider text-lg">
+                <div class="flex items-center gap-3">
+                  <i class="fa-solid fa-file-word text-xl"></i>
+                  <span>Export Word Report</span>
+                  <i class="fa-solid fa-arrow-right group-hover/btn:translate-x-2 transition-transform duration-300"></i>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="mt-16 text-center">
+      <a href="/" class="group relative inline-block">
+        <div class="absolute -inset-2 bg-gradient-to-r from-red-600 via-orange-500 to-red-600 rounded-2xl blur opacity-50 group-hover:opacity-80 transition duration-1000"></div>
+        <div class="relative bg-gradient-to-r from-red-600 via-orange-500 to-red-600 text-white font-black py-6 px-12 rounded-2xl hover:from-red-700 hover:via-orange-600 hover:to-red-700 focus:outline-none focus:ring-4 focus:ring-red-500 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1 uppercase tracking-wider text-xl">
+          <div class="flex items-center gap-4">
+            <i class="fa-solid fa-house text-2xl"></i>
+            <span>Back to Dashboard</span>
+            <i class="fa-solid fa-arrow-right group-hover:translate-x-2 transition-transform duration-300"></i>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

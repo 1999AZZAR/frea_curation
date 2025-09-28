@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+
+{% block title %}Analyze Article • AI Content Curator{% endblock %}
+
+{% block content %}
+<!-- Analyze Article Page with High Contrast Design -->
+<div class="relative min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-12">
+  <div class="max-w-5xl mx-auto px-6">
+    
+    <!-- Header Card -->
+    <div class="group relative mb-12">
+      <!-- Glow Effect -->
+      <div class="absolute -inset-2 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 rounded-3xl blur-2xl opacity-50 group-hover:opacity-80 transition duration-1000 animate-pulse"></div>
+      
+      <!-- Card Content -->
+      <div class="relative bg-white rounded-3xl shadow-2xl border-4 border-blue-200 overflow-hidden">
+        <!-- Header with Gradient -->
+        <div class="bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 p-10 text-white relative overflow-hidden">
+          <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.15"%3E%3Ccircle cx="30" cy="30" r="3"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-30"></div>
+          
+          <div class="relative flex items-center gap-8">
+            <div class="h-20 w-20 bg-white/25 backdrop-blur-sm rounded-3xl flex items-center justify-center shadow-2xl border-2 border-white/40">
+              <i class="fa-solid fa-magnifying-glass-chart text-white text-3xl"></i>
+            </div>
+            <div>
+              <h1 class="text-4xl font-black mb-3 tracking-tight">ANALYZE ARTICLE</h1>
+              <p class="text-white/90 font-semibold text-lg">Deep analysis of individual content</p>
+              <div class="flex items-center gap-3 mt-4">
+                <i class="fa-solid fa-brain text-cyan-300 text-xl"></i>
+                <span class="text-base text-white/80 font-medium">AI-Powered Intelligence</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analyze Form Card -->
+    <div class="group relative mb-12">
+      <!-- Glow Effect -->
+      <div class="absolute -inset-1 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-3xl blur opacity-30 group-hover:opacity-60 transition duration-1000"></div>
+      
+      <!-- Form Card -->
+      <div class="relative bg-white rounded-3xl shadow-2xl border-4 border-blue-200 overflow-hidden hover:shadow-3xl transition-all duration-700 hover:-translate-y-1">
+        <div class="p-10">
+          <form id="analyze-form" class="space-y-10">
+            <!-- URL Input -->
+            <div class="space-y-4">
+              <label for="analyze-url" class="flex items-center gap-3 text-lg font-black text-gray-900 uppercase tracking-wider">
+                <i class="fa-solid fa-link text-blue-600 text-xl"></i>
+                Article URL
+              </label>
+              <div class="relative group">
+                <input type="url" id="analyze-url" class="w-full px-8 py-6 pl-16 bg-white border-4 border-blue-200 rounded-2xl focus:ring-4 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 placeholder-gray-500 font-semibold text-lg shadow-lg hover:shadow-xl" placeholder="https://example.com/article" required>
+                <i class="fa-solid fa-link absolute left-6 top-1/2 transform -translate-y-1/2 text-blue-600 text-xl"></i>
+              </div>
+            </div>
+
+            <!-- Query Input -->
+            <div class="space-y-4">
+              <label for="analyze-query" class="flex items-center gap-3 text-lg font-black text-gray-900 uppercase tracking-wider">
+                <i class="fa-solid fa-search text-purple-600 text-xl"></i>
+                Search Focus (optional)
+              </label>
+              <div class="relative group">
+                <input type="text" id="analyze-query" class="w-full px-8 py-6 pl-16 bg-white border-4 border-purple-200 rounded-2xl focus:ring-4 focus:ring-purple-500 focus:border-purple-500 transition-all duration-300 placeholder-gray-500 font-semibold text-lg shadow-lg hover:shadow-xl" placeholder="e.g., artificial intelligence, climate change">
+                <i class="fa-solid fa-search absolute left-6 top-1/2 transform -translate-y-1/2 text-purple-600 text-xl"></i>
+              </div>
+            </div>
+
+            <!-- AI Options -->
+            <div class="bg-gradient-to-r from-blue-100 to-cyan-100 rounded-2xl p-8 border-4 border-blue-300">
+              <div class="flex items-start gap-6">
+                <input type="checkbox" id="use-embeddings" class="mt-2 h-6 w-6 text-blue-600 border-4 border-blue-400 rounded focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200">
+                <div>
+                  <label for="use-embeddings" class="flex items-center gap-3 text-xl font-black text-gray-900 cursor-pointer">
+                    <i class="fa-solid fa-brain text-blue-600 text-2xl"></i>
+                    Use AI Embeddings
+                  </label>
+                  <p class="text-base text-gray-700 mt-3 leading-relaxed font-medium">Enable advanced semantic analysis for superior relevance scoring and deeper content understanding</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="group relative w-full bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 text-white font-black py-6 px-10 rounded-2xl hover:from-blue-700 hover:via-cyan-600 hover:to-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1 uppercase tracking-wider text-xl">
+              <div class="relative flex items-center justify-center gap-4">
+                <i class="fa-solid fa-chart-line text-2xl"></i>
+                <span>Analyze Article</span>
+                <i class="fa-solid fa-arrow-right group-hover:translate-x-3 transition-transform duration-300"></i>
+              </div>
+            </button>
+
+            <!-- Loading State -->
+            <div id="analyze-loading" class="hidden flex items-center justify-center gap-4 text-blue-600 py-8">
+              <div class="animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
+              <span class="font-bold text-xl">Analyzing content with AI...</span>
+            </div>
+
+            <!-- Error State -->
+            <div id="analyze-error" class="hidden bg-gradient-to-r from-red-50 to-pink-50 border-4 border-red-300 rounded-2xl p-6 mt-6">
+              <div class="flex items-center gap-4">
+                <i class="fa-solid fa-exclamation-triangle text-red-600 text-2xl"></i>
+                <span class="text-lg font-bold text-red-800"></span>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Card -->
+    <div id="analyze-result-card" class="hidden">
+      <div class="group relative">
+        <!-- Glow Effect -->
+        <div class="absolute -inset-2 bg-gradient-to-r from-emerald-600 via-green-500 to-emerald-600 rounded-3xl blur-2xl opacity-50 group-hover:opacity-80 transition duration-1000 animate-pulse"></div>
+        
+        <!-- Results Card -->
+        <div class="relative bg-white rounded-3xl shadow-2xl border-4 border-emerald-200 overflow-hidden hover:shadow-3xl transition-all duration-700">
+          <div class="p-10">
+            <div class="flex items-start justify-between mb-10">
+              <div class="flex-1">
+                <h3 id="an-title" class="text-3xl font-black text-gray-900 mb-4"></h3>
+                <p id="an-meta" class="text-lg text-gray-600 font-medium"></p>
+              </div>
+              <div class="flex-shrink-0">
+                <div class="h-24 w-24 bg-gradient-to-br from-emerald-500 to-green-500 rounded-3xl flex items-center justify-center shadow-2xl border-4 border-emerald-300">
+                  <div class="text-center">
+                    <div class="text-3xl font-black text-white" id="an-overall"></div>
+                    <div class="text-xs font-bold text-white/90">SCORE</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Metrics Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+              <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border-4 border-blue-300 shadow-xl">
+                <div class="flex justify-between items-center mb-4">
+                  <span class="text-lg font-bold text-gray-800">Readability</span>
+                  <span id="an-readability-v" class="text-2xl font-black text-blue-600"></span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-4 border-2 border-gray-300">
+                  <div id="an-readability" class="bg-gradient-to-r from-blue-500 to-cyan-500 h-4 rounded-full transition-all duration-500 shadow-lg" style="width: 0%"></div>
+                </div>
+              </div>
+              
+              <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border-4 border-green-300 shadow-xl">
+                <div class="flex justify-between items-center mb-4">
+                  <span class="text-lg font-bold text-gray-800">NER Density</span>
+                  <span id="an-ner-v" class="text-2xl font-black text-green-600"></span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-4 border-2 border-gray-300">
+                  <div id="an-ner" class="bg-gradient-to-r from-green-500 to-emerald-500 h-4 rounded-full transition-all duration-500 shadow-lg" style="width: 0%"></div>
+                </div>
+              </div>
+              
+              <div class="bg-gradient-to-r from-orange-50 to-red-50 rounded-2xl p-6 border-4 border-orange-300 shadow-xl">
+                <div class="flex justify-between items-center mb-4">
+                  <span class="text-lg font-bold text-gray-800">Sentiment</span>
+                  <span id="an-sentiment-v" class="text-2xl font-black text-orange-600"></span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-4 border-2 border-gray-300">
+                  <div id="an-sentiment" class="bg-gradient-to-r from-orange-500 to-red-500 h-4 rounded-full transition-all duration-500 shadow-lg" style="width: 0%"></div>
+                </div>
+              </div>
+              
+              <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border-4 border-purple-300 shadow-xl">
+                <div class="flex justify-between items-center mb-4">
+                  <span class="text-lg font-bold text-gray-800">Relevance</span>
+                  <span id="an-tfidf-v" class="text-2xl font-black text-purple-600"></span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-4 border-2 border-gray-300">
+                  <div id="an-tfidf" class="bg-gradient-to-r from-purple-500 to-pink-500 h-4 rounded-full transition-all duration-500 shadow-lg" style="width: 0%"></div>
+                </div>
+              </div>
+              
+              <div class="bg-gradient-to-r from-pink-50 to-rose-50 rounded-2xl p-6 border-4 border-pink-300 shadow-xl">
+                <div class="flex justify-between items-center mb-4">
+                  <span class="text-lg font-bold text-gray-800">Recency</span>
+                  <span id="an-recency-v" class="text-2xl font-black text-pink-600"></span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-4 border-2 border-gray-300">
+                  <div id="an-recency" class="bg-gradient-to-r from-pink-500 to-rose-500 h-4 rounded-full transition-all duration-500 shadow-lg" style="width: 0%"></div>
+                </div>
+              </div>
+              
+              <div class="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-2xl p-6 border-4 border-teal-300 shadow-xl">
+                <div class="flex justify-between items-center mb-4">
+                  <span class="text-lg font-bold text-gray-800">Reputation</span>
+                  <span id="an-reputation-v" class="text-2xl font-black text-teal-600"></span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-4 border-2 border-gray-300">
+                  <div id="an-reputation" class="bg-gradient-to-r from-teal-500 to-cyan-500 h-4 rounded-full transition-all duration-500 shadow-lg" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Summary -->
+            <div id="an-summary" class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-6 border-4 border-gray-200 mb-10"></div>
+
+            <!-- Statistics and Entities -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+              <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-8 border-4 border-blue-300 shadow-xl">
+                <div class="flex items-center gap-4 mb-6">
+                  <div class="h-12 w-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg">
+                    <i class="fa-solid fa-chart-bar text-white text-xl"></i>
+                  </div>
+                  <h4 class="text-2xl font-black text-gray-900">Statistics</h4>
+                </div>
+                <div class="space-y-4">
+                  <div class="flex justify-between items-center">
+                    <span class="text-lg font-bold text-gray-700">Words:</span>
+                    <span id="an-word-count" class="text-xl font-black text-blue-600"></span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-lg font-bold text-gray-700">Entities:</span>
+                    <span id="an-entity-count" class="text-xl font-black text-blue-600"></span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-lg font-bold text-gray-700">Method:</span>
+                    <span id="an-rel-method" class="text-lg font-semibold text-blue-600">tfidf</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div id="an-entities" class="hidden bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-8 border-4 border-purple-300 shadow-xl">
+                <div class="flex items-center gap-4 mb-6">
+                  <div class="h-12 w-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
+                    <i class="fa-solid fa-tags text-white text-xl"></i>
+                  </div>
+                  <h4 class="text-2xl font-black text-gray-900">Entities</h4>
+                </div>
+                <div id="an-entities-list" class="flex flex-wrap gap-3"></div>
+              </div>
+            </div>
+
+            <!-- Export Buttons -->
+            <div class="flex flex-wrap gap-6 pt-8 border-t-4 border-gray-200">
+              <button id="analyze-export-json" type="button" class="group/btn bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 text-white font-black py-4 px-8 rounded-2xl hover:from-blue-700 hover:via-cyan-600 hover:to-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1 uppercase tracking-wider text-lg">
+                <div class="flex items-center gap-3">
+                  <i class="fa-solid fa-file-arrow-down text-xl"></i>
+                  <span>Export JSON</span>
+                  <i class="fa-solid fa-arrow-right group-hover/btn:translate-x-2 transition-transform duration-300"></i>
+                </div>
+              </button>
+              <button id="analyze-export-csv" type="button" class="group/btn bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 text-white font-black py-4 px-8 rounded-2xl hover:from-purple-700 hover:via-pink-600 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-purple-500 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1 uppercase tracking-wider text-lg">
+                <div class="flex items-center gap-3">
+                  <i class="fa-solid fa-table text-xl"></i>
+                  <span>Export CSV</span>
+                  <i class="fa-solid fa-arrow-right group-hover/btn:translate-x-2 transition-transform duration-300"></i>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="mt-16 text-center">
+      <a href="/" class="group relative inline-block">
+        <div class="absolute -inset-2 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 rounded-2xl blur opacity-50 group-hover:opacity-80 transition duration-1000"></div>
+        <div class="relative bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 text-white font-black py-6 px-12 rounded-2xl hover:from-blue-700 hover:via-cyan-600 hover:to-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1 uppercase tracking-wider text-xl">
+          <div class="flex items-center gap-4">
+            <i class="fa-solid fa-house text-2xl"></i>
+            <span>Back to Dashboard</span>
+            <i class="fa-solid fa-arrow-right group-hover:translate-x-2 transition-transform duration-300"></i>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}
