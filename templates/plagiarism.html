@@ -260,4 +260,160 @@
     </div>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('plagiarism-form');
+    const loadingDiv = document.getElementById('plagiarism-loading');
+    const errorDiv = document.getElementById('plagiarism-error');
+    const resultsDiv = document.getElementById('plagiarism-results');
+
+    // Handle form submission
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Show loading state
+        loadingDiv.classList.remove('hidden');
+        errorDiv.classList.add('hidden');
+        resultsDiv.classList.add('hidden');
+        
+        // Get form data
+        const formData = new FormData(form);
+        const content = formData.get('content') || '';
+        const url = formData.get('url') || '';
+        
+        // Validate input
+        if (!content.trim() && !url.trim()) {
+            showError('Please provide either content text or a URL to check.');
+            return;
+        }
+        
+        try {
+            // Submit form data
+            const response = await fetch('/plagiarism', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                displayResults(result);
+            } else {
+                const error = await response.json();
+                showError(error.error || 'An error occurred during plagiarism detection.');
+            }
+        } catch (error) {
+            showError('Network error. Please try again.');
+            console.error('Error:', error);
+        } finally {
+            loadingDiv.classList.add('hidden');
+        }
+    });
+    
+    function showError(message) {
+        errorDiv.querySelector('span').textContent = message;
+        errorDiv.classList.remove('hidden');
+    }
+    
+    function displayResults(result) {
+        // Update originality score
+        document.getElementById('originality-score').textContent = result.originality_score + '%';
+        document.getElementById('originality-status').textContent = getOriginalityStatus(result.originality_score);
+        
+        // Update similarity sources
+        const sourcesContainer = document.getElementById('similarity-sources');
+        sourcesContainer.innerHTML = '';
+        
+        if (result.similarity_sources && result.similarity_sources.length > 0) {
+            result.similarity_sources.forEach(source => {
+                const sourceDiv = document.createElement('div');
+                sourceDiv.className = 'bg-white rounded-xl p-4 border-2 border-red-200 mb-3';
+                sourceDiv.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <h5 class="font-bold text-gray-900 text-lg">${source.title}</h5>
+                        <span class="bg-red-100 text-red-800 px-3 py-1 rounded-lg font-bold text-sm">${source.similarity_percentage}%</span>
+                    </div>
+                    <p class="text-gray-700 mb-2">
+                        <a href="${source.url}" target="_blank" class="text-blue-600 hover:text-blue-700 font-semibold">${source.url}</a>
+                    </p>
+                    <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                        <p class="text-gray-600 text-sm italic">"${source.matched_text}"</p>
+                    </div>
+                `;
+                sourcesContainer.appendChild(sourceDiv);
+            });
+        } else {
+            sourcesContainer.innerHTML = '<p class="text-gray-600 font-medium">No similar content found. Great job!</p>';
+        }
+        
+        // Update analysis summary
+        const summaryContainer = document.getElementById('analysis-summary');
+        summaryContainer.innerHTML = `
+            <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <span class="font-bold text-gray-700">Total Words:</span>
+                    <span class="font-black text-blue-600">${result.total_words}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="font-bold text-gray-700">Sources Analyzed:</span>
+                    <span class="font-black text-blue-600">${result.analyzed_sources}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="font-bold text-gray-700">Detection Method:</span>
+                    <span class="font-semibold text-blue-600">${result.detection_method}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="font-bold text-gray-700">Processing Time:</span>
+                    <span class="font-semibold text-blue-600">${result.processing_time}s</span>
+                </div>
+            </div>
+        `;
+        
+        // Update recommendations
+        const recommendationsContainer = document.getElementById('recommendations');
+        recommendationsContainer.innerHTML = '';
+        
+        if (result.recommendations && result.recommendations.length > 0) {
+            result.recommendations.forEach(recommendation => {
+                const recDiv = document.createElement('div');
+                recDiv.className = 'flex items-start gap-3 p-3 bg-white rounded-lg border border-yellow-200';
+                recDiv.innerHTML = `
+                    <i class="fa-solid fa-lightbulb text-yellow-600 text-lg mt-1"></i>
+                    <span class="text-gray-700 font-medium">${recommendation}</span>
+                `;
+                recommendationsContainer.appendChild(recDiv);
+            });
+        }
+        
+        // Show results
+        resultsDiv.classList.remove('hidden');
+        
+        // Scroll to results
+        resultsDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function getOriginalityStatus(score) {
+        if (score >= 95) return 'Highly Original';
+        if (score >= 85) return 'Mostly Original';
+        if (score >= 70) return 'Moderately Original';
+        if (score >= 50) return 'Needs Improvement';
+        return 'High Similarity Detected';
+    }
+    
+    // Handle export buttons
+    document.getElementById('plagiarism-export-pdf').addEventListener('click', function() {
+        alert('PDF export functionality will be implemented soon!');
+    });
+    
+    document.getElementById('plagiarism-export-docx').addEventListener('click', function() {
+        alert('Word export functionality will be implemented soon!');
+    });
+    
+    // Auto-focus on content textarea
+    const contentTextarea = document.getElementById('plagiarism-content');
+    if (contentTextarea) {
+        contentTextarea.focus();
+    }
+});
+</script>
 {% endblock %}
