@@ -24,12 +24,26 @@ import numpy as np
 try:
     nltk.data.find('tokenizers/punkt')
 except LookupError:
-    nltk.download('punkt', quiet=True)
+    try:
+        nltk.download('punkt', quiet=True)
+    except:
+        pass
+
+try:
+    nltk.data.find('tokenizers/punkt_tab')
+except LookupError:
+    try:
+        nltk.download('punkt_tab', quiet=True)
+    except:
+        pass
 
 try:
     nltk.data.find('corpora/stopwords')
 except LookupError:
-    nltk.download('stopwords', quiet=True)
+    try:
+        nltk.download('stopwords', quiet=True)
+    except:
+        pass
 
 @dataclass
 class SimilaritySource:
@@ -102,7 +116,15 @@ class PlagiarismDetector:
         
         # Preprocess content
         processed_content = self._preprocess_text(content)
-        content_sentences = sent_tokenize(processed_content)
+        
+        # Try NLTK sentence tokenization, fallback to simple split
+        try:
+            content_sentences = sent_tokenize(processed_content)
+        except Exception:
+            # Fallback to simple sentence splitting
+            import re
+            content_sentences = re.split(r'[.!?]+', processed_content)
+            content_sentences = [s.strip() for s in content_sentences if s.strip()]
         
         # Extract potential search queries
         search_queries = self._extract_search_queries(processed_content, content_sentences)
@@ -166,7 +188,12 @@ class PlagiarismDetector:
                 queries.append(clean_sentence)
         
         # Extract key phrases (2-4 word combinations)
-        words = word_tokenize(content)
+        try:
+            words = word_tokenize(content)
+        except Exception:
+            # Fallback to simple word splitting
+            words = content.split()
+        
         phrases = []
         for i in range(len(words) - 3):
             phrase = ' '.join(words[i:i+4])
@@ -317,8 +344,16 @@ class PlagiarismDetector:
     def _extract_matching_snippet(self, original_text: str, source_text: str, snippet_length: int = 100) -> str:
         """Extract a snippet that shows the matching content"""
         # Simple implementation - find the most similar sentence
-        original_sentences = sent_tokenize(original_text)
-        source_sentences = sent_tokenize(source_text)
+        try:
+            original_sentences = sent_tokenize(original_text)
+            source_sentences = sent_tokenize(source_text)
+        except Exception:
+            # Fallback to simple sentence splitting
+            import re
+            original_sentences = re.split(r'[.!?]+', original_text)
+            source_sentences = re.split(r'[.!?]+', source_text)
+            original_sentences = [s.strip() for s in original_sentences if s.strip()]
+            source_sentences = [s.strip() for s in source_sentences if s.strip()]
         
         best_similarity = 0
         best_snippet = ""

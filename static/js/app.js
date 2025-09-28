@@ -283,7 +283,7 @@ window.addEventListener('DOMContentLoaded', () => {
       const background = document.getElementById('curate-background')?.checked || false;
       
       try{
-        const data = await postJson('/curate-topic', { topic, max_articles, apply_diversity, background });
+        const data = await postJson('/curate', { topic, max_articles, apply_diversity, background });
         
         // Check if this is a background job response
         if(data.job_id && data.status === 'submitted'){

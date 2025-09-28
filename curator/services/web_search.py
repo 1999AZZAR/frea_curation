@@ -150,19 +150,22 @@ class WebSearchService:
     
     def _mock_academic_results(self, query: str, num_results: int) -> List[Dict[str, str]]:
         """Generate mock academic search results"""
-        academic_results = [
-            {
-                'url': f'https://scholar.google.com/scholar?q={query}',
-                'title': f'Academic Study: {query[:40]}',
-                'snippet': f'Peer-reviewed research paper examining {query} with comprehensive methodology and findings.'
-            },
-            {
+        academic_results = []
+        
+        # Add scholar results
+        academic_results.append({
+            'url': f'https://scholar.google.com/scholar?q={query}',
+            'title': f'Academic Study: {query[:40]}',
+            'snippet': f'Peer-reviewed research paper examining {query} with comprehensive methodology and findings.'
+        })
+        
+        # Add arxiv results
+        for i in range(1, min(num_results, 3)):
+            academic_results.append({
                 'url': f'https://arxiv.org/abs/2023.1234{i}',
                 'title': f'Research Paper: {query[:35]} Analysis',
                 'snippet': f'Preprint research study analyzing {query} using advanced statistical methods and machine learning techniques.'
-            }
-            for i in range(1, min(num_results + 1, 4))
-        ]
+            })
         
         return academic_results[:num_results]
     

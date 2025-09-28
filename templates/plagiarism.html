@@ -51,7 +51,7 @@
                 Content to Check
               </label>
               <div class="relative group">
-                <textarea id="plagiarism-content" class="w-full px-8 py-6 bg-white border-4 border-red-200 rounded-2xl focus:ring-4 focus:ring-red-500 focus:border-red-500 transition-all duration-300 placeholder-gray-500 font-semibold text-lg shadow-lg hover:shadow-xl resize-none" rows="8" placeholder="Paste your content here to check for plagiarism..." required></textarea>
+                <textarea id="plagiarism-content" name="content" class="w-full px-8 py-6 bg-white border-4 border-red-200 rounded-2xl focus:ring-4 focus:ring-red-500 focus:border-red-500 transition-all duration-300 placeholder-gray-500 font-semibold text-lg shadow-lg hover:shadow-xl resize-none" rows="8" placeholder="Paste your content here to check for plagiarism..." required></textarea>
               </div>
               <p class="text-base text-gray-600 flex items-center gap-3 font-medium">
                 <i class="fa-solid fa-info-circle text-blue-600 text-lg"></i>
@@ -66,7 +66,7 @@
                 Or Check by URL (Alternative)
               </label>
               <div class="relative group">
-                <input type="url" id="plagiarism-url" class="w-full px-8 py-6 pl-16 bg-white border-4 border-orange-200 rounded-2xl focus:ring-4 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300 placeholder-gray-500 font-semibold text-lg shadow-lg hover:shadow-xl" placeholder="https://example.com/article">
+                <input type="url" id="plagiarism-url" name="url" class="w-full px-8 py-6 pl-16 bg-white border-4 border-orange-200 rounded-2xl focus:ring-4 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300 placeholder-gray-500 font-semibold text-lg shadow-lg hover:shadow-xl" placeholder="https://example.com/article">
                 <i class="fa-solid fa-link absolute left-6 top-1/2 transform -translate-y-1/2 text-orange-600 text-xl"></i>
               </div>
             </div>
@@ -76,7 +76,7 @@
               <!-- Search Depth Option -->
               <div class="bg-gradient-to-r from-red-100 to-orange-100 rounded-2xl p-8 border-4 border-red-300">
                 <div class="flex items-start gap-6">
-                  <input id="deep-search" type="checkbox" checked class="mt-2 h-6 w-6 text-red-600 border-4 border-red-400 rounded focus:ring-red-500 focus:ring-offset-2 transition-all duration-200">
+                  <input id="deep-search" name="deep_search" type="checkbox" checked class="mt-2 h-6 w-6 text-red-600 border-4 border-red-400 rounded focus:ring-red-500 focus:ring-offset-2 transition-all duration-200">
                   <div>
                     <label for="deep-search" class="flex items-center gap-3 text-xl font-black text-gray-900 cursor-pointer">
                       <i class="fa-solid fa-search-plus text-red-600 text-2xl"></i>
@@ -90,7 +90,7 @@
               <!-- Citation Detection Option -->
               <div class="bg-gradient-to-r from-orange-100 to-yellow-100 rounded-2xl p-8 border-4 border-orange-300">
                 <div class="flex items-start gap-6">
-                  <input id="citation-check" type="checkbox" class="mt-2 h-6 w-6 text-orange-600 border-4 border-orange-400 rounded focus:ring-orange-500 focus:ring-offset-2 transition-all duration-200">
+                  <input id="citation-check" name="citation_check" type="checkbox" class="mt-2 h-6 w-6 text-orange-600 border-4 border-orange-400 rounded focus:ring-orange-500 focus:ring-offset-2 transition-all duration-200">
                   <div>
                     <label for="citation-check" class="flex items-center gap-3 text-xl font-black text-gray-900 cursor-pointer">
                       <i class="fa-solid fa-quote-left text-orange-600 text-2xl"></i>
@@ -104,7 +104,7 @@
               <!-- Paraphrasing Detection Option -->
               <div class="bg-gradient-to-r from-yellow-100 to-red-100 rounded-2xl p-8 border-4 border-yellow-300">
                 <div class="flex items-start gap-6">
-                  <input id="paraphrase-check" type="checkbox" checked class="mt-2 h-6 w-6 text-yellow-600 border-4 border-yellow-400 rounded focus:ring-yellow-500 focus:ring-offset-2 transition-all duration-200">
+                  <input id="paraphrase-check" name="paraphrase_check" type="checkbox" checked class="mt-2 h-6 w-6 text-yellow-600 border-4 border-yellow-400 rounded focus:ring-yellow-500 focus:ring-offset-2 transition-all duration-200">
                   <div>
                     <label for="paraphrase-check" class="flex items-center gap-3 text-xl font-black text-gray-900 cursor-pointer">
                       <i class="fa-solid fa-language text-yellow-600 text-2xl"></i>

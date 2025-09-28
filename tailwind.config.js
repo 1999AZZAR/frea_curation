@@ -16,7 +16,8 @@ module.exports = {
         }
       },
       boxShadow: {
-        glow: '0 0 0 1px rgba(99,102,241,.15), 0 10px 30px -12px rgba(0,0,0,.6)'
+        glow: '0 0 0 1px rgba(99,102,241,.15), 0 10px 30px -12px rgba(0,0,0,.6)',
+        '3xl': '0 35px 60px -12px rgba(0, 0, 0, 0.25)'
       }
     }
   },
